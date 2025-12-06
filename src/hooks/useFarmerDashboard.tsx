@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './useAuth';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface FarmerProfile {
   id: string;
@@ -78,10 +78,10 @@ export const useFarmerProfile = () => {
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
-      return data as FarmerProfile;
+      return data as FarmerProfile | null;
     },
     enabled: !!user?.id,
   });
@@ -97,7 +97,8 @@ export const useFarmlands = () => {
       const { data, error } = await supabase
         .from('farmlands')
         .select('*')
-        .eq('farmer_id', user.id);
+        .eq('farmer_id', user.id)
+        .order('created_at', { ascending: false });
       
       if (error) throw error;
       return data as Farmland[];
@@ -173,6 +174,22 @@ export const useMarketPrices = (cropNames?: string[]) => {
   });
 };
 
+export const useAllMarketPrices = () => {
+  return useQuery({
+    queryKey: ['all-market-prices'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('market_prices')
+        .select('*')
+        .order('date', { ascending: false })
+        .limit(50);
+      
+      if (error) throw error;
+      return data as MarketPrice[];
+    },
+  });
+};
+
 export const useFarmerNotifications = () => {
   const { user } = useAuth();
 
@@ -185,12 +202,13 @@ export const useFarmerNotifications = () => {
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(20);
       
       if (error) throw error;
       return data as Notification[];
     },
     enabled: !!user?.id,
+    refetchInterval: 30000, // Refetch every 30 seconds
   });
 };
 

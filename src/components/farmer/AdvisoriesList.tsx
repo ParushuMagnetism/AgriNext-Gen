@@ -133,6 +133,7 @@ const AdvisoriesList = () => {
               <Button 
                 variant="ghost" 
                 className="w-full text-muted-foreground hover:text-foreground"
+                onClick={() => window.location.href = '/farmer/notifications'}
               >
                 View all notifications
                 <ChevronRight className="h-4 w-4 ml-1" />

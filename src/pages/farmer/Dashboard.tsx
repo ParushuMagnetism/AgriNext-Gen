@@ -6,6 +6,8 @@ import TransportSection from '@/components/farmer/TransportSection';
 import MarketPricesWidget from '@/components/farmer/MarketPricesWidget';
 import AdvisoriesList from '@/components/farmer/AdvisoriesList';
 import QuickActions from '@/components/farmer/QuickActions';
+import WeatherWidget from '@/components/farmer/WeatherWidget';
+import FarmlandsSummary from '@/components/farmer/FarmlandsSummary';
 
 const FarmerDashboard = () => {
   return (
@@ -16,6 +18,14 @@ const FarmerDashboard = () => {
 
         {/* Quick Actions */}
         <QuickActions />
+
+        {/* Weather + Farmlands Summary Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <WeatherWidget />
+          <div className="lg:col-span-2">
+            <FarmlandsSummary />
+          </div>
+        </div>
 
         {/* My Crops Section */}
         <CropsSection />
