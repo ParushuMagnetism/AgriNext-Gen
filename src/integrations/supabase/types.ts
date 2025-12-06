@@ -14,16 +14,362 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agent_data: {
+        Row: {
+          agent_id: string
+          created_at: string
+          crop_health: string | null
+          crop_type: string | null
+          farm_location: string | null
+          farmer_id: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          notes: string | null
+          soil_moisture: string | null
+          soil_ph: number | null
+          soil_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          crop_health?: string | null
+          crop_type?: string | null
+          farm_location?: string | null
+          farmer_id?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          soil_moisture?: string | null
+          soil_ph?: number | null
+          soil_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          crop_health?: string | null
+          crop_type?: string | null
+          farm_location?: string | null
+          farmer_id?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          soil_moisture?: string | null
+          soil_ph?: number | null
+          soil_type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      farm_pickups: {
+        Row: {
+          created_at: string
+          farmer_id: string
+          id: string
+          listing_id: string | null
+          logistics_id: string
+          notes: string | null
+          pickup_location: string
+          quantity: number | null
+          route_id: string | null
+          scheduled_date: string
+          scheduled_time: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          farmer_id: string
+          id?: string
+          listing_id?: string | null
+          logistics_id: string
+          notes?: string | null
+          pickup_location: string
+          quantity?: number | null
+          route_id?: string | null
+          scheduled_date: string
+          scheduled_time?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          farmer_id?: string
+          id?: string
+          listing_id?: string | null
+          logistics_id?: string
+          notes?: string | null
+          pickup_location?: string
+          quantity?: number | null
+          route_id?: string | null
+          scheduled_date?: string
+          scheduled_time?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "farm_pickups_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "farm_pickups_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "logistics_routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      favorites: {
+        Row: {
+          created_at: string
+          id: string
+          listing_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          listing_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          listing_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      listings: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          location: string | null
+          price: number
+          quantity: number
+          seller_id: string
+          title: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          location?: string | null
+          price: number
+          quantity: number
+          seller_id: string
+          title: string
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          location?: string | null
+          price?: number
+          quantity?: number
+          seller_id?: string
+          title?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      logistics_routes: {
+        Row: {
+          created_at: string
+          distance_km: number | null
+          end_location: string
+          estimated_time_mins: number | null
+          id: string
+          logistics_id: string
+          name: string
+          start_location: string
+          status: string
+          updated_at: string
+          waypoints: Json | null
+        }
+        Insert: {
+          created_at?: string
+          distance_km?: number | null
+          end_location: string
+          estimated_time_mins?: number | null
+          id?: string
+          logistics_id: string
+          name: string
+          start_location: string
+          status?: string
+          updated_at?: string
+          waypoints?: Json | null
+        }
+        Update: {
+          created_at?: string
+          distance_km?: number | null
+          end_location?: string
+          estimated_time_mins?: number | null
+          id?: string
+          logistics_id?: string
+          name?: string
+          start_location?: string
+          status?: string
+          updated_at?: string
+          waypoints?: Json | null
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_read: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          location: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          location?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          location?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "farmer" | "buyer" | "agent" | "logistics" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +496,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["farmer", "buyer", "agent", "logistics", "admin"],
+    },
   },
 } as const
