@@ -1,10 +1,33 @@
-import { useFarmerProfile, useDashboardStats } from '@/hooks/useFarmerDashboard';
-import { MapPin, Sprout, Truck, Wheat, LandPlot } from 'lucide-react';
+import { useFarmerProfile, useDashboardStats, useFarmlands } from '@/hooks/useFarmerDashboard';
+import { MapPin, Sprout, Truck, Wheat, LandPlot, CheckCircle, AlertCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const FarmerSummaryCard = () => {
   const { data: profile, isLoading: profileLoading } = useFarmerProfile();
-  const { activeCrops, readyToHarvest, pendingTransport, totalLandArea, isLoading: statsLoading } = useDashboardStats();
+  const { data: farmlands } = useFarmlands();
+  const { activeCrops, readyToHarvest, pendingTransport, isLoading: statsLoading } = useDashboardStats();
+  const navigate = useNavigate();
+
+  // Calculate profile completion
+  const getProfileCompletion = () => {
+    if (!profile) return 0;
+    let completed = 0;
+    const checks = [
+      profile.full_name,
+      profile.phone,
+      profile.village,
+      profile.district,
+      farmlands && farmlands.length > 0,
+    ];
+    checks.forEach(check => { if (check) completed++; });
+    return Math.round((completed / checks.length) * 100);
+  };
+
+  const profileCompletion = getProfileCompletion();
+  const totalLandArea = farmlands?.reduce((sum, f) => sum + f.area, 0) || 0;
 
   if (profileLoading || statsLoading) {
     return (
@@ -27,7 +50,7 @@ const FarmerSummaryCard = () => {
   const stats = [
     { 
       label: 'Total Land', 
-      value: `${totalLandArea} acres`, 
+      value: `${totalLandArea.toFixed(1)} acres`, 
       icon: LandPlot, 
       color: 'text-amber-600 bg-amber-100' 
     },
@@ -53,20 +76,55 @@ const FarmerSummaryCard = () => {
 
   return (
     <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 rounded-2xl p-6 border border-border shadow-soft">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
         {/* Farmer Info */}
-        <div className="space-y-2">
-          <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">
-            Welcome, {profile?.full_name || 'Farmer'}! 🌾
-          </h1>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <MapPin className="h-4 w-4" />
-            <span>
-              {profile?.village && profile?.district 
-                ? `${profile.village}, ${profile.district}`
-                : 'Location not set'}
-            </span>
+        <div className="space-y-4 flex-1">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">
+              Welcome, {profile?.full_name || 'Farmer'}! 🌾
+            </h1>
+            <div className="flex items-center gap-2 text-muted-foreground mt-1">
+              <MapPin className="h-4 w-4" />
+              <span>
+                {profile?.village && profile?.district 
+                  ? `${profile.village}, ${profile.district}`
+                  : 'Location not set'}
+              </span>
+            </div>
           </div>
+
+          {/* Profile Completion */}
+          {profileCompletion < 100 && (
+            <div className="bg-card/80 backdrop-blur-sm rounded-xl p-4 border border-border/50 max-w-md">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  {profileCompletion >= 80 ? (
+                    <CheckCircle className="h-4 w-4 text-primary" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 text-amber-500" />
+                  )}
+                  <span className="text-sm font-medium">Profile Completion</span>
+                </div>
+                <span className="text-sm text-muted-foreground">{profileCompletion}%</span>
+              </div>
+              <Progress value={profileCompletion} className="h-2" />
+              <p className="text-xs text-muted-foreground mt-2">
+                {profileCompletion < 40 
+                  ? 'Complete your profile to unlock all features'
+                  : profileCompletion < 80
+                    ? 'Almost there! Add a few more details'
+                    : 'Just a little more to complete your profile'}
+              </p>
+              <Button 
+                variant="link" 
+                size="sm" 
+                className="p-0 h-auto mt-1 text-primary"
+                onClick={() => navigate('/farmer/settings')}
+              >
+                Complete Profile →
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Quick Stats */}
