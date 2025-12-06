@@ -51,7 +51,7 @@ const TransportSection = () => {
           <Truck className="h-5 w-5 text-primary" />
           Transport & Pickup Status
         </CardTitle>
-        <Button variant="outline" size="sm" onClick={() => navigate('/farmer/transport/new')}>
+        <Button variant="outline" size="sm" onClick={() => navigate('/farmer/transport')}>
           <Plus className="h-4 w-4 mr-1" />
           New Request
         </Button>
@@ -61,7 +61,7 @@ const TransportSection = () => {
           <div className="text-center py-8">
             <Truck className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
             <p className="text-muted-foreground text-sm">No active transport requests</p>
-            <Button variant="outline" className="mt-4" size="sm" onClick={() => navigate('/farmer/transport/new')}>
+            <Button variant="outline" className="mt-4" size="sm" onClick={() => navigate('/farmer/transport')}>
               Request Transport
             </Button>
           </div>

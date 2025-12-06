@@ -13,6 +13,11 @@ import FarmerDashboard from "./pages/farmer/Dashboard";
 import FarmerListings from "./pages/farmer/Listings";
 import FarmerOrders from "./pages/farmer/Orders";
 import FarmerEarnings from "./pages/farmer/Earnings";
+import FarmerCrops from "./pages/farmer/Crops";
+import FarmerFarmlands from "./pages/farmer/Farmlands";
+import FarmerTransport from "./pages/farmer/Transport";
+import FarmerNotifications from "./pages/farmer/Notifications";
+import FarmerSettings from "./pages/farmer/Settings";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +43,30 @@ const App = () => (
               }
             />
             <Route
+              path="/farmer/crops"
+              element={
+                <ProtectedRoute allowedRoles={["farmer"]}>
+                  <FarmerCrops />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/farmer/farmlands"
+              element={
+                <ProtectedRoute allowedRoles={["farmer"]}>
+                  <FarmerFarmlands />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/farmer/transport"
+              element={
+                <ProtectedRoute allowedRoles={["farmer"]}>
+                  <FarmerTransport />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/farmer/listings"
               element={
                 <ProtectedRoute allowedRoles={["farmer"]}>
@@ -58,6 +87,22 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["farmer"]}>
                   <FarmerEarnings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/farmer/notifications"
+              element={
+                <ProtectedRoute allowedRoles={["farmer"]}>
+                  <FarmerNotifications />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/farmer/settings"
+              element={
+                <ProtectedRoute allowedRoles={["farmer"]}>
+                  <FarmerSettings />
                 </ProtectedRoute>
               }
             />

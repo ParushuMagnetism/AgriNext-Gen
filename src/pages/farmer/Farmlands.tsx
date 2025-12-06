@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '@/layouts/DashboardLayout';
-import { useFarmlands } from '@/hooks/useFarmerDashboard';
+import { useFarmlands, Farmland } from '@/hooks/useFarmerDashboard';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,7 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Search, LandPlot, MapPin, Layers, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search, LandPlot, MapPin, Layers, Edit, Trash2, TreeDeciduous } from 'lucide-react';
+import EditFarmlandDialog from '@/components/farmer/EditFarmlandDialog';
 
 const FarmlandsPage = () => {
   const { data: farmlands, isLoading } = useFarmlands();
@@ -22,6 +23,9 @@ const FarmlandsPage = () => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [editingFarmland, setEditingFarmland] = useState<Farmland | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  
   const [formData, setFormData] = useState({
     name: '',
     area: '',
@@ -75,6 +79,13 @@ const FarmlandsPage = () => {
 
   const totalArea = farmlands?.reduce((sum, l) => sum + l.area, 0) || 0;
 
+  // Get soil type distribution
+  const soilDistribution = farmlands?.reduce((acc, land) => {
+    const soil = land.soil_type || 'unknown';
+    acc[soil] = (acc[soil] || 0) + land.area;
+    return acc;
+  }, {} as Record<string, number>);
+
   return (
     <DashboardLayout title="Farmlands">
       <div className="space-y-6">
@@ -100,8 +111,38 @@ const FarmlandsPage = () => {
                   <Layers className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{totalArea}</p>
+                  <p className="text-2xl font-bold">{totalArea.toFixed(1)}</p>
                   <p className="text-xs text-muted-foreground">Total Acres</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-amber-100 text-amber-600">
+                  <TreeDeciduous className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">
+                    {Object.keys(soilDistribution || {}).length}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Soil Types</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
+                  <MapPin className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">
+                    {new Set(farmlands?.map(l => l.village).filter(Boolean)).size}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Villages</p>
                 </div>
               </div>
             </CardContent>
@@ -255,7 +296,15 @@ const FarmlandsPage = () => {
                     )}
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => {
+                        setEditingFarmland(land);
+                        setEditDialogOpen(true);
+                      }}
+                    >
                       <Edit className="h-4 w-4 mr-1" />
                       Edit
                     </Button>
@@ -274,6 +323,12 @@ const FarmlandsPage = () => {
           </div>
         )}
       </div>
+
+      <EditFarmlandDialog
+        farmland={editingFarmland}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+      />
     </DashboardLayout>
   );
 };

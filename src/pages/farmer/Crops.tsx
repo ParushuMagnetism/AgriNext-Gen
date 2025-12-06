@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '@/layouts/DashboardLayout';
-import { useCrops, useFarmlands } from '@/hooks/useFarmerDashboard';
+import { useCrops, useFarmlands, Crop, Farmland } from '@/hooks/useFarmerDashboard';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,14 +14,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Search, Sprout, Calendar, MapPin, Scale, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search, Sprout, Calendar, MapPin, Scale, Edit, Trash2, Truck, Filter } from 'lucide-react';
 import { format } from 'date-fns';
+import EditCropDialog from '@/components/farmer/EditCropDialog';
+import RequestTransportDialog from '@/components/farmer/RequestTransportDialog';
 
 const statusConfig = {
-  growing: { label: 'Growing', color: 'bg-muted text-muted-foreground' },
-  one_week: { label: '1 Week', color: 'bg-amber-100 text-amber-800' },
-  ready: { label: 'Ready', color: 'bg-emerald-100 text-emerald-800' },
-  harvested: { label: 'Harvested', color: 'bg-primary/10 text-primary' },
+  growing: { label: 'Growing', color: 'bg-muted text-muted-foreground', dotColor: 'bg-gray-400' },
+  one_week: { label: '1 Week', color: 'bg-amber-100 text-amber-800', dotColor: 'bg-amber-500' },
+  ready: { label: 'Ready', color: 'bg-emerald-100 text-emerald-800', dotColor: 'bg-emerald-500' },
+  harvested: { label: 'Harvested', color: 'bg-primary/10 text-primary', dotColor: 'bg-primary' },
 };
 
 const CropsPage = () => {
@@ -34,6 +36,12 @@ const CropsPage = () => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [editingCrop, setEditingCrop] = useState<(Crop & { farmland: Farmland | null }) | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [transportCrop, setTransportCrop] = useState<(Crop & { farmland: Farmland | null }) | null>(null);
+  const [transportDialogOpen, setTransportDialogOpen] = useState(false);
+  
   const [formData, setFormData] = useState({
     crop_name: '',
     variety: '',
@@ -45,10 +53,20 @@ const CropsPage = () => {
     quantity_unit: 'quintals',
   });
 
-  const filteredCrops = crops?.filter(crop =>
-    crop.crop_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    crop.variety?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredCrops = crops?.filter(crop => {
+    const matchesSearch = crop.crop_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      crop.variety?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || crop.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const stats = {
+    total: crops?.length || 0,
+    growing: crops?.filter(c => c.status === 'growing').length || 0,
+    oneWeek: crops?.filter(c => c.status === 'one_week').length || 0,
+    ready: crops?.filter(c => c.status === 'ready').length || 0,
+    harvested: crops?.filter(c => c.status === 'harvested').length || 0,
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,6 +119,75 @@ const CropsPage = () => {
   return (
     <DashboardLayout title="My Crops">
       <div className="space-y-6">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setStatusFilter('all')}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                  <Sprout className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{stats.total}</p>
+                  <p className="text-xs text-muted-foreground">Total Crops</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className={`cursor-pointer hover:shadow-md transition-shadow ${statusFilter === 'growing' ? 'ring-2 ring-primary' : ''}`} onClick={() => setStatusFilter('growing')}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-muted text-muted-foreground">
+                  <div className="w-5 h-5 rounded-full bg-gray-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{stats.growing}</p>
+                  <p className="text-xs text-muted-foreground">Growing</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className={`cursor-pointer hover:shadow-md transition-shadow ${statusFilter === 'one_week' ? 'ring-2 ring-primary' : ''}`} onClick={() => setStatusFilter('one_week')}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-amber-100 text-amber-600">
+                  <div className="w-5 h-5 rounded-full bg-amber-500" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{stats.oneWeek}</p>
+                  <p className="text-xs text-muted-foreground">1 Week</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className={`cursor-pointer hover:shadow-md transition-shadow ${statusFilter === 'ready' ? 'ring-2 ring-primary' : ''}`} onClick={() => setStatusFilter('ready')}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-emerald-100 text-emerald-600">
+                  <div className="w-5 h-5 rounded-full bg-emerald-500" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{stats.ready}</p>
+                  <p className="text-xs text-muted-foreground">Ready</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className={`cursor-pointer hover:shadow-md transition-shadow ${statusFilter === 'harvested' ? 'ring-2 ring-primary' : ''}`} onClick={() => setStatusFilter('harvested')}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                  <div className="w-5 h-5 rounded-full bg-primary" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{stats.harvested}</p>
+                  <p className="text-xs text-muted-foreground">Harvested</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row gap-4 justify-between">
           <div className="relative flex-1 max-w-md">
@@ -233,7 +320,10 @@ const CropsPage = () => {
                         <h3 className="font-semibold text-lg">{crop.crop_name}</h3>
                         {crop.variety && <p className="text-sm text-muted-foreground">{crop.variety}</p>}
                       </div>
-                      <Badge className={status.color}>{status.label}</Badge>
+                      <Badge className={status.color}>
+                        <span className={`w-2 h-2 rounded-full mr-1.5 ${status.dotColor}`} />
+                        {status.label}
+                      </Badge>
                     </div>
                     <div className="space-y-2 text-sm text-muted-foreground mb-4">
                       {crop.farmland && (
@@ -256,9 +346,19 @@ const CropsPage = () => {
                       )}
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => {
+                        setEditingCrop(crop);
+                        setEditDialogOpen(true);
+                      }}>
                         <Edit className="h-4 w-4 mr-1" />
                         Edit
+                      </Button>
+                      <Button variant="default" size="sm" className="flex-1" onClick={() => {
+                        setTransportCrop(crop);
+                        setTransportDialogOpen(true);
+                      }}>
+                        <Truck className="h-4 w-4 mr-1" />
+                        Transport
                       </Button>
                       <Button 
                         variant="outline" 
@@ -276,6 +376,18 @@ const CropsPage = () => {
           </div>
         )}
       </div>
+
+      <EditCropDialog
+        crop={editingCrop}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+      />
+      
+      <RequestTransportDialog
+        crop={transportCrop}
+        open={transportDialogOpen}
+        onOpenChange={setTransportDialogOpen}
+      />
     </DashboardLayout>
   );
 };

@@ -18,7 +18,7 @@ const QuickActions = () => {
       label: 'Add New Crop',
       icon: Plus,
       color: 'bg-primary hover:bg-primary/90 text-primary-foreground',
-      onClick: () => navigate('/farmer/crops/new'),
+      onClick: () => navigate('/farmer/crops'),
     },
     {
       label: 'View All Crops',
@@ -30,20 +30,19 @@ const QuickActions = () => {
       label: 'Add Farmland',
       icon: LandPlot,
       color: 'bg-amber-600 hover:bg-amber-700 text-white',
-      onClick: () => navigate('/farmer/farmlands/new'),
+      onClick: () => navigate('/farmer/farmlands'),
     },
     {
       label: 'Request Transport',
       icon: Truck,
       color: 'bg-blue-600 hover:bg-blue-700 text-white',
-      onClick: () => navigate('/farmer/transport/new'),
+      onClick: () => navigate('/farmer/transport'),
     },
     {
       label: 'Call My Agent',
       icon: Phone,
       color: 'bg-purple-600 hover:bg-purple-700 text-white',
       onClick: () => {
-        // This could open a modal with agent contact or use tel: link
         window.location.href = 'tel:+919876543210';
       },
     },
