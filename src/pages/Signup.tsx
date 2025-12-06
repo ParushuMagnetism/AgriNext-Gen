@@ -1,11 +1,17 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Leaf, Mail, Lock, User, Phone, ArrowRight, Users, ShoppingBag, ClipboardList, Truck } from "lucide-react";
+import { Leaf, Mail, Lock, User, Phone, ArrowRight, Users, ShoppingBag, ClipboardList, Truck, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import type { Database } from "@/integrations/supabase/types";
 
-const roles = [
+type AppRole = Database["public"]["Enums"]["app_role"];
+
+const roles: { id: AppRole; label: string; icon: typeof Users; description: string }[] = [
   { id: "farmer", label: "Farmer", icon: Users, description: "Sell your produce directly" },
   { id: "buyer", label: "Buyer", icon: ShoppingBag, description: "Source quality products" },
   { id: "agent", label: "Agent", icon: ClipboardList, description: "Collect field data" },
@@ -14,21 +20,137 @@ const roles = [
 
 const Signup = () => {
   const [step, setStep] = useState(1);
-  const [selectedRole, setSelectedRole] = useState("");
+  const [selectedRole, setSelectedRole] = useState<AppRole | "">("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     password: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { user, userRole } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user && userRole) {
+      const roleRoutes: Record<string, string> = {
+        farmer: "/farmer/dashboard",
+        buyer: "/buyer/dashboard",
+        agent: "/agent/dashboard",
+        logistics: "/logistics/dashboard",
+        admin: "/admin/dashboard",
+      };
+      navigate(roleRoutes[userRole] || "/");
+    }
+  }, [user, userRole, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (step === 1 && selectedRole) {
       setStep(2);
-    } else if (step === 2) {
-      // TODO: Implement signup logic
-      console.log("Signup:", { role: selectedRole, ...formData });
+      return;
+    }
+    
+    if (step === 2) {
+      if (!formData.name || !formData.email || !formData.password) {
+        toast({
+          title: "Error",
+          description: "Please fill in all required fields",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (formData.password.length < 6) {
+        toast({
+          title: "Error",
+          description: "Password must be at least 6 characters",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setIsLoading(true);
+
+      try {
+        const redirectUrl = `${window.location.origin}/`;
+
+        // Sign up the user
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: formData.email.trim(),
+          password: formData.password,
+          options: {
+            emailRedirectTo: redirectUrl,
+            data: {
+              full_name: formData.name,
+              phone: formData.phone,
+            },
+          },
+        });
+
+        if (authError) {
+          if (authError.message.includes("already registered")) {
+            toast({
+              title: "Account exists",
+              description: "This email is already registered. Please sign in instead.",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Signup failed",
+              description: authError.message,
+              variant: "destructive",
+            });
+          }
+          return;
+        }
+
+        if (authData.user) {
+          // Create profile
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .insert({
+              id: authData.user.id,
+              full_name: formData.name,
+              phone: formData.phone,
+            });
+
+          if (profileError) {
+            console.error("Profile creation error:", profileError);
+          }
+
+          // Assign role
+          const { error: roleError } = await supabase
+            .from("user_roles")
+            .insert({
+              user_id: authData.user.id,
+              role: selectedRole as AppRole,
+            });
+
+          if (roleError) {
+            console.error("Role assignment error:", roleError);
+          }
+
+          toast({
+            title: "Account created!",
+            description: "Welcome to AgriSphere. You're now signed in.",
+          });
+
+          // The auth state change listener will handle navigation
+        }
+      } catch (error) {
+        console.error("Signup error:", error);
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -110,6 +232,7 @@ const Signup = () => {
                 <button
                   onClick={() => setStep(1)}
                   className="text-sm text-muted-foreground hover:text-foreground mb-4 flex items-center gap-1"
+                  disabled={isLoading}
                 >
                   ← Back
                 </button>
@@ -134,6 +257,8 @@ const Signup = () => {
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="pl-10 h-12"
+                      disabled={isLoading}
+                      required
                     />
                   </div>
                 </div>
@@ -149,12 +274,14 @@ const Signup = () => {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="pl-10 h-12"
+                      disabled={isLoading}
+                      required
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
+                  <Label htmlFor="phone">Phone Number (Optional)</Label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <Input
@@ -164,6 +291,7 @@ const Signup = () => {
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="pl-10 h-12"
+                      disabled={isLoading}
                     />
                   </div>
                 </div>
@@ -179,13 +307,26 @@ const Signup = () => {
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       className="pl-10 h-12"
+                      disabled={isLoading}
+                      required
+                      minLength={6}
                     />
                   </div>
+                  <p className="text-xs text-muted-foreground">At least 6 characters</p>
                 </div>
 
-                <Button type="submit" variant="hero" className="w-full" size="lg">
-                  Create Account
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                <Button type="submit" variant="hero" className="w-full" size="lg" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Creating account...
+                    </>
+                  ) : (
+                    <>
+                      Create Account
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </>
+                  )}
                 </Button>
               </form>
             </>
