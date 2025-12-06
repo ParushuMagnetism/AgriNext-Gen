@@ -1,8 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
-  Package, 
-  ShoppingCart, 
+  Sprout as CropIcon,
+  LandPlot,
+  Truck, 
   DollarSign, 
   Settings, 
   LogOut,
@@ -14,8 +15,9 @@ import { useAuth } from '@/hooks/useAuth';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/farmer/dashboard' },
-  { icon: Package, label: 'My Listings', href: '/farmer/listings' },
-  { icon: ShoppingCart, label: 'Orders', href: '/farmer/orders' },
+  { icon: CropIcon, label: 'My Crops', href: '/farmer/crops' },
+  { icon: LandPlot, label: 'Farmlands', href: '/farmer/farmlands' },
+  { icon: Truck, label: 'Transport', href: '/farmer/transport' },
   { icon: DollarSign, label: 'Earnings', href: '/farmer/earnings' },
   { icon: Bell, label: 'Notifications', href: '/farmer/notifications' },
   { icon: Settings, label: 'Settings', href: '/farmer/settings' },
@@ -33,7 +35,7 @@ const DashboardSidebar = () => {
           <div className="w-9 h-9 rounded-lg bg-sidebar-primary flex items-center justify-center">
             <Sprout className="w-5 h-5 text-sidebar-primary-foreground" />
           </div>
-          <span className="font-display font-bold text-xl text-sidebar-foreground">AgriSphere</span>
+          <span className="font-display font-bold text-xl text-sidebar-foreground">Agri Mitra</span>
         </div>
 
         {/* Navigation */}

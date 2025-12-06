@@ -65,6 +65,59 @@ export type Database = {
         }
         Relationships: []
       }
+      crops: {
+        Row: {
+          created_at: string
+          crop_name: string
+          estimated_quantity: number | null
+          farmer_id: string
+          harvest_estimate: string | null
+          id: string
+          land_id: string | null
+          quantity_unit: string | null
+          sowing_date: string | null
+          status: Database["public"]["Enums"]["crop_status"]
+          updated_at: string
+          variety: string | null
+        }
+        Insert: {
+          created_at?: string
+          crop_name: string
+          estimated_quantity?: number | null
+          farmer_id: string
+          harvest_estimate?: string | null
+          id?: string
+          land_id?: string | null
+          quantity_unit?: string | null
+          sowing_date?: string | null
+          status?: Database["public"]["Enums"]["crop_status"]
+          updated_at?: string
+          variety?: string | null
+        }
+        Update: {
+          created_at?: string
+          crop_name?: string
+          estimated_quantity?: number | null
+          farmer_id?: string
+          harvest_estimate?: string | null
+          id?: string
+          land_id?: string | null
+          quantity_unit?: string | null
+          sowing_date?: string | null
+          status?: Database["public"]["Enums"]["crop_status"]
+          updated_at?: string
+          variety?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crops_land_id_fkey"
+            columns: ["land_id"]
+            isOneToOne: false
+            referencedRelation: "farmlands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       farm_pickups: {
         Row: {
           created_at: string
@@ -127,6 +180,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      farmlands: {
+        Row: {
+          area: number
+          area_unit: string
+          created_at: string
+          district: string | null
+          farmer_id: string
+          id: string
+          location_lat: number | null
+          location_long: number | null
+          name: string
+          soil_type: string | null
+          updated_at: string
+          village: string | null
+        }
+        Insert: {
+          area?: number
+          area_unit?: string
+          created_at?: string
+          district?: string | null
+          farmer_id: string
+          id?: string
+          location_lat?: number | null
+          location_long?: number | null
+          name: string
+          soil_type?: string | null
+          updated_at?: string
+          village?: string | null
+        }
+        Update: {
+          area?: number
+          area_unit?: string
+          created_at?: string
+          district?: string | null
+          farmer_id?: string
+          id?: string
+          location_lat?: number | null
+          location_long?: number | null
+          name?: string
+          soil_type?: string | null
+          updated_at?: string
+          village?: string | null
+        }
+        Relationships: []
       }
       favorites: {
         Row: {
@@ -247,6 +345,42 @@ export type Database = {
         }
         Relationships: []
       }
+      market_prices: {
+        Row: {
+          created_at: string
+          crop_name: string
+          date: string
+          id: string
+          market_name: string
+          max_price: number | null
+          min_price: number | null
+          modal_price: number
+          trend_direction: Database["public"]["Enums"]["price_trend"] | null
+        }
+        Insert: {
+          created_at?: string
+          crop_name: string
+          date?: string
+          id?: string
+          market_name: string
+          max_price?: number | null
+          min_price?: number | null
+          modal_price: number
+          trend_direction?: Database["public"]["Enums"]["price_trend"] | null
+        }
+        Update: {
+          created_at?: string
+          crop_name?: string
+          date?: string
+          id?: string
+          market_name?: string
+          max_price?: number | null
+          min_price?: number | null
+          modal_price?: number
+          trend_direction?: Database["public"]["Enums"]["price_trend"] | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -308,31 +442,99 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          district: string | null
           full_name: string | null
           id: string
           location: string | null
           phone: string | null
+          total_land_area: number | null
           updated_at: string
+          village: string | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          district?: string | null
           full_name?: string | null
           id: string
           location?: string | null
           phone?: string | null
+          total_land_area?: number | null
           updated_at?: string
+          village?: string | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
+          district?: string | null
           full_name?: string | null
           id?: string
           location?: string | null
           phone?: string | null
+          total_land_area?: number | null
           updated_at?: string
+          village?: string | null
         }
         Relationships: []
+      }
+      transport_requests: {
+        Row: {
+          created_at: string
+          crop_id: string | null
+          farmer_id: string
+          id: string
+          notes: string | null
+          pickup_location: string
+          pickup_village: string | null
+          preferred_date: string | null
+          preferred_time: string | null
+          quantity: number
+          quantity_unit: string | null
+          status: Database["public"]["Enums"]["transport_status"]
+          transporter_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          crop_id?: string | null
+          farmer_id: string
+          id?: string
+          notes?: string | null
+          pickup_location: string
+          pickup_village?: string | null
+          preferred_date?: string | null
+          preferred_time?: string | null
+          quantity: number
+          quantity_unit?: string | null
+          status?: Database["public"]["Enums"]["transport_status"]
+          transporter_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          crop_id?: string | null
+          farmer_id?: string
+          id?: string
+          notes?: string | null
+          pickup_location?: string
+          pickup_village?: string | null
+          preferred_date?: string | null
+          preferred_time?: string | null
+          quantity?: number
+          quantity_unit?: string | null
+          status?: Database["public"]["Enums"]["transport_status"]
+          transporter_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_requests_crop_id_fkey"
+            columns: ["crop_id"]
+            isOneToOne: false
+            referencedRelation: "crops"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -370,6 +572,15 @@ export type Database = {
     }
     Enums: {
       app_role: "farmer" | "buyer" | "agent" | "logistics" | "admin"
+      crop_status: "growing" | "one_week" | "ready" | "harvested"
+      price_trend: "up" | "down" | "flat"
+      transport_status:
+        | "requested"
+        | "assigned"
+        | "en_route"
+        | "picked_up"
+        | "delivered"
+        | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -498,6 +709,16 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["farmer", "buyer", "agent", "logistics", "admin"],
+      crop_status: ["growing", "one_week", "ready", "harvested"],
+      price_trend: ["up", "down", "flat"],
+      transport_status: [
+        "requested",
+        "assigned",
+        "en_route",
+        "picked_up",
+        "delivered",
+        "cancelled",
+      ],
     },
   },
 } as const
