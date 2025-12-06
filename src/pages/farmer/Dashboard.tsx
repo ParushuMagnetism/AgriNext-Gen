@@ -8,8 +8,12 @@ import AdvisoriesList from '@/components/farmer/AdvisoriesList';
 import QuickActions from '@/components/farmer/QuickActions';
 import WeatherWidget from '@/components/farmer/WeatherWidget';
 import FarmlandsSummary from '@/components/farmer/FarmlandsSummary';
+import { useRealtimeSubscriptions } from '@/hooks/useRealtimeSubscriptions';
 
 const FarmerDashboard = () => {
+  // Enable real-time subscriptions for live data updates
+  useRealtimeSubscriptions();
+
   return (
     <DashboardLayout title="Dashboard">
       <div className="space-y-6">
