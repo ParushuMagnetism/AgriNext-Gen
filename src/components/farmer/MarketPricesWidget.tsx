@@ -1,4 +1,4 @@
-import { useCrops, useMarketPrices } from '@/hooks/useFarmerDashboard';
+import { useCrops, useMarketPrices, useAllMarketPrices } from '@/hooks/useFarmerDashboard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TrendingUp, TrendingDown, Minus, IndianRupee, RefreshCw } from 'lucide-react';
@@ -7,7 +7,16 @@ import { Button } from '@/components/ui/button';
 const MarketPricesWidget = () => {
   const { data: crops } = useCrops();
   const cropNames = [...new Set(crops?.map(c => c.crop_name) || [])];
-  const { data: prices, isLoading, refetch, isFetching } = useMarketPrices(cropNames);
+  
+  // Use farmer's crops prices if they have crops, otherwise show all prices
+  const { data: farmerPrices, isLoading: farmerLoading, refetch: refetchFarmer, isFetching: isFetchingFarmer } = useMarketPrices(cropNames);
+  const { data: allPrices, isLoading: allLoading, refetch: refetchAll, isFetching: isFetchingAll } = useAllMarketPrices();
+  
+  const hasCrops = cropNames.length > 0;
+  const prices = hasCrops ? farmerPrices : allPrices;
+  const isLoading = hasCrops ? farmerLoading : allLoading;
+  const isFetching = hasCrops ? isFetchingFarmer : isFetchingAll;
+  const refetch = hasCrops ? refetchFarmer : refetchAll;
 
   // Group prices by crop name and get latest
   const latestPrices = prices?.reduce((acc, price) => {
@@ -17,7 +26,7 @@ const MarketPricesWidget = () => {
     return acc;
   }, {} as Record<string, typeof prices[0]>);
 
-  const pricesList = Object.values(latestPrices || {});
+  const pricesList = Object.values(latestPrices || {}).slice(0, 6);
 
   const getTrendIcon = (trend: string | null) => {
     switch (trend) {
@@ -64,10 +73,15 @@ const MarketPricesWidget = () => {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <IndianRupee className="h-5 w-5 text-primary" />
-          Market Prices
-        </CardTitle>
+        <div>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <IndianRupee className="h-5 w-5 text-primary" />
+            Market Prices
+          </CardTitle>
+          <p className="text-xs text-muted-foreground mt-1">
+            {hasCrops ? 'Prices for your crops' : 'Today\'s market rates'}
+          </p>
+        </div>
         <Button 
           variant="ghost" 
           size="sm" 
@@ -82,9 +96,7 @@ const MarketPricesWidget = () => {
           <div className="text-center py-8">
             <IndianRupee className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
             <p className="text-muted-foreground text-sm">
-              {cropNames.length === 0 
-                ? 'Add crops to see market prices' 
-                : 'No price data available'}
+              No price data available
             </p>
           </div>
         ) : (
