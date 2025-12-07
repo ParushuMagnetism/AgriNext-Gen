@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.transport-ai]
 verify_jwt = false
+
+[functions.marketplace-ai]
+verify_jwt = false

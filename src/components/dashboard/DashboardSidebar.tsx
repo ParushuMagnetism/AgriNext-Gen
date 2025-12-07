@@ -68,18 +68,30 @@ const DashboardSidebar = ({ onClose }: DashboardSidebarProps) => {
     { icon: Settings, label: 'Profile', href: '/logistics/profile' },
   ];
 
+  // Buyer/Marketplace navigation items
+  const buyerNavItems = [
+    { icon: LayoutDashboard, label: 'Dashboard', href: '/marketplace/dashboard' },
+    { icon: ShoppingBag, label: 'Browse Products', href: '/marketplace/browse' },
+    { icon: Package, label: 'My Orders', href: '/marketplace/orders' },
+    { icon: Settings, label: 'Profile', href: '/marketplace/profile' },
+  ];
+
   // Select nav items based on user role
   const navItems = userRole === 'agent' 
     ? agentNavItems 
     : userRole === 'logistics' 
       ? logisticsNavItems 
-      : farmerNavItems;
+      : userRole === 'buyer'
+        ? buyerNavItems
+        : farmerNavItems;
   
   const dashboardTitle = userRole === 'agent' 
     ? 'Agri Mitra Agent' 
     : userRole === 'logistics'
       ? 'Agri Mitra Transport'
-      : 'Agri Mitra';
+      : userRole === 'buyer'
+        ? 'Agri Mitra Market'
+        : 'Agri Mitra';
 
   const handleNavClick = () => {
     if (onClose) onClose();
@@ -97,12 +109,16 @@ const DashboardSidebar = ({ onClose }: DashboardSidebarProps) => {
                 ? 'bg-purple-600' 
                 : userRole === 'logistics'
                   ? 'bg-blue-600'
-                  : 'bg-sidebar-primary'
+                  : userRole === 'buyer'
+                    ? 'bg-orange-600'
+                    : 'bg-sidebar-primary'
             )}>
               {userRole === 'agent' ? (
                 <Sparkles className="w-5 h-5 text-white" />
               ) : userRole === 'logistics' ? (
                 <Truck className="w-5 h-5 text-white" />
+              ) : userRole === 'buyer' ? (
+                <ShoppingBag className="w-5 h-5 text-white" />
               ) : (
                 <Sprout className="w-5 h-5 text-sidebar-primary-foreground" />
               )}
@@ -116,6 +132,9 @@ const DashboardSidebar = ({ onClose }: DashboardSidebarProps) => {
               )}
               {userRole === 'logistics' && (
                 <span className="text-xs text-blue-500 font-medium">Logistics Partner</span>
+              )}
+              {userRole === 'buyer' && (
+                <span className="text-xs text-orange-500 font-medium">Marketplace Buyer</span>
               )}
             </div>
           </div>
@@ -146,7 +165,9 @@ const DashboardSidebar = ({ onClose }: DashboardSidebarProps) => {
                       ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
                       : userRole === 'logistics'
                         ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                        : 'bg-sidebar-accent text-sidebar-primary'
+                        : userRole === 'buyer'
+                          ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'
+                          : 'bg-sidebar-accent text-sidebar-primary'
                     : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
                 )}
               >

@@ -29,6 +29,11 @@ import LogisticsCompletedTrips from "./pages/logistics/CompletedTrips";
 import LogisticsVehicles from "./pages/logistics/Vehicles";
 import LogisticsTripDetail from "./pages/logistics/TripDetail";
 import LogisticsProfile from "./pages/logistics/Profile";
+import MarketplaceDashboard from "./pages/marketplace/Dashboard";
+import BrowseProducts from "./pages/marketplace/Browse";
+import ProductDetail from "./pages/marketplace/ProductDetail";
+import MarketplaceOrders from "./pages/marketplace/Orders";
+import MarketplaceProfile from "./pages/marketplace/Profile";
 
 const queryClient = new QueryClient();
 
@@ -206,6 +211,48 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["logistics"]}>
                   <LogisticsProfile />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Protected Buyer/Marketplace Routes */}
+            <Route
+              path="/marketplace/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["buyer"]}>
+                  <MarketplaceDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/marketplace/browse"
+              element={
+                <ProtectedRoute allowedRoles={["buyer"]}>
+                  <BrowseProducts />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/marketplace/product/:id"
+              element={
+                <ProtectedRoute allowedRoles={["buyer"]}>
+                  <ProductDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/marketplace/orders"
+              element={
+                <ProtectedRoute allowedRoles={["buyer"]}>
+                  <MarketplaceOrders />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/marketplace/profile"
+              element={
+                <ProtectedRoute allowedRoles={["buyer"]}>
+                  <MarketplaceProfile />
                 </ProtectedRoute>
               }
             />

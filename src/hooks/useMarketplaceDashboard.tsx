@@ -126,7 +126,7 @@ export const useMarketProducts = (filters?: {
         query = query.ilike('crop_name', `%${filters.cropName}%`);
       }
       if (filters?.status) {
-        query = query.eq('status', filters.status);
+        query = query.eq('status', filters.status as "growing" | "one_week" | "ready" | "harvested");
       }
       
       const { data: crops, error } = await query;
