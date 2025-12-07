@@ -187,7 +187,8 @@ const Orders = () => {
           </CardContent>
         </Card>
       )}
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

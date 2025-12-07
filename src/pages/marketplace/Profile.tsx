@@ -99,11 +99,12 @@ const BuyerProfile = () => {
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Buyer Profile</h1>
-        <p className="text-muted-foreground">Manage your marketplace profile</p>
-      </div>
+    <DashboardLayout title="Buyer Profile">
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Buyer Profile</h1>
+          <p className="text-muted-foreground">Manage your marketplace profile</p>
+        </div>
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Personal Info */}
@@ -201,13 +202,14 @@ const BuyerProfile = () => {
         </Card>
       </div>
 
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={isSaving}>
-          <Save className="h-4 w-4 mr-2" />
-          {isSaving ? 'Saving...' : 'Save Changes'}
-        </Button>
+        <div className="flex justify-end">
+          <Button onClick={handleSave} disabled={isSaving}>
+            <Save className="h-4 w-4 mr-2" />
+            {isSaving ? 'Saving...' : 'Save Changes'}
+          </Button>
+        </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
