@@ -142,6 +142,41 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_market_logs: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          id: string
+          input_data: Json | null
+          module_type: string
+          output_text: string | null
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          id?: string
+          input_data?: Json | null
+          module_type: string
+          output_text?: string | null
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          id?: string
+          input_data?: Json | null
+          module_type?: string
+          output_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_market_logs_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "buyers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_transport_logs: {
         Row: {
           created_at: string
@@ -176,6 +211,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      buyers: {
+        Row: {
+          buyer_type: string | null
+          company_name: string | null
+          created_at: string
+          district: string | null
+          id: string
+          name: string
+          phone: string | null
+          preferred_crops: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          buyer_type?: string | null
+          company_name?: string | null
+          created_at?: string
+          district?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          preferred_crops?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          buyer_type?: string | null
+          company_name?: string | null
+          created_at?: string
+          district?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          preferred_crops?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       crops: {
         Row: {
@@ -456,6 +530,75 @@ export type Database = {
           waypoints?: Json | null
         }
         Relationships: []
+      }
+      market_orders: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          crop_id: string | null
+          delivery_address: string | null
+          delivery_date: string | null
+          farmer_id: string
+          id: string
+          notes: string | null
+          payment_status: string | null
+          price_offered: number | null
+          quantity: number
+          quantity_unit: string | null
+          status: string
+          transporter_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          crop_id?: string | null
+          delivery_address?: string | null
+          delivery_date?: string | null
+          farmer_id: string
+          id?: string
+          notes?: string | null
+          payment_status?: string | null
+          price_offered?: number | null
+          quantity: number
+          quantity_unit?: string | null
+          status?: string
+          transporter_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          crop_id?: string | null
+          delivery_address?: string | null
+          delivery_date?: string | null
+          farmer_id?: string
+          id?: string
+          notes?: string | null
+          payment_status?: string | null
+          price_offered?: number | null
+          quantity?: number
+          quantity_unit?: string | null
+          status?: string
+          transporter_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_orders_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "buyers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "market_orders_crop_id_fkey"
+            columns: ["crop_id"]
+            isOneToOne: false
+            referencedRelation: "crops"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       market_prices: {
         Row: {
