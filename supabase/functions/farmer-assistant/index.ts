@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,6 +12,44 @@ serve(async (req) => {
   }
 
   try {
+    // Validate user authentication
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Missing authorization header" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      console.error("Auth error:", userError);
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Verify user has farmer role
+    const { data: roleData } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (!roleData || roleData.role !== "farmer") {
+      return new Response(
+        JSON.stringify({ error: "Access denied. Farmer role required." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const { message, language } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
@@ -18,7 +57,7 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    console.log("Received message:", message, "Language hint:", language);
+    console.log("Farmer:", user.id, "Message:", message, "Language hint:", language);
 
     const systemPrompt = `You are a helpful agricultural assistant for Indian farmers. You help with:
 - Crop management and farming techniques
@@ -84,7 +123,7 @@ Examples:
     const data = await response.json();
     const reply = data.choices?.[0]?.message?.content || "I couldn't process your request. Please try again.";
 
-    console.log("AI response:", reply.substring(0, 100) + "...");
+    console.log("AI response for farmer", user.id, ":", reply.substring(0, 100) + "...");
 
     return new Response(
       JSON.stringify({ reply }),

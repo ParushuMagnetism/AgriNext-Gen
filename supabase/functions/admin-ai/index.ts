@@ -1,5 +1,5 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,6 +12,44 @@ serve(async (req) => {
   }
 
   try {
+    // Validate user authentication
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Missing authorization header" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      console.error("Auth error:", userError);
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Verify user has admin role
+    const { data: roleData } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (!roleData || roleData.role !== "admin") {
+      return new Response(
+        JSON.stringify({ error: "Access denied. Admin role required." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const { type, data } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
@@ -19,12 +57,14 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
+    console.log("Admin:", user.id, "AI request type:", type);
+
     let systemPrompt = '';
     let userPrompt = '';
 
     switch (type) {
       case 'cluster_health':
-        systemPrompt = `You are an agricultural ecosystem analyst for Agri Mitra platform. 
+        systemPrompt = `You are an agricultural ecosystem analyst for AgriNext Gen platform. 
 Analyze the provided cluster data and generate a comprehensive health report.
 Focus on:
 1. Overall cluster health summary
@@ -52,7 +92,7 @@ Provide a detailed cluster health analysis with actionable recommendations.`;
         break;
 
       case 'supply_demand':
-        systemPrompt = `You are an agricultural supply-demand forecasting expert for Agri Mitra.
+        systemPrompt = `You are an agricultural supply-demand forecasting expert for AgriNext Gen.
 Analyze the provided data to predict supply vs demand for the next 7 days.
 Consider:
 1. Current harvest-ready crops
@@ -110,7 +150,7 @@ Identify any price irregularities, manipulation risks, or market anomalies.`;
         break;
 
       case 'efficiency_advisor':
-        systemPrompt = `You are an operations efficiency consultant for Agri Mitra agricultural platform.
+        systemPrompt = `You are an operations efficiency consultant for AgriNext Gen agricultural platform.
 Analyze operational data to identify inefficiencies and recommend optimizations.
 Focus on:
 1. Agent productivity metrics
@@ -149,7 +189,7 @@ Provide efficiency optimization recommendations with priority rankings.`;
         throw new Error('Invalid AI module type');
     }
 
-    console.log(`Admin AI request: ${type}`);
+    console.log(`Admin AI request: ${type} from admin ${user.id}`);
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -188,7 +228,7 @@ Provide efficiency optimization recommendations with priority rankings.`;
     const aiResponse = await response.json();
     const content = aiResponse.choices?.[0]?.message?.content || 'No analysis generated.';
 
-    console.log(`Admin AI response generated for: ${type}`);
+    console.log(`Admin AI response generated for: ${type} by admin ${user.id}`);
 
     return new Response(
       JSON.stringify({ 

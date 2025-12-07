@@ -1,16 +1,11 @@
 project_id = "fblxjdlaedzgigcxhevl"
 
 [functions.farmer-assistant]
-verify_jwt = false
 
 [functions.agent-ai]
-verify_jwt = false
 
 [functions.transport-ai]
-verify_jwt = false
 
 [functions.marketplace-ai]
-verify_jwt = false
 
 [functions.admin-ai]
-verify_jwt = false
