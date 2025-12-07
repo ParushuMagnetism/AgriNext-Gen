@@ -65,6 +65,83 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_tasks: {
+        Row: {
+          agent_id: string
+          created_at: string
+          crop_id: string | null
+          due_date: string
+          farmer_id: string
+          id: string
+          notes: string | null
+          priority: number | null
+          task_status: Database["public"]["Enums"]["agent_task_status"]
+          task_type: Database["public"]["Enums"]["agent_task_type"]
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          crop_id?: string | null
+          due_date?: string
+          farmer_id: string
+          id?: string
+          notes?: string | null
+          priority?: number | null
+          task_status?: Database["public"]["Enums"]["agent_task_status"]
+          task_type?: Database["public"]["Enums"]["agent_task_type"]
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          crop_id?: string | null
+          due_date?: string
+          farmer_id?: string
+          id?: string
+          notes?: string | null
+          priority?: number | null
+          task_status?: Database["public"]["Enums"]["agent_task_status"]
+          task_type?: Database["public"]["Enums"]["agent_task_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_tasks_crop_id_fkey"
+            columns: ["crop_id"]
+            isOneToOne: false
+            referencedRelation: "crops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agent_logs: {
+        Row: {
+          agent_id: string
+          created_at: string
+          id: string
+          input_context: Json | null
+          log_type: string
+          output_text: string | null
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          id?: string
+          input_context?: Json | null
+          log_type: string
+          output_text?: string | null
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          id?: string
+          input_context?: Json | null
+          log_type?: string
+          output_text?: string | null
+        }
+        Relationships: []
+      }
       crops: {
         Row: {
           created_at: string
@@ -571,6 +648,12 @@ export type Database = {
       }
     }
     Enums: {
+      agent_task_status: "pending" | "in_progress" | "completed"
+      agent_task_type:
+        | "visit"
+        | "verify_crop"
+        | "harvest_check"
+        | "transport_assist"
       app_role: "farmer" | "buyer" | "agent" | "logistics" | "admin"
       crop_status: "growing" | "one_week" | "ready" | "harvested"
       price_trend: "up" | "down" | "flat"
@@ -708,6 +791,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      agent_task_status: ["pending", "in_progress", "completed"],
+      agent_task_type: [
+        "visit",
+        "verify_crop",
+        "harvest_check",
+        "transport_assist",
+      ],
       app_role: ["farmer", "buyer", "agent", "logistics", "admin"],
       crop_status: ["growing", "one_week", "ready", "harvested"],
       price_trend: ["up", "down", "flat"],
