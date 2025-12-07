@@ -8,6 +8,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import FarmerDashboard from "./pages/farmer/Dashboard";
 import FarmerListings from "./pages/farmer/Listings";
@@ -57,6 +59,17 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            
+            {/* Marketplace redirect for unauthenticated users */}
+            <Route path="/marketplace" element={<Navigate to="/login" replace />} />
+            
+            {/* Role-based redirects */}
+            <Route path="/farmer" element={<Navigate to="/farmer/dashboard" replace />} />
+            <Route path="/buyer" element={<Navigate to="/marketplace/dashboard" replace />} />
+            <Route path="/agent" element={<Navigate to="/agent/dashboard" replace />} />
+            <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
             
             {/* Protected Farmer Routes */}
             <Route

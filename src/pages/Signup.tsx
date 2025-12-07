@@ -37,7 +37,7 @@ const Signup = () => {
     if (user && userRole) {
       const roleRoutes: Record<string, string> = {
         farmer: "/farmer/dashboard",
-        buyer: "/buyer/dashboard",
+        buyer: "/marketplace/dashboard",
         agent: "/agent/dashboard",
         logistics: "/logistics/dashboard",
         admin: "/admin/dashboard",

@@ -3,6 +3,13 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Users, ShoppingBag, Truck, ClipboardList } from "lucide-react";
 
 const HeroSection = () => {
+  const roleCards = [
+    { icon: Users, label: "Farmers", desc: "Sell directly", color: "bg-primary", link: "/signup" },
+    { icon: ShoppingBag, label: "Buyers", desc: "Source quality", color: "bg-accent", link: "/signup" },
+    { icon: ClipboardList, label: "Agents", desc: "Collect data", color: "bg-primary", link: "/signup" },
+    { icon: Truck, label: "Logistics", desc: "Deliver goods", color: "bg-accent", link: "/signup" },
+  ];
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
       {/* Background Pattern */}
@@ -51,28 +58,24 @@ const HeroSection = () => {
               </Link>
             </Button>
             <Button variant="glass" size="xl" asChild>
-              <Link to="/marketplace">Explore Marketplace</Link>
+              <Link to="/login">Sign In to Platform</Link>
             </Button>
           </div>
 
           {/* Role Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto animate-slide-up" style={{ animationDelay: "0.3s" }}>
-            {[
-              { icon: Users, label: "Farmers", desc: "Sell directly", color: "bg-primary" },
-              { icon: ShoppingBag, label: "Buyers", desc: "Source quality", color: "bg-accent" },
-              { icon: ClipboardList, label: "Agents", desc: "Collect data", color: "bg-primary" },
-              { icon: Truck, label: "Logistics", desc: "Deliver goods", color: "bg-accent" },
-            ].map((role, i) => (
-              <div
+            {roleCards.map((role) => (
+              <Link
                 key={role.label}
-                className="group p-4 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50 shadow-soft hover:shadow-medium transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                to={role.link}
+                className="group p-4 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50 shadow-soft hover:shadow-medium transition-all duration-300 hover:-translate-y-1"
               >
                 <div className={`w-12 h-12 rounded-xl ${role.color} flex items-center justify-center mb-3 mx-auto group-hover:scale-110 transition-transform`}>
                   <role.icon className="w-6 h-6 text-primary-foreground" />
                 </div>
                 <h3 className="font-display font-semibold text-foreground">{role.label}</h3>
                 <p className="text-sm text-muted-foreground">{role.desc}</p>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
