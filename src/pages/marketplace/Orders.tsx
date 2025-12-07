@@ -1,3 +1,4 @@
+import DashboardLayout from '@/layouts/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -29,10 +30,12 @@ const Orders = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 p-4 md:p-6">
-        <Skeleton className="h-10 w-48" />
-        <Skeleton className="h-96 w-full" />
-      </div>
+      <DashboardLayout title="My Orders">
+        <div className="space-y-6">
+          <Skeleton className="h-10 w-48" />
+          <Skeleton className="h-96 w-full" />
+        </div>
+      </DashboardLayout>
     );
   }
 
@@ -40,7 +43,8 @@ const Orders = () => {
   const pastOrders = orders?.filter(o => ['delivered', 'cancelled'].includes(o.status)) || [];
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <DashboardLayout title="My Orders">
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
