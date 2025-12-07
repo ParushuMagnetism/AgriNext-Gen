@@ -9,6 +9,7 @@ import QuickActions from '@/components/farmer/QuickActions';
 import WeatherWidget from '@/components/farmer/WeatherWidget';
 import FarmlandsSummary from '@/components/farmer/FarmlandsSummary';
 import OnboardingTour from '@/components/farmer/OnboardingTour';
+import VoiceAssistant from '@/components/farmer/VoiceAssistant';
 import { useRealtimeSubscriptions } from '@/hooks/useRealtimeSubscriptions';
 
 const FarmerDashboard = () => {
@@ -50,6 +51,9 @@ const FarmerDashboard = () => {
           <AdvisoriesList />
         </div>
       </div>
+      
+      {/* Voice Assistant - Floating Button */}
+      <VoiceAssistant />
     </DashboardLayout>
   );
 };
