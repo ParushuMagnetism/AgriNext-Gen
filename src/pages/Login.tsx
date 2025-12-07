@@ -1,18 +1,28 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Leaf, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { Leaf, Mail, Lock, ArrowRight, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
 
+const roleRoutes: Record<string, string> = {
+  farmer: "/farmer/dashboard",
+  buyer: "/marketplace/dashboard",
+  agent: "/agent/dashboard",
+  logistics: "/logistics/dashboard",
+  admin: "/admin/dashboard",
+};
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, userRole } = useAuth();
@@ -20,24 +30,35 @@ const Login = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (user && userRole) {
-      const roleRoutes: Record<string, string> = {
-        farmer: "/farmer/dashboard",
-        buyer: "/marketplace/dashboard",
-        agent: "/agent/dashboard",
-        logistics: "/logistics/dashboard",
-        admin: "/admin/dashboard",
-      };
       navigate(roleRoutes[userRole] || "/");
     }
   }, [user, userRole, navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Email validation
+  const isValidEmail = useMemo(() => {
+    if (!email) return true;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }, [email]);
+
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     
-    if (!email || !password) {
+    if (!email.trim() || !password) {
+      setError("Please fill in all fields");
       toast({
         title: "Error",
         description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!isValidEmail) {
+      setError("Please enter a valid email address");
+      toast({
+        title: "Error",
+        description: "Please enter a valid email address",
         variant: "destructive",
       });
       return;
@@ -47,14 +68,19 @@ const Login = () => {
     
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
+        email: email.trim().toLowerCase(),
         password,
       });
 
       if (error) {
+        let errorMessage = error.message;
+        if (error.message.includes("Invalid login credentials")) {
+          errorMessage = "Invalid email or password. Please try again.";
+        }
+        setError(errorMessage);
         toast({
           title: "Login failed",
-          description: error.message,
+          description: errorMessage,
           variant: "destructive",
         });
         return;
@@ -65,15 +91,17 @@ const Login = () => {
         description: "You have successfully signed in.",
       });
     } catch (error) {
+      const errorMessage = "An unexpected error occurred. Please try again.";
+      setError(errorMessage);
       toast({
         title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [email, password, isValidEmail, toast]);
 
   return (
     <div className="min-h-screen flex">
@@ -100,6 +128,14 @@ const Login = () => {
             </p>
           </div>
 
+          {/* Error Alert */}
+          {error && (
+            <div className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/20 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+              <p className="text-sm text-destructive">{error}</p>
+            </div>
+          )}
+
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
@@ -111,31 +147,48 @@ const Login = () => {
                   type="email"
                   placeholder="you@example.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 h-12"
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setError(null);
+                  }}
+                  className={`pl-10 h-12 ${!isValidEmail ? 'border-destructive' : ''}`}
                   disabled={isLoading}
+                  autoComplete="email"
+                  autoFocus
                 />
               </div>
+              {!isValidEmail && (
+                <p className="text-xs text-destructive">Please enter a valid email address</p>
+              )}
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                  Forgot password?
-                </Link>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 h-12"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setError(null);
+                  }}
+                  className="pl-10 pr-10 h-12"
                   disabled={isLoading}
+                  autoComplete="current-password"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
             </div>
 

@@ -1,40 +1,64 @@
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate, useLocation } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   allowedRoles?: string[];
 }
 
+const roleRoutes: Record<string, string> = {
+  farmer: "/farmer/dashboard",
+  buyer: "/marketplace/dashboard",
+  agent: "/agent/dashboard",
+  logistics: "/logistics/dashboard",
+  admin: "/admin/dashboard",
+};
+
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const { user, loading, userRole } = useAuth();
   const location = useLocation();
 
+  // Show loading state with a better UI
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted-foreground">Loading...</p>
+          <div className="relative">
+            <div className="w-12 h-12 rounded-full border-4 border-primary/20" />
+            <Loader2 className="absolute inset-0 w-12 h-12 text-primary animate-spin" />
+          </div>
+          <p className="text-muted-foreground text-sm">Loading your dashboard...</p>
         </div>
       </div>
     );
   }
 
+  // Redirect to login if not authenticated
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // If user has a role and it's not in the allowed roles, redirect to their dashboard
   if (allowedRoles && userRole && !allowedRoles.includes(userRole)) {
-    // Redirect to appropriate dashboard based on role
-    const roleRoutes: Record<string, string> = {
-      farmer: "/farmer/dashboard",
-      buyer: "/marketplace/dashboard",
-      agent: "/agent/dashboard",
-      logistics: "/logistics/dashboard",
-      admin: "/admin/dashboard",
-    };
-    return <Navigate to={roleRoutes[userRole] || "/"} replace />;
+    const targetRoute = roleRoutes[userRole] || "/";
+    return <Navigate to={targetRoute} replace />;
+  }
+
+  // If user doesn't have a role yet but is authenticated, show loading
+  // This handles the case where role is still being fetched after signup
+  if (allowedRoles && !userRole) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="w-12 h-12 rounded-full border-4 border-primary/20" />
+            <Loader2 className="absolute inset-0 w-12 h-12 text-primary animate-spin" />
+          </div>
+          <p className="text-muted-foreground text-sm">Setting up your account...</p>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;

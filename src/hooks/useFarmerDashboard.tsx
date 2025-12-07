@@ -9,6 +9,8 @@ export interface FarmerProfile {
   village: string | null;
   district: string | null;
   total_land_area: number | null;
+  avatar_url: string | null;
+  location: string | null;
 }
 
 export interface Farmland {

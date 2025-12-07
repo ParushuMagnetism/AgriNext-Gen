@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Bell, Search, Menu } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Bell, Search, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -24,21 +24,29 @@ interface DashboardHeaderProps {
 }
 
 const DashboardHeader = ({ title, onMenuClick }: DashboardHeaderProps) => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, userRole } = useAuth();
   const { data: notifications } = useFarmerNotifications();
   const { data: profile } = useFarmerProfile();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [searchOpen, setSearchOpen] = useState(false);
 
-  const unreadCount = notifications?.filter(n => !n.is_read).length || 0;
-  const recentNotifications = notifications?.slice(0, 5) || [];
+  const unreadCount = useMemo(() => 
+    notifications?.filter(n => !n.is_read).length || 0,
+    [notifications]
+  );
+  
+  const recentNotifications = useMemo(() => 
+    notifications?.slice(0, 5) || [],
+    [notifications]
+  );
 
   // Set up real-time notifications
   useEffect(() => {
     if (!user?.id) return;
 
     const channel = supabase
-      .channel('notifications-changes')
+      .channel('notifications-header')
       .on(
         'postgres_changes',
         {
@@ -71,13 +79,31 @@ const DashboardHeader = ({ title, onMenuClick }: DashboardHeaderProps) => {
     if (name) {
       return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     }
-    return email?.slice(0, 2).toUpperCase() || 'FM';
+    return email?.slice(0, 2).toUpperCase() || 'U';
   };
 
   const initials = getInitials(profile?.full_name, user?.email);
 
+  // Role-specific settings navigation
+  const getSettingsPath = () => {
+    const rolePaths: Record<string, string> = {
+      farmer: '/farmer/settings',
+      buyer: '/marketplace/profile',
+      logistics: '/logistics/profile',
+      agent: '/agent/dashboard',
+      admin: '/admin/dashboard',
+    };
+    return rolePaths[userRole || ''] || '/';
+  };
+
+  // Role-specific notification path
+  const getNotificationPath = () => {
+    if (userRole === 'farmer') return '/farmer/notifications';
+    return getSettingsPath();
+  };
+
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
@@ -87,10 +113,23 @@ const DashboardHeader = ({ title, onMenuClick }: DashboardHeaderProps) => {
         >
           <Menu className="h-5 w-5" />
         </Button>
-        <h1 className="font-display text-xl font-semibold text-foreground">{title}</h1>
+        <h1 className="font-display text-lg md:text-xl font-semibold text-foreground truncate max-w-[200px] md:max-w-none">
+          {title}
+        </h1>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 md:gap-4">
+        {/* Mobile Search Toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={() => setSearchOpen(!searchOpen)}
+        >
+          {searchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
+        </Button>
+
+        {/* Desktop Search */}
         <div className="hidden md:flex relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -135,7 +174,7 @@ const DashboardHeader = ({ title, onMenuClick }: DashboardHeaderProps) => {
                       if (!notification.is_read) {
                         markAsRead(notification.id);
                       }
-                      navigate('/farmer/notifications');
+                      navigate(getNotificationPath());
                     }}
                   >
                     <div className="flex items-start justify-between w-full">
@@ -155,7 +194,7 @@ const DashboardHeader = ({ title, onMenuClick }: DashboardHeaderProps) => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="text-center justify-center text-primary cursor-pointer"
-                  onClick={() => navigate('/farmer/notifications')}
+                  onClick={() => navigate(getNotificationPath())}
                 >
                   View all notifications
                 </DropdownMenuItem>
@@ -169,7 +208,7 @@ const DashboardHeader = ({ title, onMenuClick }: DashboardHeaderProps) => {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-9 w-9 rounded-full">
               <Avatar className="h-9 w-9 border-2 border-primary/20">
-                <AvatarImage src="" />
+                <AvatarImage src={profile?.avatar_url || ''} />
                 <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
                   {initials}
                 </AvatarFallback>
@@ -179,19 +218,13 @@ const DashboardHeader = ({ title, onMenuClick }: DashboardHeaderProps) => {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium">{profile?.full_name || 'Farmer'}</p>
-                <p className="text-xs text-muted-foreground">{user?.email}</p>
+                <p className="text-sm font-medium">{profile?.full_name || 'User'}</p>
+                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate('/farmer/settings')}>
+            <DropdownMenuItem onClick={() => navigate(getSettingsPath())}>
               Profile Settings
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/farmer/farmlands')}>
-              My Farmlands
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/farmer/crops')}>
-              My Crops
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem 
@@ -203,6 +236,20 @@ const DashboardHeader = ({ title, onMenuClick }: DashboardHeaderProps) => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* Mobile Search Bar */}
+      {searchOpen && (
+        <div className="absolute top-16 left-0 right-0 p-4 bg-background border-b border-border md:hidden">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search..."
+              className="w-full pl-9"
+              autoFocus
+            />
+          </div>
+        </div>
+      )}
     </header>
   );
 };

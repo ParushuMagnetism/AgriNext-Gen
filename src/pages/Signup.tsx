@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Leaf, Mail, Lock, User, Phone, ArrowRight, Users, ShoppingBag, ClipboardList, Truck, Loader2, Shield } from "lucide-react";
+import { Leaf, Mail, Lock, User, Phone, ArrowRight, Users, ShoppingBag, ClipboardList, Truck, Loader2, Shield, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,6 +19,14 @@ const roles: { id: AppRole; label: string; icon: typeof Users; description: stri
   { id: "admin", label: "Admin", icon: Shield, description: "Manage ecosystem" },
 ];
 
+const roleRoutes: Record<string, string> = {
+  farmer: "/farmer/dashboard",
+  buyer: "/marketplace/dashboard",
+  agent: "/agent/dashboard",
+  logistics: "/logistics/dashboard",
+  admin: "/admin/dashboard",
+};
+
 const Signup = () => {
   const [step, setStep] = useState(1);
   const [selectedRole, setSelectedRole] = useState<AppRole | "">("");
@@ -29,26 +37,38 @@ const Signup = () => {
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, userRole } = useAuth();
+  const { user, userRole, refreshRole } = useAuth();
 
-  // Redirect if already logged in
+  // Redirect if already logged in with role
   useEffect(() => {
     if (user && userRole) {
-      const roleRoutes: Record<string, string> = {
-        farmer: "/farmer/dashboard",
-        buyer: "/marketplace/dashboard",
-        agent: "/agent/dashboard",
-        logistics: "/logistics/dashboard",
-        admin: "/admin/dashboard",
-      };
       navigate(roleRoutes[userRole] || "/");
     }
   }, [user, userRole, navigate]);
 
+  // Input validation
+  const validateForm = useCallback(() => {
+    if (!formData.name.trim()) {
+      return "Please enter your full name";
+    }
+    if (!formData.email.trim()) {
+      return "Please enter your email address";
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      return "Please enter a valid email address";
+    }
+    if (formData.password.length < 6) {
+      return "Password must be at least 6 characters";
+    }
+    return null;
+  }, [formData]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     
     if (step === 1 && selectedRole) {
       setStep(2);
@@ -56,19 +76,12 @@ const Signup = () => {
     }
     
     if (step === 2) {
-      if (!formData.name || !formData.email || !formData.password) {
+      const validationError = validateForm();
+      if (validationError) {
+        setError(validationError);
         toast({
-          title: "Error",
-          description: "Please fill in all required fields",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (formData.password.length < 6) {
-        toast({
-          title: "Error",
-          description: "Password must be at least 6 characters",
+          title: "Validation Error",
+          description: validationError,
           variant: "destructive",
         });
         return;
@@ -79,27 +92,30 @@ const Signup = () => {
       try {
         const redirectUrl = `${window.location.origin}/`;
 
-        // Sign up the user
+        // Sign up the user with role in metadata
         const { data: authData, error: authError } = await supabase.auth.signUp({
-          email: formData.email.trim(),
+          email: formData.email.trim().toLowerCase(),
           password: formData.password,
           options: {
             emailRedirectTo: redirectUrl,
             data: {
-              full_name: formData.name,
-              phone: formData.phone,
+              full_name: formData.name.trim(),
+              phone: formData.phone.trim() || null,
+              role: selectedRole,
             },
           },
         });
 
         if (authError) {
           if (authError.message.includes("already registered")) {
+            setError("This email is already registered. Please sign in instead.");
             toast({
               title: "Account exists",
               description: "This email is already registered. Please sign in instead.",
               variant: "destructive",
             });
           } else {
+            setError(authError.message);
             toast({
               title: "Signup failed",
               description: authError.message,
@@ -110,26 +126,16 @@ const Signup = () => {
         }
 
         if (authData.user) {
-          // Create profile
-          const { error: profileError } = await supabase
-            .from("profiles")
-            .insert({
-              id: authData.user.id,
-              full_name: formData.name,
-              phone: formData.phone,
-            });
+          // Wait a moment for the trigger to create the profile
+          await new Promise(resolve => setTimeout(resolve, 500));
 
-          if (profileError) {
-            console.error("Profile creation error:", profileError);
-          }
-
-          // Assign role
+          // Assign role explicitly (backup in case trigger doesn't work)
           const { error: roleError } = await supabase
             .from("user_roles")
-            .insert({
+            .upsert({
               user_id: authData.user.id,
               role: selectedRole as AppRole,
-            });
+            }, { onConflict: 'user_id' });
 
           if (roleError) {
             console.error("Role assignment error:", roleError);
@@ -137,44 +143,46 @@ const Signup = () => {
 
           // Create role-specific profile
           if (selectedRole === "buyer") {
-            const { error: buyerError } = await supabase
+            await supabase
               .from("buyers")
-              .insert({
+              .upsert({
                 user_id: authData.user.id,
-                name: formData.name,
-                phone: formData.phone || null,
-              });
-            if (buyerError) console.error("Buyer profile error:", buyerError);
+                name: formData.name.trim(),
+                phone: formData.phone.trim() || null,
+              }, { onConflict: 'user_id' });
           } else if (selectedRole === "logistics") {
-            const { error: transporterError } = await supabase
+            await supabase
               .from("transporters")
-              .insert({
+              .upsert({
                 user_id: authData.user.id,
-                name: formData.name,
-                phone: formData.phone || null,
-              });
-            if (transporterError) console.error("Transporter profile error:", transporterError);
+                name: formData.name.trim(),
+                phone: formData.phone.trim() || null,
+              }, { onConflict: 'user_id' });
           } else if (selectedRole === "admin") {
-            const { error: adminError } = await supabase
+            await supabase
               .from("admin_users")
-              .insert({
+              .upsert({
                 user_id: authData.user.id,
-                name: formData.name,
-                email: formData.email.trim(),
-                phone: formData.phone || null,
-              });
-            if (adminError) console.error("Admin profile error:", adminError);
+                name: formData.name.trim(),
+                email: formData.email.trim().toLowerCase(),
+                phone: formData.phone.trim() || null,
+              }, { onConflict: 'user_id' });
           }
+
+          // Refresh the role in auth context
+          await refreshRole();
 
           toast({
             title: "Account created!",
             description: "Welcome to AgriNext Gen. You're now signed in.",
           });
 
-          // The auth state change listener will handle navigation
+          // Navigate to the appropriate dashboard
+          navigate(roleRoutes[selectedRole] || "/");
         }
       } catch (error) {
         console.error("Signup error:", error);
+        setError("An unexpected error occurred. Please try again.");
         toast({
           title: "Error",
           description: "An unexpected error occurred. Please try again.",
@@ -185,6 +193,16 @@ const Signup = () => {
       }
     }
   };
+
+  const handleInputChange = useCallback((field: keyof typeof formData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    setError(null);
+  }, []);
+
+  const selectedRoleInfo = useMemo(() => 
+    roles.find(r => r.id === selectedRole),
+    [selectedRole]
+  );
 
   return (
     <div className="min-h-screen flex">
@@ -203,9 +221,17 @@ const Signup = () => {
 
           {/* Progress */}
           <div className="flex items-center gap-2 mb-8">
-            <div className={`h-1.5 flex-1 rounded-full ${step >= 1 ? "bg-primary" : "bg-muted"}`} />
-            <div className={`h-1.5 flex-1 rounded-full ${step >= 2 ? "bg-primary" : "bg-muted"}`} />
+            <div className={`h-1.5 flex-1 rounded-full transition-colors ${step >= 1 ? "bg-primary" : "bg-muted"}`} />
+            <div className={`h-1.5 flex-1 rounded-full transition-colors ${step >= 2 ? "bg-primary" : "bg-muted"}`} />
           </div>
+
+          {/* Error Alert */}
+          {error && (
+            <div className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/20 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+              <p className="text-sm text-destructive">{error}</p>
+            </div>
+          )}
 
           {step === 1 ? (
             <>
@@ -262,9 +288,13 @@ const Signup = () => {
               {/* Step 2: Account Details */}
               <div className="mb-8">
                 <button
-                  onClick={() => setStep(1)}
+                  onClick={() => {
+                    setStep(1);
+                    setError(null);
+                  }}
                   className="text-sm text-muted-foreground hover:text-foreground mb-4 flex items-center gap-1"
                   disabled={isLoading}
+                  type="button"
                 >
                   ← Back
                 </button>
@@ -273,7 +303,7 @@ const Signup = () => {
                 </h1>
                 <p className="text-muted-foreground">
                   Fill in your details as a{" "}
-                  <span className="text-primary font-medium capitalize">{selectedRole}</span>
+                  <span className="text-primary font-medium capitalize">{selectedRoleInfo?.label}</span>
                 </p>
               </div>
 
@@ -287,10 +317,11 @@ const Signup = () => {
                       type="text"
                       placeholder="Your full name"
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
                       className="pl-10 h-12"
                       disabled={isLoading}
                       required
+                      autoComplete="name"
                     />
                   </div>
                 </div>
@@ -304,10 +335,11 @@ const Signup = () => {
                       type="email"
                       placeholder="you@example.com"
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
                       className="pl-10 h-12"
                       disabled={isLoading}
                       required
+                      autoComplete="email"
                     />
                   </div>
                 </div>
@@ -321,9 +353,10 @@ const Signup = () => {
                       type="tel"
                       placeholder="+91 9876543210"
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      onChange={(e) => handleInputChange('phone', e.target.value)}
                       className="pl-10 h-12"
                       disabled={isLoading}
+                      autoComplete="tel"
                     />
                   </div>
                 </div>
@@ -337,11 +370,12 @@ const Signup = () => {
                       type="password"
                       placeholder="••••••••"
                       value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      onChange={(e) => handleInputChange('password', e.target.value)}
                       className="pl-10 h-12"
                       disabled={isLoading}
                       required
                       minLength={6}
+                      autoComplete="new-password"
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">At least 6 characters</p>
