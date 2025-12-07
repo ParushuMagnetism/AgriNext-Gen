@@ -58,9 +58,28 @@ const DashboardSidebar = ({ onClose }: DashboardSidebarProps) => {
     { icon: Truck, label: 'Transport', href: '/agent/transport' },
   ];
 
+  // Logistics navigation items
+  const logisticsNavItems = [
+    { icon: LayoutDashboard, label: 'Dashboard', href: '/logistics/dashboard' },
+    { icon: Package, label: 'Available Loads', href: '/logistics/loads' },
+    { icon: Truck, label: 'Active Trips', href: '/logistics/trips' },
+    { icon: CropIcon, label: 'Completed', href: '/logistics/completed' },
+    { icon: LandPlot, label: 'My Vehicles', href: '/logistics/vehicles' },
+    { icon: Settings, label: 'Profile', href: '/logistics/profile' },
+  ];
+
   // Select nav items based on user role
-  const navItems = userRole === 'agent' ? agentNavItems : farmerNavItems;
-  const dashboardTitle = userRole === 'agent' ? 'Agri Mitra Agent' : 'Agri Mitra';
+  const navItems = userRole === 'agent' 
+    ? agentNavItems 
+    : userRole === 'logistics' 
+      ? logisticsNavItems 
+      : farmerNavItems;
+  
+  const dashboardTitle = userRole === 'agent' 
+    ? 'Agri Mitra Agent' 
+    : userRole === 'logistics'
+      ? 'Agri Mitra Transport'
+      : 'Agri Mitra';
 
   const handleNavClick = () => {
     if (onClose) onClose();
@@ -74,10 +93,16 @@ const DashboardSidebar = ({ onClose }: DashboardSidebarProps) => {
           <div className="flex items-center gap-2">
             <div className={cn(
               "w-9 h-9 rounded-lg flex items-center justify-center",
-              userRole === 'agent' ? 'bg-purple-600' : 'bg-sidebar-primary'
+              userRole === 'agent' 
+                ? 'bg-purple-600' 
+                : userRole === 'logistics'
+                  ? 'bg-blue-600'
+                  : 'bg-sidebar-primary'
             )}>
               {userRole === 'agent' ? (
                 <Sparkles className="w-5 h-5 text-white" />
+              ) : userRole === 'logistics' ? (
+                <Truck className="w-5 h-5 text-white" />
               ) : (
                 <Sprout className="w-5 h-5 text-sidebar-primary-foreground" />
               )}
@@ -88,6 +113,9 @@ const DashboardSidebar = ({ onClose }: DashboardSidebarProps) => {
               </span>
               {userRole === 'agent' && (
                 <span className="text-xs text-purple-500 font-medium">Field Operations</span>
+              )}
+              {userRole === 'logistics' && (
+                <span className="text-xs text-blue-500 font-medium">Logistics Partner</span>
               )}
             </div>
           </div>
@@ -116,7 +144,9 @@ const DashboardSidebar = ({ onClose }: DashboardSidebarProps) => {
                   isActive
                     ? userRole === 'agent' 
                       ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-                      : 'bg-sidebar-accent text-sidebar-primary'
+                      : userRole === 'logistics'
+                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                        : 'bg-sidebar-accent text-sidebar-primary'
                     : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
                 )}
               >

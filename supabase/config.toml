@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.agent-ai]
 verify_jwt = false
+
+[functions.transport-ai]
+verify_jwt = false

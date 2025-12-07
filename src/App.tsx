@@ -22,6 +22,13 @@ import AgentDashboard from "./pages/agent/Dashboard";
 import AgentTasks from "./pages/agent/Tasks";
 import AgentFarmers from "./pages/agent/Farmers";
 import AgentTransport from "./pages/agent/Transport";
+import LogisticsDashboard from "./pages/logistics/Dashboard";
+import LogisticsAvailableLoads from "./pages/logistics/AvailableLoads";
+import LogisticsActiveTrips from "./pages/logistics/ActiveTrips";
+import LogisticsCompletedTrips from "./pages/logistics/CompletedTrips";
+import LogisticsVehicles from "./pages/logistics/Vehicles";
+import LogisticsTripDetail from "./pages/logistics/TripDetail";
+import LogisticsProfile from "./pages/logistics/Profile";
 
 const queryClient = new QueryClient();
 
@@ -141,6 +148,64 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["agent"]}>
                   <AgentTransport />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Protected Logistics Routes */}
+            <Route
+              path="/logistics/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["logistics"]}>
+                  <LogisticsDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/logistics/loads"
+              element={
+                <ProtectedRoute allowedRoles={["logistics"]}>
+                  <LogisticsAvailableLoads />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/logistics/trips"
+              element={
+                <ProtectedRoute allowedRoles={["logistics"]}>
+                  <LogisticsActiveTrips />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/logistics/completed"
+              element={
+                <ProtectedRoute allowedRoles={["logistics"]}>
+                  <LogisticsCompletedTrips />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/logistics/vehicles"
+              element={
+                <ProtectedRoute allowedRoles={["logistics"]}>
+                  <LogisticsVehicles />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/logistics/trip/:id"
+              element={
+                <ProtectedRoute allowedRoles={["logistics"]}>
+                  <LogisticsTripDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/logistics/profile"
+              element={
+                <ProtectedRoute allowedRoles={["logistics"]}>
+                  <LogisticsProfile />
                 </ProtectedRoute>
               }
             />
