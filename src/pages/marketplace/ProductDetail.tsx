@@ -153,9 +153,10 @@ const ProductDetail = () => {
       : Minus;
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
+    <DashboardLayout title={product.crop_name}>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-4">
         <Button variant="ghost" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4 mr-2" /> Back
         </Button>
@@ -323,71 +324,72 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      {/* Order Dialog */}
-      <Dialog open={isOrderOpen} onOpenChange={setIsOrderOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Request Purchase</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="p-3 bg-muted rounded-lg">
-              <p className="font-medium">{product.crop_name}</p>
-              <p className="text-sm text-muted-foreground">
-                Available: {product.estimated_quantity} {product.quantity_unit}
-              </p>
+        {/* Order Dialog */}
+        <Dialog open={isOrderOpen} onOpenChange={setIsOrderOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Request Purchase</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-3 bg-muted rounded-lg">
+                <p className="font-medium">{product.crop_name}</p>
+                <p className="text-sm text-muted-foreground">
+                  Available: {product.estimated_quantity} {product.quantity_unit}
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="quantity">Quantity Needed *</Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  placeholder={`Max: ${product.estimated_quantity} ${product.quantity_unit}`}
+                  value={orderQuantity}
+                  onChange={(e) => setOrderQuantity(e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="price">Your Offer Price (₹/quintal)</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  placeholder="Optional"
+                  value={orderPrice}
+                  onChange={(e) => setOrderPrice(e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="address">Delivery Address</Label>
+                <Textarea
+                  id="address"
+                  placeholder="Where should it be delivered?"
+                  value={orderAddress}
+                  onChange={(e) => setOrderAddress(e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea
+                  id="notes"
+                  placeholder="Any special requirements?"
+                  value={orderNotes}
+                  onChange={(e) => setOrderNotes(e.target.value)}
+                />
+              </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="quantity">Quantity Needed *</Label>
-              <Input
-                id="quantity"
-                type="number"
-                placeholder={`Max: ${product.estimated_quantity} ${product.quantity_unit}`}
-                value={orderQuantity}
-                onChange={(e) => setOrderQuantity(e.target.value)}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="price">Your Offer Price (₹/quintal)</Label>
-              <Input
-                id="price"
-                type="number"
-                placeholder="Optional"
-                value={orderPrice}
-                onChange={(e) => setOrderPrice(e.target.value)}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="address">Delivery Address</Label>
-              <Textarea
-                id="address"
-                placeholder="Where should it be delivered?"
-                value={orderAddress}
-                onChange={(e) => setOrderAddress(e.target.value)}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
-              <Textarea
-                id="notes"
-                placeholder="Any special requirements?"
-                value={orderNotes}
-                onChange={(e) => setOrderNotes(e.target.value)}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsOrderOpen(false)}>Cancel</Button>
-            <Button onClick={handlePlaceOrder} disabled={createOrder.isPending}>
-              {createOrder.isPending ? 'Placing...' : 'Place Order'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsOrderOpen(false)}>Cancel</Button>
+              <Button onClick={handlePlaceOrder} disabled={createOrder.isPending}>
+                {createOrder.isPending ? 'Placing...' : 'Place Order'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </DashboardLayout>
   );
 };
 
