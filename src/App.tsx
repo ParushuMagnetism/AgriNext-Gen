@@ -34,6 +34,15 @@ import BrowseProducts from "./pages/marketplace/Browse";
 import ProductDetail from "./pages/marketplace/ProductDetail";
 import MarketplaceOrders from "./pages/marketplace/Orders";
 import MarketplaceProfile from "./pages/marketplace/Profile";
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminFarmers from "./pages/admin/Farmers";
+import AdminAgents from "./pages/admin/Agents";
+import AdminTransporters from "./pages/admin/Transporters";
+import AdminBuyers from "./pages/admin/Buyers";
+import AdminCrops from "./pages/admin/Crops";
+import AdminTransport from "./pages/admin/Transport";
+import AdminOrders from "./pages/admin/Orders";
+import AIConsole from "./pages/admin/AIConsole";
 
 const queryClient = new QueryClient();
 
@@ -253,6 +262,80 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["buyer"]}>
                   <MarketplaceProfile />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Protected Admin Routes */}
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/farmers"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminFarmers />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/agents"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminAgents />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/transporters"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminTransporters />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/buyers"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminBuyers />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/crops"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminCrops />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/transport"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminTransport />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/orders"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminOrders />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/ai-console"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AIConsole />
                 </ProtectedRoute>
               }
             />

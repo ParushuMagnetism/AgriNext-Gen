@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.marketplace-ai]
 verify_jwt = false
+
+[functions.admin-ai]
+verify_jwt = false
