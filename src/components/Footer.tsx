@@ -13,7 +13,7 @@ const Footer = () => {
                 <Leaf className="w-5 h-5 text-sidebar-primary-foreground" />
               </div>
               <span className="text-xl font-display font-bold">
-                Agri<span className="text-sidebar-primary">Sphere</span>
+                AgriNext <span className="text-sidebar-primary">Gen</span>
               </span>
             </Link>
             <p className="text-sidebar-foreground/70 text-sm leading-relaxed">
@@ -50,7 +50,7 @@ const Footer = () => {
             <ul className="space-y-3 text-sidebar-foreground/70">
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-sidebar-primary" />
-                <span>support@agrisphere.in</span>
+                <span>support@agrinextgen.in</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-sidebar-primary" />
@@ -67,7 +67,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-sidebar-border flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sidebar-foreground/60 text-sm">
-            © 2024 AgriSphere. All rights reserved.
+            © 2024 AgriNext Gen. All rights reserved.
           </p>
           <div className="flex items-center gap-6 text-sm text-sidebar-foreground/60">
             <Link to="/privacy" className="hover:text-sidebar-primary transition-colors">Privacy Policy</Link>

@@ -25,7 +25,7 @@ const CTASection = () => {
 
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10">
               Join thousands of farmers, buyers, and partners who are already 
-              benefiting from AgriSphere's connected ecosystem.
+              benefiting from AgriNext Gen's connected ecosystem.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

@@ -167,7 +167,7 @@ const Signup = () => {
 
           toast({
             title: "Account created!",
-            description: "Welcome to AgriSphere. You're now signed in.",
+            description: "Welcome to AgriNext Gen. You're now signed in.",
           });
 
           // The auth state change listener will handle navigation
@@ -196,7 +196,7 @@ const Signup = () => {
               <Leaf className="w-5 h-5 text-primary-foreground" />
             </div>
             <span className="text-xl font-display font-bold text-foreground">
-              Agri<span className="text-primary">Sphere</span>
+              AgriNext <span className="text-primary">Gen</span>
             </span>
           </Link>
 
@@ -211,7 +211,7 @@ const Signup = () => {
               {/* Step 1: Role Selection */}
               <div className="mb-8">
                 <h1 className="text-3xl font-display font-bold text-foreground mb-2">
-                  Join AgriSphere
+                  Join AgriNext Gen
                 </h1>
                 <p className="text-muted-foreground">
                   Select your role to get started

@@ -89,7 +89,7 @@ const MarketplaceDashboard = () => {
           <Card className="max-w-md w-full">
             <CardHeader className="text-center">
               <ShoppingCart className="h-16 w-16 mx-auto text-primary mb-4" />
-              <CardTitle>Welcome to Agri Mitra Marketplace!</CardTitle>
+              <CardTitle>Welcome to AgriNext Gen Marketplace!</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-center text-muted-foreground">

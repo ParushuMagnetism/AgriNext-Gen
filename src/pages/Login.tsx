@@ -86,7 +86,7 @@ const Login = () => {
               <Leaf className="w-5 h-5 text-primary-foreground" />
             </div>
             <span className="text-xl font-display font-bold text-foreground">
-              Agri<span className="text-primary">Sphere</span>
+              AgriNext <span className="text-primary">Gen</span>
             </span>
           </Link>
 
@@ -191,7 +191,7 @@ const Login = () => {
 
         <div className="text-center text-primary-foreground relative z-10">
           <h2 className="text-4xl font-display font-bold mb-4">
-            Welcome to AgriSphere
+            Welcome to AgriNext Gen
           </h2>
           <p className="text-primary-foreground/80 text-lg max-w-md">
             Connect with buyers, manage your farm, and grow your agricultural business 

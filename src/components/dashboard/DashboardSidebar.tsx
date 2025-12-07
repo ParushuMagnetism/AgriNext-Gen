@@ -101,14 +101,14 @@ const DashboardSidebar = ({ onClose }: DashboardSidebarProps) => {
           : farmerNavItems;
   
   const dashboardTitle = userRole === 'agent' 
-    ? 'Agri Mitra Agent' 
+    ? 'AgriNext Gen Agent' 
     : userRole === 'logistics'
-      ? 'Agri Mitra Transport'
+      ? 'AgriNext Gen Transport'
       : userRole === 'buyer'
-        ? 'Agri Mitra Market'
+        ? 'AgriNext Gen Market'
         : userRole === 'admin'
-          ? 'Agri Mitra Admin'
-          : 'Agri Mitra';
+          ? 'AgriNext Gen Admin'
+          : 'AgriNext Gen';
 
   const handleNavClick = () => {
     if (onClose) onClose();
