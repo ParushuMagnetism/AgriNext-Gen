@@ -1,73 +1,119 @@
-# Welcome to your Lovable project
+# 🌾 AgriNext Gen — AI-Powered Agriculture Operating System
 
-## Project info
+AgriNext Gen is a unified, AI-driven digital ecosystem designed to transform the Indian agricultural value chain.  
+It connects *farmers, field agents, transporters, buyers, and administrators* into one intelligent workflow, turning raw ground-level crop data into *real-time insights and AI-powered decisions*.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+This repository contains the source code for the *AgriNext Gen multi-dashboard web application*, including the Farmer, Agent, Transporter, Buyer, and Admin dashboards, along with backend services and AI integrations.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## 🚀 Key Features
 
-**Use Lovable**
+### 🧑‍🌾 Farmer Dashboard
+- Real-time crop tracking  
+- AI-based crop advisory (pest, fertilizer, irrigation)  
+- Market price trend prediction  
+- One-click transport requests  
+- Harvest readiness updates  
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### 🧑‍💼 Field Agent Dashboard
+- AI-prioritized daily visit planning  
+- Crop verification with geo-tagged photos  
+- Yield estimation & harvest scoring  
+- Cluster-level AI risk summary  
+- Farmer onboarding and support  
 
-Changes made via Lovable will be committed automatically to this repo.
+### 🚚 Transporter Dashboard
+- View & accept load requests  
+- Trip progress updates (Assigned → En-route → Delivered)  
+- AI-generated pickup route optimization  
+- AI reverse logistics suggestions  
+- Vehicle & capacity management  
 
-**Use your preferred IDE**
+### 🛒 Buyer Dashboard
+- View upcoming harvest volumes  
+- Discover batches with quality/grade  
+- Traceability from farmer → batch → delivery  
+- AI procurement recommendations  
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 🛠 Admin Dashboard
+- Full ecosystem monitoring  
+- User & role management  
+- Anomaly/fraud detection indicators  
+- AI model controls  
+- Region-level reports & analytics  
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+## 🤖 AI Decision Engine
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+AgriNext Gen uses OpenAI models to deliver:
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+- *AI Crop Advisory*  
+- *AI Harvest Readiness Scoring*  
+- *AI Price & Market Trend Forecasting*  
+- *AI Agent Visit Prioritization*  
+- *AI Logistics Optimization*  
+- *AI Reverse Load Planning*  
+- *AI Demand–Supply Prediction*  
 
-# Step 3: Install the necessary dependencies.
-npm i
+The AI engine continuously learns from field data, transport logs, and market signals to provide *accurate, contextual, and personalized insights*.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+---
 
-**Edit a file directly in GitHub**
+## 🏗 System Architecture
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+AgriNext Gen uses a *4-Layer Modular Architecture*:
 
-**Use GitHub Codespaces**
+### 1️⃣ Data Layer
+- Farmer & crop data  
+- Field agent verification data  
+- Transport requests & trip logs  
+- Location & cluster data  
+- Market signals (price, demand, weather)  
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### 2️⃣ Application Layer (Five Connected Dashboards)
+- Farmer Web App  
+- Field Agent Web App  
+- Transporter Web App  
+- Buyer Web App  
+- Admin Web App  
 
-## What technologies are used for this project?
+### 3️⃣ AI Layer (OpenAI Models)
+- Advisory, prediction, optimization  
+- Price forecasting & risk detection  
+- Route optimization & planning  
 
-This project is built with:
+### 4️⃣ Backend Layer
+- Centralized database  
+- Shared REST APIs  
+- Authentication & RBAC  
+- Notification engine  
+- Data validation  
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+---
 
-## How can I deploy this project?
+## 🛠 Tech Stack
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+### Frontend
+- React / Next.js  
+- Tailwind CSS  
+- Lovable AI Builder  
+- Responsive UI components  
 
-## Can I connect a custom domain to my Lovable project?
+### Backend
+- Node.js  
+- Express / NestJS  
+- Prisma ORM  
+- PostgreSQL / Supabase  
+- REST APIs  
 
-Yes, you can!
+### AI & Integrations
+- OpenAI GPT-4.1 / GPT-3.5  
+- Google Maps API  
+- Weather API  
+- Cloud Storage (Supabase/AWS/Firebase)  
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 📦 Repository Structure (Recommended)
