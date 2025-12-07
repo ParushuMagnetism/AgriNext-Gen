@@ -142,6 +142,41 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_transport_logs: {
+        Row: {
+          created_at: string
+          id: string
+          input_data: Json | null
+          log_type: string
+          output_text: string | null
+          transporter_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          input_data?: Json | null
+          log_type?: string
+          output_text?: string | null
+          transporter_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          input_data?: Json | null
+          log_type?: string
+          output_text?: string | null
+          transporter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_transport_logs_transporter_id_fkey"
+            columns: ["transporter_id"]
+            isOneToOne: false
+            referencedRelation: "transporters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crops: {
         Row: {
           created_at: string
@@ -556,12 +591,16 @@ export type Database = {
       }
       transport_requests: {
         Row: {
+          completed_at: string | null
           created_at: string
           crop_id: string | null
+          delivery_photo_url: string | null
+          distance_km: number | null
           farmer_id: string
           id: string
           notes: string | null
           pickup_location: string
+          pickup_photo_url: string | null
           pickup_village: string | null
           preferred_date: string | null
           preferred_time: string | null
@@ -570,14 +609,19 @@ export type Database = {
           status: Database["public"]["Enums"]["transport_status"]
           transporter_id: string | null
           updated_at: string
+          vehicle_id: string | null
         }
         Insert: {
+          completed_at?: string | null
           created_at?: string
           crop_id?: string | null
+          delivery_photo_url?: string | null
+          distance_km?: number | null
           farmer_id: string
           id?: string
           notes?: string | null
           pickup_location: string
+          pickup_photo_url?: string | null
           pickup_village?: string | null
           preferred_date?: string | null
           preferred_time?: string | null
@@ -586,14 +630,19 @@ export type Database = {
           status?: Database["public"]["Enums"]["transport_status"]
           transporter_id?: string | null
           updated_at?: string
+          vehicle_id?: string | null
         }
         Update: {
+          completed_at?: string | null
           created_at?: string
           crop_id?: string | null
+          delivery_photo_url?: string | null
+          distance_km?: number | null
           farmer_id?: string
           id?: string
           notes?: string | null
           pickup_location?: string
+          pickup_photo_url?: string | null
           pickup_village?: string | null
           preferred_date?: string | null
           preferred_time?: string | null
@@ -602,6 +651,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["transport_status"]
           transporter_id?: string | null
           updated_at?: string
+          vehicle_id?: string | null
         }
         Relationships: [
           {
@@ -611,7 +661,56 @@ export type Database = {
             referencedRelation: "crops"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "transport_requests_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      transporters: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          operating_district: string | null
+          operating_village: string | null
+          phone: string | null
+          registration_number: string | null
+          updated_at: string
+          user_id: string
+          vehicle_capacity: number | null
+          vehicle_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          operating_district?: string | null
+          operating_village?: string | null
+          phone?: string | null
+          registration_number?: string | null
+          updated_at?: string
+          user_id: string
+          vehicle_capacity?: number | null
+          vehicle_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          operating_district?: string | null
+          operating_village?: string | null
+          phone?: string | null
+          registration_number?: string | null
+          updated_at?: string
+          user_id?: string
+          vehicle_capacity?: number | null
+          vehicle_type?: string | null
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -633,6 +732,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      vehicles: {
+        Row: {
+          capacity: number
+          created_at: string
+          id: string
+          is_active: boolean
+          number_plate: string
+          transporter_id: string
+          updated_at: string
+          vehicle_type: string
+        }
+        Insert: {
+          capacity?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          number_plate: string
+          transporter_id: string
+          updated_at?: string
+          vehicle_type?: string
+        }
+        Update: {
+          capacity?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          number_plate?: string
+          transporter_id?: string
+          updated_at?: string
+          vehicle_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_transporter_id_fkey"
+            columns: ["transporter_id"]
+            isOneToOne: false
+            referencedRelation: "transporters"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
