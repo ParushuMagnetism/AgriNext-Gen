@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import DashboardLayout from '@/layouts/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -56,32 +57,37 @@ const TripDetail = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 p-4 md:p-6">
-        <Skeleton className="h-10 w-48" />
-        <Skeleton className="h-64 w-full" />
-      </div>
+      <DashboardLayout title="Trip Details">
+        <div className="space-y-6">
+          <Skeleton className="h-10 w-48" />
+          <Skeleton className="h-64 w-full" />
+        </div>
+      </DashboardLayout>
     );
   }
 
   if (!trip) {
     return (
-      <div className="p-4 md:p-6">
-        <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
-        <Card>
-          <CardContent className="py-12 text-center">
-            <Package className="h-16 w-16 mx-auto mb-4 opacity-50" />
-            <p className="text-lg text-muted-foreground">Trip not found</p>
-          </CardContent>
-        </Card>
-      </div>
+      <DashboardLayout title="Trip Details">
+        <div>
+          <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          <Card>
+            <CardContent className="py-12 text-center">
+              <Package className="h-16 w-16 mx-auto mb-4 opacity-50" />
+              <p className="text-lg text-muted-foreground">Trip not found</p>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <DashboardLayout title="Trip Details">
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" onClick={() => navigate(-1)}>
@@ -268,7 +274,8 @@ const TripDetail = () => {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

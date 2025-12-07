@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import DashboardLayout from '@/layouts/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -57,17 +58,20 @@ const BrowseMarketplace = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 p-4 md:p-6">
-        <Skeleton className="h-10 w-full" />
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-48" />)}
+      <DashboardLayout title="Browse Marketplace">
+        <div className="space-y-6">
+          <Skeleton className="h-10 w-full" />
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-48" />)}
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <DashboardLayout title="Browse Marketplace">
+      <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Browse Marketplace</h1>
@@ -185,7 +189,8 @@ const BrowseMarketplace = () => {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

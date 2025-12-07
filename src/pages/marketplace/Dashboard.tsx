@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import DashboardLayout from '@/layouts/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -70,37 +71,41 @@ const MarketplaceDashboard = () => {
 
   if (profileLoading) {
     return (
-      <div className="space-y-6 p-6">
-        <Skeleton className="h-32 w-full" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24" />)}
+      <DashboardLayout title="Marketplace">
+        <div className="space-y-6">
+          <Skeleton className="h-32 w-full" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24" />)}
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
   if (!profile) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh] p-6">
-        <Card className="max-w-md w-full">
-          <CardHeader className="text-center">
-            <ShoppingCart className="h-16 w-16 mx-auto text-primary mb-4" />
-            <CardTitle>Welcome to Agri Mitra Marketplace!</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-center text-muted-foreground">
-              Set up your buyer profile to start purchasing fresh produce directly from farmers.
-            </p>
-            <Button 
-              className="w-full" 
-              onClick={handleCreateProfile}
-              disabled={createProfile.isPending}
-            >
-              {createProfile.isPending ? 'Creating...' : 'Create Buyer Profile'}
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <DashboardLayout title="Marketplace">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="max-w-md w-full">
+            <CardHeader className="text-center">
+              <ShoppingCart className="h-16 w-16 mx-auto text-primary mb-4" />
+              <CardTitle>Welcome to Agri Mitra Marketplace!</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-center text-muted-foreground">
+                Set up your buyer profile to start purchasing fresh produce directly from farmers.
+              </p>
+              <Button 
+                className="w-full" 
+                onClick={handleCreateProfile}
+                disabled={createProfile.isPending}
+              >
+                {createProfile.isPending ? 'Creating...' : 'Create Buyer Profile'}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
     );
   }
 
@@ -108,7 +113,8 @@ const MarketplaceDashboard = () => {
   const activeOrders = orders?.filter(o => !['delivered', 'cancelled'].includes(o.status)).slice(0, 3) || [];
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <DashboardLayout title="Marketplace">
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -295,7 +301,8 @@ const MarketplaceDashboard = () => {
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import DashboardLayout from '@/layouts/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -94,17 +95,20 @@ const ActiveTrips = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 p-4 md:p-6">
-        <Skeleton className="h-10 w-48" />
-        <div className="space-y-4">
-          {[1, 2, 3].map(i => <Skeleton key={i} className="h-40" />)}
+      <DashboardLayout title="Active Trips">
+        <div className="space-y-6">
+          <Skeleton className="h-10 w-48" />
+          <div className="space-y-4">
+            {[1, 2, 3].map(i => <Skeleton key={i} className="h-40" />)}
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <DashboardLayout title="Active Trips">
+      <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Active Trips</h1>
@@ -277,7 +281,8 @@ const ActiveTrips = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

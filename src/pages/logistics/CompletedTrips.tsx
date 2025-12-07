@@ -1,3 +1,4 @@
+import DashboardLayout from '@/layouts/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -18,15 +19,18 @@ const CompletedTrips = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 p-4 md:p-6">
-        <Skeleton className="h-10 w-48" />
-        <Skeleton className="h-96 w-full" />
-      </div>
+      <DashboardLayout title="Completed Trips">
+        <div className="space-y-6">
+          <Skeleton className="h-10 w-48" />
+          <Skeleton className="h-96 w-full" />
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <DashboardLayout title="Completed Trips">
+      <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Completed Trips</h1>
@@ -150,7 +154,8 @@ const CompletedTrips = () => {
           </Card>
         </div>
       )}
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 
