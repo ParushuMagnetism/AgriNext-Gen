@@ -9,3 +9,6 @@ project_id = "fblxjdlaedzgigcxhevl"
 [functions.marketplace-ai]
 
 [functions.admin-ai]
+
+[functions.seed-test-data]
+verify_jwt = false
