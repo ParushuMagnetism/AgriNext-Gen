@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-
+import { toast } from 'sonner';
 export interface FarmerProfile {
   id: string;
   full_name: string | null;
@@ -67,6 +67,24 @@ export interface Notification {
   type: string;
   is_read: boolean;
   created_at: string;
+}
+
+export interface FarmerOrder {
+  id: string;
+  buyer_id: string;
+  crop_id: string | null;
+  quantity: number;
+  quantity_unit: string | null;
+  price_offered: number | null;
+  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled' | 'rejected';
+  payment_status: string | null;
+  delivery_date: string | null;
+  delivery_address: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  buyer?: { name: string; company_name: string | null; phone: string | null; district: string | null };
+  crop?: { crop_name: string; variety: string | null };
 }
 
 export const useFarmerProfile = () => {
@@ -235,4 +253,72 @@ export const useDashboardStats = () => {
     totalLandArea,
     isLoading: cropsLoading || transportLoading || farmlandsLoading,
   };
+};
+
+// Farmer Orders Hook - fetches real orders from market_orders table
+export const useFarmerOrders = () => {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['farmer-orders', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+
+      const { data: orders, error } = await supabase
+        .from('market_orders')
+        .select('*')
+        .eq('farmer_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Enrich with buyer and crop info
+      const enriched = await Promise.all(
+        (orders || []).map(async (order) => {
+          const [buyerRes, cropRes] = await Promise.all([
+            supabase.from('buyers').select('name, company_name, phone, district')
+              .eq('id', order.buyer_id).maybeSingle(),
+            order.crop_id
+              ? supabase.from('crops').select('crop_name, variety')
+                  .eq('id', order.crop_id).maybeSingle()
+              : Promise.resolve({ data: null }),
+          ]);
+
+          return {
+            ...order,
+            buyer: buyerRes.data,
+            crop: cropRes.data,
+          };
+        })
+      );
+
+      return enriched as FarmerOrder[];
+    },
+    enabled: !!user?.id,
+  });
+};
+
+// Farmer Update Order Status - uses secure RPC function
+export const useFarmerUpdateOrderStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ orderId, newStatus }: { orderId: string; newStatus: string }) => {
+      const { data, error } = await supabase
+        .rpc('farmer_update_order_status', {
+          p_order_id: orderId,
+          p_new_status: newStatus,
+        });
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['farmer-orders'] });
+      toast.success('Order status updated!');
+    },
+    onError: (error) => {
+      toast.error('Failed to update order: ' + error.message);
+    },
+  });
 };
