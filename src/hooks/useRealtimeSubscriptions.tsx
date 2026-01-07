@@ -86,12 +86,31 @@ export const useRealtimeSubscriptions = () => {
       )
       .subscribe();
 
+    // Subscribe to market orders changes (for farmer orders)
+    const ordersChannel = supabase
+      .channel('farmer-orders-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'market_orders',
+          filter: `farmer_id=eq.${user.id}`,
+        },
+        () => {
+          console.log('Market orders updated - refreshing data');
+          queryClient.invalidateQueries({ queryKey: ['farmer-orders', user.id] });
+        }
+      )
+      .subscribe();
+
     // Cleanup subscriptions on unmount
     return () => {
       supabase.removeChannel(cropsChannel);
       supabase.removeChannel(farmlandsChannel);
       supabase.removeChannel(transportChannel);
       supabase.removeChannel(notificationsChannel);
+      supabase.removeChannel(ordersChannel);
     };
   }, [user?.id, queryClient]);
 };

@@ -258,7 +258,7 @@ export const useCreateOrder = () => {
           price_offered: data.price_offered,
           delivery_address: data.delivery_address,
           notes: data.notes,
-          status: 'requested',
+          status: 'pending',
         })
         .select()
         .single();

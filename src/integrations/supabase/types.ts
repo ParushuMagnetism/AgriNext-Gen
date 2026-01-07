@@ -993,6 +993,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      farmer_update_order_status: {
+        Args: { p_new_status: string; p_order_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
