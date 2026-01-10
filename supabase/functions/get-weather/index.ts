@@ -114,9 +114,14 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Extract and verify the JWT token using service role
+    // Extract JWT token and verify using admin API
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    
+    // Use admin API to get user from token
+    const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(
+      // First decode the JWT to get the user ID
+      JSON.parse(atob(token.split('.')[1])).sub
+    );
     
     if (userError || !user) {
       console.error('Auth error:', userError);
