@@ -13,6 +13,8 @@ import {
   Bot, 
   User, 
   Loader2,
+  Globe,
+  Sparkles,
   Languages,
   MessageSquare,
   X
@@ -70,6 +72,8 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  personalized?: boolean;
+  webVerified?: boolean;
 }
 
 type SupportedLanguage = 'en-IN' | 'hi-IN' | 'kn-IN';
@@ -232,6 +236,8 @@ const VoiceAssistant = () => {
         role: 'assistant',
         content: data.reply,
         timestamp: new Date(),
+        personalized: data.metadata?.personalized ?? true,
+        webVerified: data.metadata?.webVerified ?? false,
       };
 
       setMessages(prev => [...prev, assistantMessage]);
@@ -368,14 +374,32 @@ const VoiceAssistant = () => {
                       <Bot className="h-4 w-4 text-primary" />
                     </div>
                   )}
-                  <div
-                    className={`rounded-lg px-3 py-2 max-w-[80%] text-sm ${
-                      msg.role === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted'
-                    }`}
-                  >
-                    {msg.content}
+                  <div className="flex flex-col gap-1 max-w-[80%]">
+                    {msg.role === 'assistant' && (
+                      <div className="flex gap-1">
+                        {msg.personalized && (
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 gap-0.5">
+                            <Sparkles className="h-2.5 w-2.5" />
+                            Personalized
+                          </Badge>
+                        )}
+                        {msg.webVerified && (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 gap-0.5 border-blue-300 text-blue-600">
+                            <Globe className="h-2.5 w-2.5" />
+                            Web verified
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                    <div
+                      className={`rounded-lg px-3 py-2 text-sm ${
+                        msg.role === 'user'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted'
+                      }`}
+                    >
+                      {msg.content}
+                    </div>
                   </div>
                   {msg.role === 'user' && (
                     <div className="h-7 w-7 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">

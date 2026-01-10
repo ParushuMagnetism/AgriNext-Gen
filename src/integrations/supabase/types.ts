@@ -213,6 +213,48 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_farmer_logs: {
+        Row: {
+          ai_response: string
+          created_at: string
+          farmer_context_summary: Json | null
+          id: string
+          model: string | null
+          router_category: string
+          used_web: boolean
+          user_id: string
+          user_message: string
+          web_context_summary: Json | null
+          web_query: string | null
+        }
+        Insert: {
+          ai_response: string
+          created_at?: string
+          farmer_context_summary?: Json | null
+          id?: string
+          model?: string | null
+          router_category: string
+          used_web?: boolean
+          user_id: string
+          user_message: string
+          web_context_summary?: Json | null
+          web_query?: string | null
+        }
+        Update: {
+          ai_response?: string
+          created_at?: string
+          farmer_context_summary?: Json | null
+          id?: string
+          model?: string | null
+          router_category?: string
+          used_web?: boolean
+          user_id?: string
+          user_message?: string
+          web_context_summary?: Json | null
+          web_query?: string | null
+        }
+        Relationships: []
+      }
       ai_market_logs: {
         Row: {
           buyer_id: string
@@ -987,6 +1029,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      web_cache: {
+        Row: {
+          cache_key: string
+          crop_key: string | null
+          data: Json
+          fetched_at: string
+          location_key: string
+          topic: string
+        }
+        Insert: {
+          cache_key: string
+          crop_key?: string | null
+          data: Json
+          fetched_at?: string
+          location_key: string
+          topic: string
+        }
+        Update: {
+          cache_key?: string
+          crop_key?: string | null
+          data?: Json
+          fetched_at?: string
+          location_key?: string
+          topic?: string
+        }
+        Relationships: []
       }
     }
     Views: {
