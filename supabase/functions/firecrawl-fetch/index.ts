@@ -24,8 +24,13 @@ Deno.serve(async (req) => {
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+  let logUrl = "";
+  let logSourceId: string | null = null;
+
   try {
-    const { url, source_id } = await req.json();
+    const { url, source_id, segment_key } = await req.json();
+    logUrl = url || "";
+    logSourceId = source_id || null;
 
     if (!url) {
       return new Response(
@@ -51,7 +56,7 @@ Deno.serve(async (req) => {
 
     console.log("Firecrawl fetching:", formattedUrl);
 
-    // Call Firecrawl API
+    // Call Firecrawl API - single page fetch only (no deep crawl)
     const response = await fetch("https://api.firecrawl.dev/v1/scrape", {
       method: "POST",
       headers: {
@@ -62,7 +67,8 @@ Deno.serve(async (req) => {
         url: formattedUrl,
         formats: ["markdown", "html"],
         onlyMainContent: true,
-        waitFor: 2000,
+        waitFor: 3000,
+        timeout: 30000,
       }),
     });
 
@@ -73,11 +79,13 @@ Deno.serve(async (req) => {
     await supabase.from("web_fetch_logs").insert({
       endpoint: "firecrawl-fetch",
       source_id: source_id || null,
-      url: formattedUrl,
+      segment_key: segment_key || null,
+      query: formattedUrl,
       success: response.ok,
       latency_ms: latencyMs,
       http_status: response.status,
       cache_hit: false,
+      response_size: JSON.stringify(responseData).length,
       error: response.ok ? null : (responseData.error || "Unknown error").substring(0, 500),
     });
 
@@ -117,7 +125,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log("Firecrawl fetch successful, content length:", extractedText.length);
+    console.log(`Firecrawl fetch successful, content length: ${extractedText.length}, latency: ${latencyMs}ms`);
 
     return new Response(
       JSON.stringify({
@@ -127,6 +135,7 @@ Deno.serve(async (req) => {
           extracted_json: extractedJson,
           content_hash: contentHash,
           url: formattedUrl,
+          latency_ms: latencyMs,
         },
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -138,6 +147,8 @@ Deno.serve(async (req) => {
     // Log error
     await supabase.from("web_fetch_logs").insert({
       endpoint: "firecrawl-fetch",
+      source_id: logSourceId,
+      query: logUrl,
       success: false,
       latency_ms: latencyMs,
       error: (error instanceof Error ? error.message : "Unknown error").substring(0, 500),
