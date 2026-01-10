@@ -850,8 +850,10 @@ export type Database = {
       }
       price_forecasts: {
         Row: {
+          based_on_points: number | null
           confidence: string
           crop_name: string
+          data_freshness_hours: number | null
           direction: string
           district: string
           generated_at: string
@@ -860,8 +862,10 @@ export type Database = {
           state: string
         }
         Insert: {
+          based_on_points?: number | null
           confidence?: string
           crop_name: string
+          data_freshness_hours?: number | null
           direction: string
           district: string
           generated_at?: string
@@ -870,8 +874,10 @@ export type Database = {
           state?: string
         }
         Update: {
+          based_on_points?: number | null
           confidence?: string
           crop_name?: string
+          data_freshness_hours?: number | null
           direction?: string
           district?: string
           generated_at?: string
@@ -1152,30 +1158,42 @@ export type Database = {
       }
       web_fetch_logs: {
         Row: {
+          cache_hit: boolean | null
+          cache_key: string | null
           endpoint: string
           error: string | null
           fetched_at: string
+          http_status: number | null
           id: string
           latency_ms: number | null
           query: string | null
+          response_size: number | null
           success: boolean
         }
         Insert: {
+          cache_hit?: boolean | null
+          cache_key?: string | null
           endpoint: string
           error?: string | null
           fetched_at?: string
+          http_status?: number | null
           id?: string
           latency_ms?: number | null
           query?: string | null
+          response_size?: number | null
           success?: boolean
         }
         Update: {
+          cache_hit?: boolean | null
+          cache_key?: string | null
           endpoint?: string
           error?: string | null
           fetched_at?: string
+          http_status?: number | null
           id?: string
           latency_ms?: number | null
           query?: string | null
+          response_size?: number | null
           success?: boolean
         }
         Relationships: []
