@@ -10,6 +10,7 @@ import WeatherWidget from '@/components/farmer/WeatherWidget';
 import FarmlandsSummary from '@/components/farmer/FarmlandsSummary';
 import OnboardingTour from '@/components/farmer/OnboardingTour';
 import VoiceAssistant from '@/components/farmer/VoiceAssistant';
+import AgentNotesSection from '@/components/farmer/AgentNotesSection';
 import { useRealtimeSubscriptions } from '@/hooks/useRealtimeSubscriptions';
 
 const FarmerDashboard = () => {
@@ -50,6 +51,9 @@ const FarmerDashboard = () => {
           <MarketPricesWidget />
           <AdvisoriesList />
         </div>
+
+        {/* Agent Notes Section */}
+        <AgentNotesSection />
       </div>
       
       {/* Voice Assistant - Floating Button */}

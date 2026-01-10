@@ -47,8 +47,10 @@ import {
   Clock, 
   Play,
   Filter,
-  Search
+  Search,
+  FileAudio
 } from 'lucide-react';
+import AgentVoiceNoteDialog from '@/components/agent/AgentVoiceNoteDialog';
 import { format, parseISO } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -334,26 +336,38 @@ const AgentTasks = () => {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {task.task_status === 'pending' && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleStatusChange(task, 'in_progress')}
-                            >
-                              Start
-                            </Button>
-                          )}
-                          {task.task_status === 'in_progress' && (
-                            <Button
-                              size="sm"
-                              onClick={() => handleStatusChange(task, 'completed')}
-                            >
-                              Complete
-                            </Button>
-                          )}
-                          {task.task_status === 'completed' && (
-                            <span className="text-sm text-green-600">Done</span>
-                          )}
+                          <div className="flex items-center gap-2">
+                            {task.task_status === 'pending' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleStatusChange(task, 'in_progress')}
+                              >
+                                Start
+                              </Button>
+                            )}
+                            {task.task_status === 'in_progress' && (
+                              <Button
+                                size="sm"
+                                onClick={() => handleStatusChange(task, 'completed')}
+                              >
+                                Complete
+                              </Button>
+                            )}
+                            {task.task_status === 'completed' && (
+                              <span className="text-sm text-green-600">Done</span>
+                            )}
+                            <AgentVoiceNoteDialog
+                              farmerId={task.farmer_id}
+                              taskId={task.id}
+                              cropId={task.crop_id}
+                              triggerButton={
+                                <Button variant="ghost" size="icon" className="h-8 w-8" title="Add voice note">
+                                  <FileAudio className="h-4 w-4" />
+                                </Button>
+                              }
+                            />
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))
