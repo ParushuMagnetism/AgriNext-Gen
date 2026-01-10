@@ -151,6 +151,42 @@ export type Database = {
           },
         ]
       }
+      agent_voice_notes: {
+        Row: {
+          agent_id: string
+          audio_path: string | null
+          created_at: string
+          crop_id: string | null
+          farmer_id: string | null
+          id: string
+          language_code: string
+          note_text: string | null
+          task_id: string | null
+        }
+        Insert: {
+          agent_id: string
+          audio_path?: string | null
+          created_at?: string
+          crop_id?: string | null
+          farmer_id?: string | null
+          id?: string
+          language_code?: string
+          note_text?: string | null
+          task_id?: string | null
+        }
+        Update: {
+          agent_id?: string
+          audio_path?: string | null
+          created_at?: string
+          crop_id?: string | null
+          farmer_id?: string | null
+          id?: string
+          language_code?: string
+          note_text?: string | null
+          task_id?: string | null
+        }
+        Relationships: []
+      }
       ai_admin_logs: {
         Row: {
           admin_id: string
@@ -210,6 +246,39 @@ export type Database = {
           input_context?: Json | null
           log_type?: string
           output_text?: string | null
+        }
+        Relationships: []
+      }
+      ai_audio_cache: {
+        Row: {
+          cache_key: string
+          created_at: string
+          id: string
+          language_code: string
+          storage_path: string
+          text_hash: string
+          voice_id: string
+          voice_role: string
+        }
+        Insert: {
+          cache_key: string
+          created_at?: string
+          id?: string
+          language_code: string
+          storage_path: string
+          text_hash: string
+          voice_id: string
+          voice_role: string
+        }
+        Update: {
+          cache_key?: string
+          created_at?: string
+          id?: string
+          language_code?: string
+          storage_path?: string
+          text_hash?: string
+          voice_id?: string
+          voice_role?: string
         }
         Relationships: []
       }
@@ -1110,6 +1179,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      voice_ops_logs: {
+        Row: {
+          cache_hit: boolean | null
+          created_at: string
+          error: string | null
+          id: string
+          language_code: string | null
+          latency_ms: number | null
+          op: string
+          role: string | null
+          success: boolean
+          user_id: string | null
+        }
+        Insert: {
+          cache_hit?: boolean | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          language_code?: string | null
+          latency_ms?: number | null
+          op: string
+          role?: string | null
+          success?: boolean
+          user_id?: string | null
+        }
+        Update: {
+          cache_hit?: boolean | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          language_code?: string | null
+          latency_ms?: number | null
+          op?: string
+          role?: string | null
+          success?: boolean
+          user_id?: string | null
+        }
+        Relationships: []
       }
       weather_cache: {
         Row: {
