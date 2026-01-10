@@ -1,15 +1,21 @@
-import { useCrops, useMarketPrices, useAllMarketPrices } from '@/hooks/useFarmerDashboard';
+import { useCrops, useMarketPrices, useAllMarketPrices, useFarmerProfile } from '@/hooks/useFarmerDashboard';
 import { usePriceForecasts } from '@/hooks/useMarketData';
+import { useIsDistrictValid } from '@/hooks/useKarnatakaDistricts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { TrendingUp, TrendingDown, Minus, IndianRupee, RefreshCw, Clock, MapPin } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, IndianRupee, RefreshCw, Clock, MapPin, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const MarketPricesWidget = () => {
+  const { data: profile, isLoading: profileLoading } = useFarmerProfile();
   const { data: crops } = useCrops();
   const cropNames = [...new Set(crops?.map(c => c.crop_name) || [])];
+  
+  // Check if farmer has a valid Karnataka district
+  const hasValidDistrict = useIsDistrictValid(profile?.district);
   
   // Use farmer's crops prices if they have crops, otherwise show all prices
   const { data: farmerPrices, isLoading: farmerLoading, refetch: refetchFarmer, isFetching: isFetchingFarmer } = useMarketPrices(cropNames);
@@ -18,7 +24,7 @@ const MarketPricesWidget = () => {
   
   const hasCrops = cropNames.length > 0;
   const prices = hasCrops ? farmerPrices : allPrices;
-  const isLoading = hasCrops ? farmerLoading : allLoading;
+  const isLoading = profileLoading || (hasCrops ? farmerLoading : allLoading);
   const isFetching = hasCrops ? isFetchingFarmer : isFetchingAll;
   const refetch = hasCrops ? refetchFarmer : refetchAll;
 
@@ -120,7 +126,11 @@ const MarketPricesWidget = () => {
             Karnataka Mandi Prices
           </CardTitle>
           <p className="text-xs text-muted-foreground mt-1">
-            {hasCrops ? 'Prices for your crops' : 'Today\'s market rates'}
+            {hasValidDistrict && profile?.district 
+              ? `Prices for ${profile.district}` 
+              : hasCrops 
+                ? 'Prices for your crops' 
+                : 'Today\'s market rates'}
           </p>
         </div>
         <Button 
@@ -133,6 +143,16 @@ const MarketPricesWidget = () => {
         </Button>
       </CardHeader>
       <CardContent>
+        {/* Show fallback message if district is not set */}
+        {!hasValidDistrict && (
+          <Alert className="mb-4 border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800">
+            <AlertCircle className="h-4 w-4 text-amber-600" />
+            <AlertDescription className="text-amber-800 dark:text-amber-200 text-sm">
+              Set your district to see personalized local mandi prices
+            </AlertDescription>
+          </Alert>
+        )}
+        
         {pricesList.length === 0 ? (
           <div className="text-center py-8">
             <IndianRupee className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />

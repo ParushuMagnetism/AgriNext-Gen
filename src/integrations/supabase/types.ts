@@ -187,6 +187,45 @@ export type Database = {
         }
         Relationships: []
       }
+      agri_advisories: {
+        Row: {
+          crop_name: string | null
+          district: string | null
+          fetched_at: string | null
+          id: string
+          published_date: string | null
+          recommended_actions: string | null
+          source_url: string | null
+          state: string | null
+          summary: string | null
+          title: string
+        }
+        Insert: {
+          crop_name?: string | null
+          district?: string | null
+          fetched_at?: string | null
+          id?: string
+          published_date?: string | null
+          recommended_actions?: string | null
+          source_url?: string | null
+          state?: string | null
+          summary?: string | null
+          title: string
+        }
+        Update: {
+          crop_name?: string | null
+          district?: string | null
+          fetched_at?: string | null
+          id?: string
+          published_date?: string | null
+          recommended_actions?: string | null
+          source_url?: string | null
+          state?: string | null
+          summary?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       ai_admin_logs: {
         Row: {
           admin_id: string
@@ -433,6 +472,30 @@ export type Database = {
         }
         Relationships: []
       }
+      crop_aliases: {
+        Row: {
+          alias: string
+          canonical_name: string
+          created_at: string | null
+          id: string
+          language_code: string | null
+        }
+        Insert: {
+          alias: string
+          canonical_name: string
+          created_at?: string | null
+          id?: string
+          language_code?: string | null
+        }
+        Update: {
+          alias?: string
+          canonical_name?: string
+          created_at?: string | null
+          id?: string
+          language_code?: string | null
+        }
+        Relationships: []
+      }
       crops: {
         Row: {
           created_at: string
@@ -549,6 +612,39 @@ export type Database = {
           },
         ]
       }
+      farmer_segments: {
+        Row: {
+          active_farmer_count: number | null
+          crawl_frequency_hours: number | null
+          crop_canonical: string
+          district: string
+          last_crawled_at: string | null
+          segment_key: string
+          state: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          active_farmer_count?: number | null
+          crawl_frequency_hours?: number | null
+          crop_canonical: string
+          district: string
+          last_crawled_at?: string | null
+          segment_key: string
+          state?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          active_farmer_count?: number | null
+          crawl_frequency_hours?: number | null
+          crop_canonical?: string
+          district?: string
+          last_crawled_at?: string | null
+          segment_key?: string
+          state?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       farmlands: {
         Row: {
           area: number
@@ -622,6 +718,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      karnataka_districts: {
+        Row: {
+          created_at: string | null
+          district: string
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          district: string
+          id?: string
+        }
+        Update: {
+          created_at?: string | null
+          district?: string
+          id?: string
+        }
+        Relationships: []
       }
       listings: {
         Row: {
@@ -860,6 +974,45 @@ export type Database = {
         }
         Relationships: []
       }
+      market_prices_agg: {
+        Row: {
+          confidence: string | null
+          crop_name: string
+          district: string
+          fetched_at: string | null
+          id: string
+          modal_price: number | null
+          sources_count: number | null
+          sources_used: Json | null
+          state: string | null
+          unit: string | null
+        }
+        Insert: {
+          confidence?: string | null
+          crop_name: string
+          district: string
+          fetched_at?: string | null
+          id?: string
+          modal_price?: number | null
+          sources_count?: number | null
+          sources_used?: Json | null
+          state?: string | null
+          unit?: string | null
+        }
+        Update: {
+          confidence?: string | null
+          crop_name?: string
+          district?: string
+          fetched_at?: string | null
+          id?: string
+          modal_price?: number | null
+          sources_count?: number | null
+          sources_used?: Json | null
+          state?: string | null
+          unit?: string | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -961,10 +1114,14 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           district: string | null
+          district_confidence: string | null
+          district_source: string | null
           full_name: string | null
           id: string
           location: string | null
           phone: string | null
+          pincode: string | null
+          taluk: string | null
           total_land_area: number | null
           updated_at: string
           village: string | null
@@ -973,10 +1130,14 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           district?: string | null
+          district_confidence?: string | null
+          district_source?: string | null
           full_name?: string | null
           id: string
           location?: string | null
           phone?: string | null
+          pincode?: string | null
+          taluk?: string | null
           total_land_area?: number | null
           updated_at?: string
           village?: string | null
@@ -985,13 +1146,56 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           district?: string | null
+          district_confidence?: string | null
+          district_source?: string | null
           full_name?: string | null
           id?: string
           location?: string | null
           phone?: string | null
+          pincode?: string | null
+          taluk?: string | null
           total_land_area?: number | null
           updated_at?: string
           village?: string | null
+        }
+        Relationships: []
+      }
+      schemes_catalog: {
+        Row: {
+          apply_steps: string | null
+          benefits: string | null
+          deadline: string | null
+          documents: string | null
+          eligibility: string | null
+          fetched_at: string | null
+          id: string
+          official_link: string | null
+          scheme_name: string
+          state: string | null
+        }
+        Insert: {
+          apply_steps?: string | null
+          benefits?: string | null
+          deadline?: string | null
+          documents?: string | null
+          eligibility?: string | null
+          fetched_at?: string | null
+          id?: string
+          official_link?: string | null
+          scheme_name: string
+          state?: string | null
+        }
+        Update: {
+          apply_steps?: string | null
+          benefits?: string | null
+          deadline?: string | null
+          documents?: string | null
+          eligibility?: string | null
+          fetched_at?: string | null
+          id?: string
+          official_link?: string | null
+          scheme_name?: string
+          state?: string | null
         }
         Relationships: []
       }
@@ -1115,6 +1319,54 @@ export type Database = {
           user_id?: string
           vehicle_capacity?: number | null
           vehicle_type?: string | null
+        }
+        Relationships: []
+      }
+      trusted_sources: {
+        Row: {
+          active: boolean | null
+          category: string
+          crawl_frequency_hours: number | null
+          created_at: string | null
+          crop_canonical: string | null
+          district: string | null
+          id: string
+          last_crawled_at: string | null
+          name: string
+          priority: number | null
+          state: string | null
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          active?: boolean | null
+          category: string
+          crawl_frequency_hours?: number | null
+          created_at?: string | null
+          crop_canonical?: string | null
+          district?: string | null
+          id?: string
+          last_crawled_at?: string | null
+          name: string
+          priority?: number | null
+          state?: string | null
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          active?: boolean | null
+          category?: string
+          crawl_frequency_hours?: number | null
+          created_at?: string | null
+          crop_canonical?: string | null
+          district?: string | null
+          id?: string
+          last_crawled_at?: string | null
+          name?: string
+          priority?: number | null
+          state?: string | null
+          updated_at?: string | null
+          url?: string
         }
         Relationships: []
       }
@@ -1264,6 +1516,50 @@ export type Database = {
         }
         Relationships: []
       }
+      web_documents: {
+        Row: {
+          content_hash: string | null
+          error: string | null
+          extracted_json: Json | null
+          extracted_text: string | null
+          fetched_at: string | null
+          id: string
+          source_id: string | null
+          status: string | null
+          url: string
+        }
+        Insert: {
+          content_hash?: string | null
+          error?: string | null
+          extracted_json?: Json | null
+          extracted_text?: string | null
+          fetched_at?: string | null
+          id?: string
+          source_id?: string | null
+          status?: string | null
+          url: string
+        }
+        Update: {
+          content_hash?: string | null
+          error?: string | null
+          extracted_json?: Json | null
+          extracted_text?: string | null
+          fetched_at?: string | null
+          id?: string
+          source_id?: string | null
+          status?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "web_documents_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "trusted_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       web_fetch_logs: {
         Row: {
           cache_hit: boolean | null
@@ -1276,6 +1572,8 @@ export type Database = {
           latency_ms: number | null
           query: string | null
           response_size: number | null
+          segment_key: string | null
+          source_id: string | null
           success: boolean
         }
         Insert: {
@@ -1289,6 +1587,8 @@ export type Database = {
           latency_ms?: number | null
           query?: string | null
           response_size?: number | null
+          segment_key?: string | null
+          source_id?: string | null
           success?: boolean
         }
         Update: {
@@ -1302,9 +1602,19 @@ export type Database = {
           latency_ms?: number | null
           query?: string | null
           response_size?: number | null
+          segment_key?: string | null
+          source_id?: string | null
           success?: boolean
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "web_fetch_logs_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "trusted_sources"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -1322,6 +1632,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      normalize_district: { Args: { input_text: string }; Returns: string }
     }
     Enums: {
       agent_task_status: "pending" | "in_progress" | "completed"

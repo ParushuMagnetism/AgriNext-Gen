@@ -1,7 +1,9 @@
-import { useFarmerNotifications } from '@/hooks/useFarmerDashboard';
+import { useFarmerNotifications, useFarmerProfile } from '@/hooks/useFarmerDashboard';
+import { useIsDistrictValid } from '@/hooks/useKarnatakaDistricts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Bell, 
   Cloud, 
@@ -10,7 +12,8 @@ import {
   FileText, 
   AlertTriangle,
   ChevronRight,
-  Check
+  Check,
+  AlertCircle
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
@@ -29,6 +32,8 @@ const categoryConfig: Record<string, { icon: React.ElementType; color: string }>
 
 const AdvisoriesList = () => {
   const { data: notifications, isLoading } = useFarmerNotifications();
+  const { data: profile } = useFarmerProfile();
+  const hasValidDistrict = useIsDistrictValid(profile?.district);
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -77,6 +82,16 @@ const AdvisoriesList = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {/* Show fallback message if district is not set */}
+        {!hasValidDistrict && (
+          <Alert className="mb-4 border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800">
+            <AlertCircle className="h-4 w-4 text-amber-600" />
+            <AlertDescription className="text-amber-800 dark:text-amber-200 text-sm">
+              Set your district to see local advisories and alerts
+            </AlertDescription>
+          </Alert>
+        )}
+        
         {!notifications || notifications.length === 0 ? (
           <div className="text-center py-8">
             <Bell className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
