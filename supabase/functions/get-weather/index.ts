@@ -114,12 +114,10 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-
-    const { data: { user }, error: userError } = await userClient.auth.getUser();
+    // Extract and verify the JWT token using service role
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    
     if (userError || !user) {
       console.error('Auth error:', userError);
       return new Response(JSON.stringify({ error: 'Invalid token' }), {
@@ -129,7 +127,7 @@ Deno.serve(async (req) => {
     }
 
     // Fetch farmer profile for location
-    const { data: profile, error: profileError } = await userClient
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('village, district')
       .eq('id', user.id)
