@@ -12,3 +12,11 @@ project_id = "fblxjdlaedzgigcxhevl"
 
 [functions.seed-test-data]
 verify_jwt = false
+
+[functions.get-weather]
+
+[functions.sync-karnataka-mandi-prices]
+verify_jwt = false
+
+[functions.generate-price-forecast]
+verify_jwt = false

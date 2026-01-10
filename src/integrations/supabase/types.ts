@@ -644,6 +644,33 @@ export type Database = {
         }
         Relationships: []
       }
+      mandi_registry: {
+        Row: {
+          created_at: string
+          district: string
+          id: string
+          mandi_name: string
+          priority: number
+          state: string
+        }
+        Insert: {
+          created_at?: string
+          district: string
+          id?: string
+          mandi_name: string
+          priority?: number
+          state?: string
+        }
+        Update: {
+          created_at?: string
+          district?: string
+          id?: string
+          mandi_name?: string
+          priority?: number
+          state?: string
+        }
+        Relationships: []
+      }
       market_orders: {
         Row: {
           buyer_id: string
@@ -718,34 +745,49 @@ export type Database = {
           created_at: string
           crop_name: string
           date: string
+          district: string | null
+          fetched_at: string | null
           id: string
           market_name: string
           max_price: number | null
           min_price: number | null
           modal_price: number
+          source: string | null
+          state: string | null
           trend_direction: Database["public"]["Enums"]["price_trend"] | null
+          unit: string | null
         }
         Insert: {
           created_at?: string
           crop_name: string
           date?: string
+          district?: string | null
+          fetched_at?: string | null
           id?: string
           market_name: string
           max_price?: number | null
           min_price?: number | null
           modal_price: number
+          source?: string | null
+          state?: string | null
           trend_direction?: Database["public"]["Enums"]["price_trend"] | null
+          unit?: string | null
         }
         Update: {
           created_at?: string
           crop_name?: string
           date?: string
+          district?: string | null
+          fetched_at?: string | null
           id?: string
           market_name?: string
           max_price?: number | null
           min_price?: number | null
           modal_price?: number
+          source?: string | null
+          state?: string | null
           trend_direction?: Database["public"]["Enums"]["price_trend"] | null
+          unit?: string | null
         }
         Relationships: []
       }
@@ -803,6 +845,39 @@ export type Database = {
           title?: string
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      price_forecasts: {
+        Row: {
+          confidence: string
+          crop_name: string
+          direction: string
+          district: string
+          generated_at: string
+          id: string
+          reason: string | null
+          state: string
+        }
+        Insert: {
+          confidence?: string
+          crop_name: string
+          direction: string
+          district: string
+          generated_at?: string
+          id?: string
+          reason?: string | null
+          state?: string
+        }
+        Update: {
+          confidence?: string
+          crop_name?: string
+          direction?: string
+          district?: string
+          generated_at?: string
+          id?: string
+          reason?: string | null
+          state?: string
         }
         Relationships: []
       }
@@ -1030,6 +1105,24 @@ export type Database = {
           },
         ]
       }
+      weather_cache: {
+        Row: {
+          data: Json
+          fetched_at: string
+          location_key: string
+        }
+        Insert: {
+          data: Json
+          fetched_at?: string
+          location_key: string
+        }
+        Update: {
+          data?: Json
+          fetched_at?: string
+          location_key?: string
+        }
+        Relationships: []
+      }
       web_cache: {
         Row: {
           cache_key: string
@@ -1054,6 +1147,36 @@ export type Database = {
           fetched_at?: string
           location_key?: string
           topic?: string
+        }
+        Relationships: []
+      }
+      web_fetch_logs: {
+        Row: {
+          endpoint: string
+          error: string | null
+          fetched_at: string
+          id: string
+          latency_ms: number | null
+          query: string | null
+          success: boolean
+        }
+        Insert: {
+          endpoint: string
+          error?: string | null
+          fetched_at?: string
+          id?: string
+          latency_ms?: number | null
+          query?: string | null
+          success?: boolean
+        }
+        Update: {
+          endpoint?: string
+          error?: string | null
+          fetched_at?: string
+          id?: string
+          latency_ms?: number | null
+          query?: string | null
+          success?: boolean
         }
         Relationships: []
       }
