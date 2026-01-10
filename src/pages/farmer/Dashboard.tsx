@@ -11,6 +11,7 @@ import FarmlandsSummary from '@/components/farmer/FarmlandsSummary';
 import OnboardingTour from '@/components/farmer/OnboardingTour';
 import VoiceAssistant from '@/components/farmer/VoiceAssistant';
 import AgentNotesSection from '@/components/farmer/AgentNotesSection';
+import FarmerLocationPrompt from '@/components/farmer/FarmerLocationPrompt';
 import { useRealtimeSubscriptions } from '@/hooks/useRealtimeSubscriptions';
 
 const FarmerDashboard = () => {
@@ -20,6 +21,9 @@ const FarmerDashboard = () => {
   return (
     <DashboardLayout title="Dashboard">
       <div className="space-y-6">
+        {/* Location Prompt - Shows if district is missing */}
+        <FarmerLocationPrompt />
+
         {/* Onboarding Tour for New Farmers */}
         <OnboardingTour />
 

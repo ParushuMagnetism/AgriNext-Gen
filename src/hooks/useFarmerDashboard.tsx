@@ -8,6 +8,10 @@ export interface FarmerProfile {
   phone: string | null;
   village: string | null;
   district: string | null;
+  taluk: string | null;
+  pincode: string | null;
+  district_source: 'user' | 'pincode' | 'agent' | 'unknown' | null;
+  district_confidence: 'high' | 'medium' | 'low' | null;
   total_land_area: number | null;
   avatar_url: string | null;
   location: string | null;
