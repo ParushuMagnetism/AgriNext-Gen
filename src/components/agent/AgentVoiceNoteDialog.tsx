@@ -181,10 +181,6 @@ const AgentVoiceNoteDialog = ({
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => open ? setIsOpen(true) : handleClose()}>
@@ -246,16 +242,9 @@ const AgentVoiceNoteDialog = ({
               )}
             </Button>
             {isRecording && (
-              <div className="text-center">
-                <Badge variant="destructive" className="animate-pulse">
-                  Recording {formatDuration(recordingDuration)}
-                </Badge>
-                {isTranscribing && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Live transcribing...
-                  </p>
-                )}
-              </div>
+              <Badge variant="destructive" className="animate-pulse">
+                Recording {formatDuration(recordingDuration)}
+              </Badge>
             )}
             {audioBlob && !isRecording && (
               <Badge variant="secondary">
