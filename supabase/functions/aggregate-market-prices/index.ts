@@ -13,11 +13,13 @@ function median(values: number[]): number {
   return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
-// Calculate variance
-function variance(values: number[]): number {
+// Calculate coefficient of variation
+function coefficientOfVariation(values: number[]): number {
   if (values.length < 2) return 0;
   const mean = values.reduce((a, b) => a + b, 0) / values.length;
-  return values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+  if (mean === 0) return 0;
+  const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+  return Math.sqrt(variance) / mean;
 }
 
 Deno.serve(async (req) => {
@@ -25,12 +27,13 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const startTime = Date.now();
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   try {
-    const { district, crop_name, hours_lookback = 6 } = await req.json();
+    const { district, crop_name, hours_lookback = 12 } = await req.json();
 
     if (!district || !crop_name) {
       return new Response(
@@ -39,19 +42,19 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Aggregating prices for ${crop_name} in ${district}`);
+    console.log(`Aggregating prices for ${crop_name} in ${district} (last ${hours_lookback}h)`);
 
     // 1. Get recent market_prices for this district + crop
     const lookbackTime = new Date(Date.now() - hours_lookback * 60 * 60 * 1000).toISOString();
 
     const { data: prices, error: pricesError } = await supabase
       .from("market_prices")
-      .select("id, modal_price, min_price, max_price, market_name, date, source_url")
+      .select("id, modal_price, min_price, max_price, market_name, date, source_url, fetched_at")
       .eq("district", district)
       .ilike("crop_name", crop_name)
-      .gte("date", lookbackTime.split("T")[0])
-      .order("date", { ascending: false })
-      .limit(20);
+      .gte("fetched_at", lookbackTime)
+      .order("fetched_at", { ascending: false })
+      .limit(50);
 
     if (pricesError) {
       throw new Error(`Failed to fetch prices: ${pricesError.message}`);
@@ -67,59 +70,72 @@ Deno.serve(async (req) => {
 
     // 2. Calculate aggregate metrics
     const modalPrices = prices.map((p) => p.modal_price).filter((p) => p != null) as number[];
-    const sources = [...new Set(prices.map((p) => p.market_name))];
+    const sourceUrls = [...new Set(prices.map((p) => p.source_url).filter(Boolean))];
+    const marketNames = [...new Set(prices.map((p) => p.market_name))];
 
     const aggregatedModalPrice = median(modalPrices);
-    const priceVariance = variance(modalPrices);
-    const sourcesCount = sources.length;
+    const cv = coefficientOfVariation(modalPrices);
+    const sourcesCount = sourceUrls.length;
 
-    // 3. Determine confidence
+    // 3. Determine confidence based on sources and variance
     let confidence: "low" | "medium" | "high";
-    const coefficientOfVariation = priceVariance > 0 ? Math.sqrt(priceVariance) / aggregatedModalPrice : 0;
-
-    if (sourcesCount >= 2 && coefficientOfVariation < 0.1) {
+    
+    if (sourcesCount >= 2 && cv <= 0.10) {
+      // Multiple sources with <10% variance = high confidence
       confidence = "high";
-    } else if (sourcesCount >= 1 && coefficientOfVariation < 0.25) {
+    } else if (sourcesCount === 1 && cv <= 0.15) {
+      // Single source with low variance = medium confidence
       confidence = "medium";
-    } else {
+    } else if (sourcesCount >= 2 && cv > 0.10) {
+      // Multiple sources but conflicting = low confidence
       confidence = "low";
+    } else {
+      confidence = "medium";
     }
 
-    console.log(`Aggregated: ₹${aggregatedModalPrice}, confidence: ${confidence}, sources: ${sourcesCount}`);
+    console.log(`Aggregated: ₹${aggregatedModalPrice}, confidence: ${confidence}, sources: ${sourcesCount}, CV: ${(cv * 100).toFixed(1)}%`);
 
     // 4. Upsert into market_prices_agg
+    const aggData = {
+      crop_name,
+      district,
+      state: "Karnataka",
+      modal_price: aggregatedModalPrice,
+      unit: "quintal",
+      confidence,
+      sources_count: sourcesCount,
+      sources_used: marketNames,
+      fetched_at: new Date().toISOString(),
+    };
+
+    // Try upsert first (requires unique constraint on district,crop_name)
     const { error: upsertError } = await supabase
       .from("market_prices_agg")
-      .upsert(
-        {
-          crop_name,
-          district,
-          state: "Karnataka",
-          modal_price: aggregatedModalPrice,
-          unit: "quintal",
-          confidence,
-          sources_count: sourcesCount,
-          sources_used: sources,
-          fetched_at: new Date().toISOString(),
-        },
-        { onConflict: "district,crop_name" }
-      );
-
-    // Note: If upsert fails due to no unique constraint, we'll insert instead
-    if (upsertError) {
-      // Try insert instead
-      await supabase.from("market_prices_agg").insert({
-        crop_name,
-        district,
-        state: "Karnataka",
-        modal_price: aggregatedModalPrice,
-        unit: "quintal",
-        confidence,
-        sources_count: sourcesCount,
-        sources_used: sources,
-        fetched_at: new Date().toISOString(),
+      .upsert(aggData, { 
+        onConflict: "district,crop_name",
+        ignoreDuplicates: false 
       });
+
+    if (upsertError) {
+      console.log("Upsert failed, trying delete + insert:", upsertError.message);
+      
+      // Fallback: delete existing and insert new
+      await supabase
+        .from("market_prices_agg")
+        .delete()
+        .eq("district", district)
+        .eq("crop_name", crop_name);
+      
+      const { error: insertError } = await supabase
+        .from("market_prices_agg")
+        .insert(aggData);
+      
+      if (insertError) {
+        console.warn("Insert also failed:", insertError.message);
+      }
     }
+
+    const latencyMs = Date.now() - startTime;
 
     return new Response(
       JSON.stringify({
@@ -131,8 +147,11 @@ Deno.serve(async (req) => {
           modal_price: aggregatedModalPrice,
           confidence,
           sources_count: sourcesCount,
-          sources_used: sources,
+          sources_used: marketNames,
+          coefficient_of_variation: cv,
+          prices_analyzed: prices.length,
         },
+        latency_ms: latencyMs,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
