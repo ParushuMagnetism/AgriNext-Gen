@@ -46,6 +46,7 @@ import AdminTransport from "./pages/admin/Transport";
 import AdminOrders from "./pages/admin/Orders";
 import AIConsole from "./pages/admin/AIConsole";
 import SeedData from "./pages/admin/SeedData";
+import DataHealth from "./pages/admin/DataHealth";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -358,6 +359,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <SeedData />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/data-health"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <DataHealth />
                 </ProtectedRoute>
               }
             />

@@ -496,6 +496,45 @@ export type Database = {
         }
         Relationships: []
       }
+      crop_calendar: {
+        Row: {
+          crop_name: string
+          fetched_at: string | null
+          id: string
+          irrigation_notes: string | null
+          nutrient_notes: string | null
+          pest_watchouts: string | null
+          season: string | null
+          source_url: string | null
+          sowing_window: string | null
+          state: string | null
+        }
+        Insert: {
+          crop_name: string
+          fetched_at?: string | null
+          id?: string
+          irrigation_notes?: string | null
+          nutrient_notes?: string | null
+          pest_watchouts?: string | null
+          season?: string | null
+          source_url?: string | null
+          sowing_window?: string | null
+          state?: string | null
+        }
+        Update: {
+          crop_name?: string
+          fetched_at?: string | null
+          id?: string
+          irrigation_notes?: string | null
+          nutrient_notes?: string | null
+          pest_watchouts?: string | null
+          season?: string | null
+          source_url?: string | null
+          sowing_window?: string | null
+          state?: string | null
+        }
+        Relationships: []
+      }
       crops: {
         Row: {
           created_at: string
@@ -719,6 +758,48 @@ export type Database = {
           },
         ]
       }
+      input_prices: {
+        Row: {
+          brand: string | null
+          district: string | null
+          fetched_at: string | null
+          id: string
+          item_name: string
+          item_type: string | null
+          price_max: number | null
+          price_min: number | null
+          source_url: string | null
+          state: string | null
+          unit: string | null
+        }
+        Insert: {
+          brand?: string | null
+          district?: string | null
+          fetched_at?: string | null
+          id?: string
+          item_name: string
+          item_type?: string | null
+          price_max?: number | null
+          price_min?: number | null
+          source_url?: string | null
+          state?: string | null
+          unit?: string | null
+        }
+        Update: {
+          brand?: string | null
+          district?: string | null
+          fetched_at?: string | null
+          id?: string
+          item_name?: string
+          item_type?: string | null
+          price_max?: number | null
+          price_min?: number | null
+          source_url?: string | null
+          state?: string | null
+          unit?: string | null
+        }
+        Relationships: []
+      }
       karnataka_districts: {
         Row: {
           created_at: string | null
@@ -936,6 +1017,7 @@ export type Database = {
           min_price: number | null
           modal_price: number
           source: string | null
+          source_url: string | null
           state: string | null
           trend_direction: Database["public"]["Enums"]["price_trend"] | null
           unit: string | null
@@ -952,6 +1034,7 @@ export type Database = {
           min_price?: number | null
           modal_price: number
           source?: string | null
+          source_url?: string | null
           state?: string | null
           trend_direction?: Database["public"]["Enums"]["price_trend"] | null
           unit?: string | null
@@ -968,6 +1051,7 @@ export type Database = {
           min_price?: number | null
           modal_price?: number
           source?: string | null
+          source_url?: string | null
           state?: string | null
           trend_direction?: Database["public"]["Enums"]["price_trend"] | null
           unit?: string | null
@@ -1010,6 +1094,39 @@ export type Database = {
           sources_used?: Json | null
           state?: string | null
           unit?: string | null
+        }
+        Relationships: []
+      }
+      market_prices_raw: {
+        Row: {
+          crop_name: string
+          district: string | null
+          fetched_at: string | null
+          id: string
+          mandi_name: string | null
+          raw_json: Json | null
+          source_url: string | null
+          state: string | null
+        }
+        Insert: {
+          crop_name: string
+          district?: string | null
+          fetched_at?: string | null
+          id?: string
+          mandi_name?: string | null
+          raw_json?: Json | null
+          source_url?: string | null
+          state?: string | null
+        }
+        Update: {
+          crop_name?: string
+          district?: string | null
+          fetched_at?: string | null
+          id?: string
+          mandi_name?: string | null
+          raw_json?: Json | null
+          source_url?: string | null
+          state?: string | null
         }
         Relationships: []
       }
@@ -1632,6 +1749,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      normalize_crop_name: { Args: { input_name: string }; Returns: string }
       normalize_district: { Args: { input_text: string }; Returns: string }
     }
     Enums: {
