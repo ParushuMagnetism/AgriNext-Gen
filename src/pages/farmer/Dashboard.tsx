@@ -13,6 +13,8 @@ import VoiceAssistant from '@/components/farmer/VoiceAssistant';
 import AgentNotesSection from '@/components/farmer/AgentNotesSection';
 import FarmerLocationPrompt from '@/components/farmer/FarmerLocationPrompt';
 import CropPhotoReminderWidget from '@/components/crop-diary/CropPhotoReminderWidget';
+import MyAgentWidget from '@/components/farmer/MyAgentWidget';
+import MyHelpRequests from '@/components/farmer/MyHelpRequests';
 import { useRealtimeSubscriptions } from '@/hooks/useRealtimeSubscriptions';
 
 const FarmerDashboard = () => {
@@ -58,6 +60,12 @@ const FarmerDashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <MarketPricesWidget />
           <AdvisoriesList />
+        </div>
+
+        {/* My Agent + Help Requests */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <MyAgentWidget />
+          <MyHelpRequests />
         </div>
 
         {/* Agent Notes Section */}

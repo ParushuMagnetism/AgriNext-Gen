@@ -408,19 +408,23 @@ export const useAssignFarmerToAgent = () => {
   });
 };
 
+// Helper function to unassign farmer
+async function unassignFarmerById(assignmentId: string): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const table = supabase.from('agent_farmer_assignments') as any;
+  const { error } = await table
+    .update({ active: false })
+    .eq('id', assignmentId);
+
+  if (error) throw error;
+}
+
 // Admin hook: Unassign farmer from agent
 export const useUnassignFarmer = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (assignmentId: string) => {
-      const { error } = await supabase
-        .from('agent_farmer_assignments')
-        .update({ active: false, updated_at: new Date().toISOString() })
-        .eq('id', assignmentId);
-
-      if (error) throw error;
-    },
+    mutationFn: unassignFarmerById,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assigned-farmers'] });
       queryClient.invalidateQueries({ queryKey: ['agent-farmer-assignments'] });
