@@ -140,26 +140,26 @@ const DataHealthPage = () => {
   // Recent failed logs
   const failedLogs = recentLogs?.filter((l) => !l.success);
 
-  // Run full crawl
-  const runFullCrawl = async () => {
+  // Run mandi price sync
+  const runMandiSync = async (force = false) => {
     setIsRunningCrawl(true);
     try {
-      const { data, error } = await supabase.functions.invoke('crawl-all-due-sources', {
-        body: {},
+      const { data, error } = await supabase.functions.invoke('sync-karnataka-mandi-prices', {
+        body: { force, maxSegments: 20 },
       });
 
       if (error) throw error;
 
       if (data?.success) {
-        toast.success(`Crawl complete! Segments: ${data.segments_crawled}, Sources: ${data.sources_crawled}`);
+        toast.success(`Sync complete! Success: ${data.results?.success || 0}, Raw: ${data.results?.raw_records_inserted || 0}`);
         refetchSources();
         refetchSegments();
         refetchLogs();
       } else {
-        toast.error(data?.error || 'Crawl failed');
+        toast.error(data?.error || 'Sync failed');
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to run crawl');
+      toast.error(err instanceof Error ? err.message : 'Failed to run sync');
     } finally {
       setIsRunningCrawl(false);
     }
@@ -199,13 +199,17 @@ const DataHealthPage = () => {
               <Database className="h-4 w-4 mr-2" />
               Rebuild Segments
             </Button>
-            <Button onClick={runFullCrawl} disabled={isRunningCrawl}>
+            <Button variant="outline" onClick={() => runMandiSync(false)} disabled={isRunningCrawl}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${isRunningCrawl ? 'animate-spin' : ''}`} />
+              Sync Now
+            </Button>
+            <Button onClick={() => runMandiSync(true)} disabled={isRunningCrawl}>
               {isRunningCrawl ? (
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
               ) : (
                 <Play className="h-4 w-4 mr-2" />
               )}
-              Run Full Crawl
+              Force Sync
             </Button>
           </div>
         </div>

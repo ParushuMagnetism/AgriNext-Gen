@@ -18,14 +18,51 @@ export interface MarketPriceAgg {
   district: string;
   state: string | null;
   modal_price: number | null;
+  min_price?: number | null;
+  max_price?: number | null;
   unit: string | null;
   confidence: string | null;
   sources_count: number | null;
+  freshness_minutes?: number | null;
+  fetched_at: string | null;
+}
+
+export interface NeighborPrice {
+  crop_name: string;
+  district: string;
+  modal_price: number | null;
+  confidence: string | null;
   fetched_at: string | null;
 }
 
 /**
- * 3-tier market prices fallback:
+ * Fetch neighbor districts for a given district
+ */
+export const useDistrictNeighbors = (district: string | null | undefined) => {
+  return useQuery({
+    queryKey: ['district-neighbors', district],
+    queryFn: async () => {
+      if (!district) return [];
+      
+      const { data, error } = await supabase
+        .from('district_neighbors')
+        .select('neighbor_district')
+        .eq('district', district);
+      
+      if (error) {
+        console.error('Error fetching neighbors:', error);
+        return [];
+      }
+      
+      return data?.map(d => d.neighbor_district) || [];
+    },
+    enabled: !!district,
+    staleTime: 60 * 60 * 1000, // 1 hour - neighbors don't change often
+  });
+};
+
+/**
+ * 3-tier market prices fallback with neighbor comparison:
  * Tier A: Personalized (farmer district + crops)
  * Tier B: District default (farmer district, any crops)
  * Tier C: State default (Karnataka, any crops)
@@ -94,6 +131,8 @@ export const useMarketPricesTiered = (
           district: p.district || 'Karnataka',
           state: p.state,
           modal_price: p.modal_price,
+          min_price: p.min_price,
+          max_price: p.max_price,
           unit: p.unit,
           confidence: null,
           sources_count: null,
@@ -105,6 +144,49 @@ export const useMarketPricesTiered = (
       return { tier: 'C' as const, data: [] as MarketPriceAgg[], label: 'No price data available' };
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+/**
+ * Fetch neighbor district prices for comparison
+ */
+export const useNeighborPrices = (
+  neighborDistricts: string[],
+  cropNames: string[]
+) => {
+  return useQuery({
+    queryKey: ['neighbor-prices', neighborDistricts, cropNames],
+    queryFn: async () => {
+      if (neighborDistricts.length === 0 || cropNames.length === 0) {
+        return {} as Record<string, NeighborPrice>;
+      }
+
+      const { data, error } = await supabase
+        .from('market_prices_agg')
+        .select('crop_name, district, modal_price, confidence, fetched_at')
+        .in('district', neighborDistricts)
+        .in('crop_name', cropNames)
+        .order('fetched_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching neighbor prices:', error);
+        return {} as Record<string, NeighborPrice>;
+      }
+
+      // Group by crop and get the best price (highest modal_price) from neighbors
+      const bestByaCrop: Record<string, NeighborPrice> = {};
+      
+      for (const price of data || []) {
+        const existing = bestByaCrop[price.crop_name];
+        if (!existing || (price.modal_price && (!existing.modal_price || price.modal_price > existing.modal_price))) {
+          bestByaCrop[price.crop_name] = price as NeighborPrice;
+        }
+      }
+
+      return bestByaCrop;
+    },
+    enabled: neighborDistricts.length > 0 && cropNames.length > 0,
+    staleTime: 5 * 60 * 1000,
   });
 };
 
