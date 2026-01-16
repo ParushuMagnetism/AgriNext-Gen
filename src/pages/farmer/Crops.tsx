@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import { useCrops, useFarmlands, Crop, Farmland } from '@/hooks/useFarmerDashboard';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/hooks/useLanguage';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,18 +23,12 @@ import ConfirmDialog from '@/components/ui/confirm-dialog';
 import EmptyState from '@/components/farmer/EmptyState';
 import HelpTooltip from '@/components/farmer/HelpTooltip';
 
-const statusConfig = {
-  growing: { label: 'Growing', color: 'bg-muted text-muted-foreground', dotColor: 'bg-gray-400' },
-  one_week: { label: '1 Week', color: 'bg-amber-100 text-amber-800', dotColor: 'bg-amber-500' },
-  ready: { label: 'Ready', color: 'bg-emerald-100 text-emerald-800', dotColor: 'bg-emerald-500' },
-  harvested: { label: 'Harvested', color: 'bg-primary/10 text-primary', dotColor: 'bg-primary' },
-};
-
 const CropsPage = () => {
   const { data: crops, isLoading } = useCrops();
   const { data: farmlands } = useFarmlands();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -58,6 +53,13 @@ const CropsPage = () => {
     estimated_quantity: '',
     quantity_unit: 'quintals',
   });
+
+  const statusConfig = {
+    growing: { label: t('enum.crop_status.growing'), color: 'bg-muted text-muted-foreground', dotColor: 'bg-gray-400' },
+    one_week: { label: t('enum.crop_status.one_week'), color: 'bg-amber-100 text-amber-800', dotColor: 'bg-amber-500' },
+    ready: { label: t('enum.crop_status.ready'), color: 'bg-emerald-100 text-emerald-800', dotColor: 'bg-emerald-500' },
+    harvested: { label: t('enum.crop_status.harvested'), color: 'bg-primary/10 text-primary', dotColor: 'bg-primary' },
+  };
 
   const filteredCrops = crops?.filter(crop => {
     const matchesSearch = crop.crop_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -93,7 +95,7 @@ const CropsPage = () => {
 
       if (error) throw error;
 
-      toast({ title: 'Success!', description: 'Your crop has been added successfully.' });
+      toast({ title: t('common.success'), description: t('farmer.crops.addSuccess') });
       setIsDialogOpen(false);
       setFormData({
         crop_name: '',
@@ -107,7 +109,7 @@ const CropsPage = () => {
       });
       queryClient.invalidateQueries({ queryKey: ['crops', user.id] });
     } catch (error: any) {
-      toast({ title: 'Error adding crop', description: error.message, variant: 'destructive' });
+      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
     }
   };
 
@@ -123,19 +125,19 @@ const CropsPage = () => {
     try {
       const { error } = await supabase.from('crops').delete().eq('id', deletingCrop.id);
       if (error) throw error;
-      toast({ title: 'Crop deleted', description: `${deletingCrop.name} has been removed.` });
+      toast({ title: t('farmer.crops.deleted'), description: t('farmer.crops.deleteSuccess') });
       queryClient.invalidateQueries({ queryKey: ['crops', user?.id] });
       setDeleteConfirmOpen(false);
       setDeletingCrop(null);
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
     } finally {
       setIsDeleting(false);
     }
   };
 
   return (
-    <DashboardLayout title="My Crops">
+    <DashboardLayout title={t('farmer.crops.title')}>
       <div className="space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -150,7 +152,7 @@ const CropsPage = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.total}</p>
-                  <p className="text-xs text-muted-foreground">Total Crops</p>
+                  <p className="text-xs text-muted-foreground">{t('farmer.crops.totalCrops')}</p>
                 </div>
               </div>
             </CardContent>
@@ -163,7 +165,7 @@ const CropsPage = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.growing}</p>
-                  <p className="text-xs text-muted-foreground">Growing</p>
+                  <p className="text-xs text-muted-foreground">{t('enum.crop_status.growing')}</p>
                 </div>
               </div>
             </CardContent>
@@ -176,7 +178,7 @@ const CropsPage = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.oneWeek}</p>
-                  <p className="text-xs text-muted-foreground">1 Week</p>
+                  <p className="text-xs text-muted-foreground">{t('enum.crop_status.one_week')}</p>
                 </div>
               </div>
             </CardContent>
@@ -189,7 +191,7 @@ const CropsPage = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.ready}</p>
-                  <p className="text-xs text-muted-foreground">Ready</p>
+                  <p className="text-xs text-muted-foreground">{t('enum.crop_status.ready')}</p>
                 </div>
               </div>
             </CardContent>
@@ -202,7 +204,7 @@ const CropsPage = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.harvested}</p>
-                  <p className="text-xs text-muted-foreground">Harvested</p>
+                  <p className="text-xs text-muted-foreground">{t('enum.crop_status.harvested')}</p>
                 </div>
               </div>
             </CardContent>
@@ -214,7 +216,7 @@ const CropsPage = () => {
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by crop name or variety..."
+              placeholder={t('farmer.crops.searchPlaceholder')}
               className="pl-10"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -224,48 +226,48 @@ const CropsPage = () => {
             <DialogTrigger asChild>
               <Button size="lg">
                 <Plus className="h-4 w-4 mr-2" />
-                Add Crop
+                {t('farmer.crops.addCrop')}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>Add New Crop</DialogTitle>
+                <DialogTitle>{t('farmer.crops.addNewCrop')}</DialogTitle>
                 <DialogDescription>
-                  Fill in the details about your crop. Fields marked with * are required.
+                  {t('farmer.crops.addCropDescription')}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <Label className="flex items-center">
-                    Crop Name *
-                    <HelpTooltip content="Enter the name of the crop you are growing, like Rice, Wheat, or Tomato" />
+                    {t('farmer.crops.cropName')} *
+                    <HelpTooltip content={t('farmer.crops.cropNameHelp')} />
                   </Label>
                   <Input
                     value={formData.crop_name}
                     onChange={(e) => setFormData({ ...formData, crop_name: e.target.value })}
-                    placeholder="e.g., Rice, Wheat, Tomato"
+                    placeholder={t('farmer.crops.cropNamePlaceholder')}
                     required
                   />
                 </div>
                 <div>
                   <Label className="flex items-center">
-                    Variety
-                    <HelpTooltip content="The specific variety of your crop, like Basmati for rice or IR-64" />
+                    {t('farmer.crops.variety')}
+                    <HelpTooltip content={t('farmer.crops.varietyHelp')} />
                   </Label>
                   <Input
                     value={formData.variety}
                     onChange={(e) => setFormData({ ...formData, variety: e.target.value })}
-                    placeholder="e.g., Basmati, IR-64"
+                    placeholder={t('farmer.crops.varietyPlaceholder')}
                   />
                 </div>
                 <div>
                   <Label className="flex items-center">
-                    Farmland
-                    <HelpTooltip content="Select which of your farmlands this crop is planted on" />
+                    {t('farmer.farmlands.title')}
+                    <HelpTooltip content={t('farmer.crops.farmlandHelp')} />
                   </Label>
                   <Select value={formData.land_id} onValueChange={(v) => setFormData({ ...formData, land_id: v })}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select farmland" />
+                      <SelectValue placeholder={t('farmer.crops.selectFarmland')} />
                     </SelectTrigger>
                     <SelectContent>
                       {farmlands?.map((land) => (
@@ -277,15 +279,15 @@ const CropsPage = () => {
                   </Select>
                   {(!farmlands || farmlands.length === 0) && (
                     <p className="text-xs text-muted-foreground mt-1">
-                      No farmlands added yet. <button type="button" className="text-primary underline" onClick={() => navigate('/farmer/farmlands')}>Add farmland first</button>
+                      {t('farmer.crops.noFarmlands')} <button type="button" className="text-primary underline" onClick={() => navigate('/farmer/farmlands')}>{t('farmer.crops.addFarmlandFirst')}</button>
                     </p>
                   )}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="flex items-center">
-                      Sowing Date
-                      <HelpTooltip content="When did you plant this crop?" />
+                      {t('farmer.crops.sowingDate')}
+                      <HelpTooltip content={t('farmer.crops.sowingDateHelp')} />
                     </Label>
                     <Input
                       type="date"
@@ -295,8 +297,8 @@ const CropsPage = () => {
                   </div>
                   <div>
                     <Label className="flex items-center">
-                      Harvest Date
-                      <HelpTooltip content="When do you expect to harvest?" />
+                      {t('farmer.crops.harvestDate')}
+                      <HelpTooltip content={t('farmer.crops.harvestDateHelp')} />
                     </Label>
                     <Input
                       type="date"
@@ -308,31 +310,31 @@ const CropsPage = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="flex items-center">
-                      Expected Quantity
-                      <HelpTooltip content="How much crop do you expect to harvest?" />
+                      {t('farmer.crops.expectedQuantity')}
+                      <HelpTooltip content={t('farmer.crops.quantityHelp')} />
                     </Label>
                     <Input
                       type="number"
                       value={formData.estimated_quantity}
                       onChange={(e) => setFormData({ ...formData, estimated_quantity: e.target.value })}
-                      placeholder="e.g., 50"
+                      placeholder="50"
                     />
                   </div>
                   <div>
-                    <Label>Unit</Label>
+                    <Label>{t('common.unit')}</Label>
                     <Select value={formData.quantity_unit} onValueChange={(v) => setFormData({ ...formData, quantity_unit: v })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="quintals">Quintals</SelectItem>
-                        <SelectItem value="kg">Kg</SelectItem>
-                        <SelectItem value="tonnes">Tonnes</SelectItem>
+                        <SelectItem value="quintals">{t('enum.units.quintals')}</SelectItem>
+                        <SelectItem value="kg">{t('enum.units.kg')}</SelectItem>
+                        <SelectItem value="tonnes">{t('enum.units.tonnes')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
-                <Button type="submit" className="w-full" size="lg">Add Crop</Button>
+                <Button type="submit" className="w-full" size="lg">{t('farmer.crops.addCrop')}</Button>
               </form>
             </DialogContent>
           </Dialog>
@@ -350,13 +352,13 @@ const CropsPage = () => {
             <CardContent className="p-0">
               <EmptyState
                 icon={Sprout}
-                title={searchQuery || statusFilter !== 'all' ? "No crops found" : "No crops added yet"}
+                title={searchQuery || statusFilter !== 'all' ? t('farmer.crops.noCropsFound') : t('farmer.crops.noCropsYet')}
                 description={
                   searchQuery || statusFilter !== 'all' 
-                    ? "Try adjusting your search or filter to find what you're looking for."
-                    : "Start by adding your first crop to track its growth and manage harvests."
+                    ? t('farmer.crops.adjustSearch')
+                    : t('farmer.crops.startAddingCrops')
                 }
-                actionLabel={searchQuery || statusFilter !== 'all' ? "Clear Filters" : "Add Your First Crop"}
+                actionLabel={searchQuery || statusFilter !== 'all' ? t('common.clearFilters') : t('farmer.crops.addFirstCrop')}
                 onAction={() => {
                   if (searchQuery || statusFilter !== 'all') {
                     setSearchQuery('');
@@ -395,7 +397,7 @@ const CropsPage = () => {
                       {crop.harvest_estimate && (
                         <div className="flex items-center gap-2">
                           <Calendar className="h-4 w-4 shrink-0" />
-                          <span>Harvest: {format(new Date(crop.harvest_estimate), 'MMM d, yyyy')}</span>
+                          <span>{t('farmer.crops.harvest')}: {format(new Date(crop.harvest_estimate), 'MMM d, yyyy')}</span>
                         </div>
                       )}
                       {crop.estimated_quantity && (
@@ -408,7 +410,7 @@ const CropsPage = () => {
                     <div className="flex gap-2 flex-wrap">
                       <Button variant="default" size="sm" className="flex-1" onClick={() => navigate(`/farmer/crops/${crop.id}`)}>
                         <BookOpen className="h-4 w-4 mr-1" />
-                        Diary
+                        {t('farmer.crops.diary')}
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => {
                         setEditingCrop(crop);
@@ -454,9 +456,9 @@ const CropsPage = () => {
       <ConfirmDialog
         open={deleteConfirmOpen}
         onOpenChange={setDeleteConfirmOpen}
-        title="Delete Crop"
-        description={`Are you sure you want to delete "${deletingCrop?.name}"? This action cannot be undone.`}
-        confirmText="Delete"
+        title={t('farmer.crops.deleteCrop')}
+        description={t('farmer.crops.deleteConfirm')}
+        confirmText={t('common.delete')}
         variant="destructive"
         onConfirm={handleDeleteConfirm}
         loading={isDeleting}

@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import { useTransportRequests, useCrops, useFarmlands } from '@/hooks/useFarmerDashboard';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/hooks/useLanguage';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,21 +21,13 @@ import ConfirmDialog from '@/components/ui/confirm-dialog';
 import EmptyState from '@/components/farmer/EmptyState';
 import HelpTooltip from '@/components/farmer/HelpTooltip';
 
-const statusConfig = {
-  requested: { label: 'Requested', color: 'bg-blue-100 text-blue-800', icon: Clock },
-  assigned: { label: 'Assigned', color: 'bg-purple-100 text-purple-800', icon: Truck },
-  en_route: { label: 'En Route', color: 'bg-amber-100 text-amber-800', icon: Truck },
-  picked_up: { label: 'Picked Up', color: 'bg-emerald-100 text-emerald-800', icon: Package },
-  delivered: { label: 'Delivered', color: 'bg-primary/10 text-primary', icon: CheckCircle2 },
-  cancelled: { label: 'Cancelled', color: 'bg-destructive/10 text-destructive', icon: XCircle },
-};
-
 const TransportPage = () => {
   const { data: requests, isLoading } = useTransportRequests();
   const { data: crops } = useCrops();
   const { data: farmlands } = useFarmlands();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -53,6 +46,15 @@ const TransportPage = () => {
     preferred_time: '',
     notes: '',
   });
+
+  const statusConfig = {
+    requested: { label: t('enum.transport_status.requested'), color: 'bg-blue-100 text-blue-800', icon: Clock },
+    assigned: { label: t('enum.transport_status.assigned'), color: 'bg-purple-100 text-purple-800', icon: Truck },
+    en_route: { label: t('enum.transport_status.en_route'), color: 'bg-amber-100 text-amber-800', icon: Truck },
+    picked_up: { label: t('enum.transport_status.picked_up'), color: 'bg-emerald-100 text-emerald-800', icon: Package },
+    delivered: { label: t('enum.transport_status.delivered'), color: 'bg-primary/10 text-primary', icon: CheckCircle2 },
+    cancelled: { label: t('enum.transport_status.cancelled'), color: 'bg-destructive/10 text-destructive', icon: XCircle },
+  };
 
   const filteredRequests = requests?.filter(req => 
     statusFilter === 'all' || req.status === statusFilter
@@ -97,7 +99,7 @@ const TransportPage = () => {
 
       if (error) throw error;
 
-      toast({ title: 'Success!', description: 'Transport request submitted. You will be notified when assigned.' });
+      toast({ title: t('common.success'), description: t('farmer.transport.requestSuccess') });
       setIsDialogOpen(false);
       setFormData({
         crop_id: '',
@@ -111,7 +113,7 @@ const TransportPage = () => {
       });
       queryClient.invalidateQueries({ queryKey: ['transport-requests', user.id] });
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
     }
   };
 
@@ -130,27 +132,27 @@ const TransportPage = () => {
         .update({ status: 'cancelled' })
         .eq('id', cancellingRequest.id);
       if (error) throw error;
-      toast({ title: 'Request cancelled', description: 'Your transport request has been cancelled.' });
+      toast({ title: t('farmer.transport.cancelled'), description: t('farmer.transport.cancelSuccess') });
       queryClient.invalidateQueries({ queryKey: ['transport-requests', user?.id] });
       setCancelConfirmOpen(false);
       setCancellingRequest(null);
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
     } finally {
       setIsCancelling(false);
     }
   };
 
   const filterButtons = [
-    { value: 'all', label: 'All', count: requests?.length },
-    { value: 'requested', label: 'Pending', count: requests?.filter(r => r.status === 'requested').length },
-    { value: 'assigned', label: 'Assigned', count: requests?.filter(r => r.status === 'assigned').length },
-    { value: 'en_route', label: 'En Route', count: requests?.filter(r => r.status === 'en_route').length },
-    { value: 'delivered', label: 'Delivered', count: completedCount },
+    { value: 'all', label: t('common.all'), count: requests?.length },
+    { value: 'requested', label: t('farmer.transport.pending'), count: requests?.filter(r => r.status === 'requested').length },
+    { value: 'assigned', label: t('enum.transport_status.assigned'), count: requests?.filter(r => r.status === 'assigned').length },
+    { value: 'en_route', label: t('enum.transport_status.en_route'), count: requests?.filter(r => r.status === 'en_route').length },
+    { value: 'delivered', label: t('enum.transport_status.delivered'), count: completedCount },
   ];
 
   return (
-    <DashboardLayout title="Transport Requests">
+    <DashboardLayout title={t('farmer.transport.title')}>
       <div className="space-y-6">
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -162,7 +164,7 @@ const TransportPage = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{activeCount}</p>
-                  <p className="text-xs text-muted-foreground">Active Requests</p>
+                  <p className="text-xs text-muted-foreground">{t('farmer.transport.activeRequests')}</p>
                 </div>
               </div>
             </CardContent>
@@ -175,7 +177,7 @@ const TransportPage = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{completedCount}</p>
-                  <p className="text-xs text-muted-foreground">Completed</p>
+                  <p className="text-xs text-muted-foreground">{t('farmer.transport.completed')}</p>
                 </div>
               </div>
             </CardContent>
@@ -190,7 +192,7 @@ const TransportPage = () => {
                   <p className="text-2xl font-bold">
                     {requests?.filter(r => r.status === 'en_route').length || 0}
                   </p>
-                  <p className="text-xs text-muted-foreground">In Transit</p>
+                  <p className="text-xs text-muted-foreground">{t('farmer.transport.inTransit')}</p>
                 </div>
               </div>
             </CardContent>
@@ -203,7 +205,7 @@ const TransportPage = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{requests?.length || 0}</p>
-                  <p className="text-xs text-muted-foreground">Total Requests</p>
+                  <p className="text-xs text-muted-foreground">{t('farmer.transport.totalRequests')}</p>
                 </div>
               </div>
             </CardContent>
@@ -233,25 +235,25 @@ const TransportPage = () => {
             <DialogTrigger asChild>
               <Button size="lg">
                 <Plus className="h-4 w-4 mr-2" />
-                New Request
+                {t('farmer.transport.newRequest')}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>Request Transport</DialogTitle>
+                <DialogTitle>{t('farmer.transport.requestTransport')}</DialogTitle>
                 <DialogDescription>
-                  Fill in the details for pickup. We'll notify you when a transporter is assigned.
+                  {t('farmer.transport.requestDescription')}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <Label className="flex items-center">
-                    Crop
-                    <HelpTooltip content="Select the crop to be transported. This helps auto-fill pickup details." />
+                    {t('farmer.transport.crop')}
+                    <HelpTooltip content={t('farmer.transport.cropHelp')} />
                   </Label>
                   <Select value={formData.crop_id} onValueChange={handleCropSelect}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select crop (optional)" />
+                      <SelectValue placeholder={t('farmer.transport.selectCrop')} />
                     </SelectTrigger>
                     <SelectContent>
                       {crops?.filter(c => c.status !== 'harvested').map((crop) => (
@@ -265,54 +267,54 @@ const TransportPage = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="flex items-center">
-                      Quantity *
-                      <HelpTooltip content="How much produce needs to be transported?" />
+                      {t('farmer.transport.quantity')} *
+                      <HelpTooltip content={t('farmer.transport.quantityHelp')} />
                     </Label>
                     <Input
                       type="number"
                       value={formData.quantity}
                       onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                      placeholder="e.g., 50"
+                      placeholder="50"
                       required
                     />
                   </div>
                   <div>
-                    <Label>Unit</Label>
+                    <Label>{t('common.unit')}</Label>
                     <Select value={formData.quantity_unit} onValueChange={(v) => setFormData({ ...formData, quantity_unit: v })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="quintals">Quintals</SelectItem>
-                        <SelectItem value="kg">Kg</SelectItem>
-                        <SelectItem value="tonnes">Tonnes</SelectItem>
+                        <SelectItem value="quintals">{t('enum.units.quintals')}</SelectItem>
+                        <SelectItem value="kg">{t('enum.units.kg')}</SelectItem>
+                        <SelectItem value="tonnes">{t('enum.units.tonnes')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
                 <div>
                   <Label className="flex items-center">
-                    Pickup Location *
-                    <HelpTooltip content="Full address where the transporter should come for pickup" />
+                    {t('farmer.transport.pickupLocation')} *
+                    <HelpTooltip content={t('farmer.transport.pickupHelp')} />
                   </Label>
                   <Input
                     value={formData.pickup_location}
                     onChange={(e) => setFormData({ ...formData, pickup_location: e.target.value })}
-                    placeholder="Full address or landmark"
+                    placeholder={t('farmer.transport.pickupPlaceholder')}
                     required
                   />
                 </div>
                 <div>
-                  <Label>Village</Label>
+                  <Label>{t('farmer.farmlands.village')}</Label>
                   <Input
                     value={formData.pickup_village}
                     onChange={(e) => setFormData({ ...formData, pickup_village: e.target.value })}
-                    placeholder="Village name"
+                    placeholder={t('farmer.farmlands.villagePlaceholder')}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Preferred Date</Label>
+                    <Label>{t('farmer.transport.preferredDate')}</Label>
                     <Input
                       type="date"
                       value={formData.preferred_date}
@@ -322,32 +324,32 @@ const TransportPage = () => {
                   </div>
                   <div>
                     <Label className="flex items-center">
-                      Preferred Time
-                      <HelpTooltip content="When is the best time for pickup?" />
+                      {t('farmer.transport.preferredTime')}
+                      <HelpTooltip content={t('farmer.transport.timeHelp')} />
                     </Label>
                     <Select value={formData.preferred_time} onValueChange={(v) => setFormData({ ...formData, preferred_time: v })}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select time" />
+                        <SelectValue placeholder={t('farmer.transport.selectTime')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Early Morning (5-8 AM)">Early Morning (5-8 AM)</SelectItem>
-                        <SelectItem value="Morning (8-11 AM)">Morning (8-11 AM)</SelectItem>
-                        <SelectItem value="Afternoon (12-3 PM)">Afternoon (12-3 PM)</SelectItem>
-                        <SelectItem value="Evening (4-6 PM)">Evening (4-6 PM)</SelectItem>
+                        <SelectItem value="Early Morning (5-8 AM)">{t('farmer.transport.earlyMorning')}</SelectItem>
+                        <SelectItem value="Morning (8-11 AM)">{t('farmer.transport.morning')}</SelectItem>
+                        <SelectItem value="Afternoon (12-3 PM)">{t('farmer.transport.afternoon')}</SelectItem>
+                        <SelectItem value="Evening (4-6 PM)">{t('farmer.transport.evening')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
                 <div>
-                  <Label>Notes (Optional)</Label>
+                  <Label>{t('farmer.transport.notes')}</Label>
                   <Textarea
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    placeholder="Any special instructions for the transporter..."
+                    placeholder={t('farmer.transport.notesPlaceholder')}
                     rows={2}
                   />
                 </div>
-                <Button type="submit" className="w-full" size="lg">Submit Request</Button>
+                <Button type="submit" className="w-full" size="lg">{t('farmer.transport.submitRequest')}</Button>
               </form>
             </DialogContent>
           </Dialog>
@@ -365,13 +367,13 @@ const TransportPage = () => {
             <CardContent className="p-0">
               <EmptyState
                 icon={Truck}
-                title={statusFilter !== 'all' ? "No requests found" : "No transport requests yet"}
+                title={statusFilter !== 'all' ? t('farmer.transport.noRequestsFound') : t('farmer.transport.noRequestsYet')}
                 description={
                   statusFilter !== 'all'
-                    ? "Try selecting a different status filter."
-                    : "When your crops are ready, request transport to get them to market."
+                    ? t('farmer.transport.tryDifferentFilter')
+                    : t('farmer.transport.startRequestingTransport')
                 }
-                actionLabel={statusFilter !== 'all' ? "Show All" : "Create Your First Request"}
+                actionLabel={statusFilter !== 'all' ? t('common.showAll') : t('farmer.transport.createFirstRequest')}
                 onAction={() => {
                   if (statusFilter !== 'all') {
                     setStatusFilter('all');
@@ -398,7 +400,7 @@ const TransportPage = () => {
                             <StatusIcon className="h-4 w-4" />
                           </div>
                           <span className="font-semibold text-lg">
-                            {request.crop?.crop_name || 'General Produce'}
+                            {request.crop?.crop_name || t('farmer.transport.generalProduce')}
                           </span>
                           <span className="text-muted-foreground">
                             • {request.quantity} {request.quantity_unit}
@@ -429,9 +431,9 @@ const TransportPage = () => {
                           variant="outline" 
                           size="sm"
                           className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => handleCancelClick(request.id, request.crop?.crop_name || 'General Produce')}
+                          onClick={() => handleCancelClick(request.id, request.crop?.crop_name || t('farmer.transport.generalProduce'))}
                         >
-                          Cancel Request
+                          {t('farmer.transport.cancelRequest')}
                         </Button>
                       )}
                     </div>
@@ -446,9 +448,9 @@ const TransportPage = () => {
       <ConfirmDialog
         open={cancelConfirmOpen}
         onOpenChange={setCancelConfirmOpen}
-        title="Cancel Transport Request"
-        description={`Are you sure you want to cancel the transport request for "${cancellingRequest?.cropName}"?`}
-        confirmText="Yes, Cancel"
+        title={t('farmer.transport.cancelTransportRequest')}
+        description={t('farmer.transport.cancelConfirm')}
+        confirmText={t('farmer.transport.yesCancel')}
         variant="destructive"
         onConfirm={handleCancelConfirm}
         loading={isCancelling}

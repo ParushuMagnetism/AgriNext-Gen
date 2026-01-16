@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/hooks/useLanguage';
 import { useFarmlands, Crop, Farmland } from '@/hooks/useFarmerDashboard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ interface EditCropDialogProps {
 const EditCropDialog = ({ crop, open, onOpenChange }: EditCropDialogProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const { data: farmlands } = useFarmlands();
   const [isSaving, setIsSaving] = useState(false);
@@ -72,11 +74,11 @@ const EditCropDialog = ({ crop, open, onOpenChange }: EditCropDialogProps) => {
 
       if (error) throw error;
 
-      toast({ title: 'Crop updated successfully' });
+      toast({ title: t('farmer.crops.updateSuccess') });
       onOpenChange(false);
       queryClient.invalidateQueries({ queryKey: ['crops', user.id] });
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
     } finally {
       setIsSaving(false);
     }
@@ -86,28 +88,28 @@ const EditCropDialog = ({ crop, open, onOpenChange }: EditCropDialogProps) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Crop</DialogTitle>
+          <DialogTitle>{t('farmer.crops.editCrop')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label>Crop Name *</Label>
+            <Label>{t('farmer.crops.cropName')} *</Label>
             <Input
               value={formData.crop_name}
               onChange={(e) => setFormData({ ...formData, crop_name: e.target.value })}
-              placeholder="e.g., Rice, Wheat, Tomato"
+              placeholder={t('farmer.crops.cropNamePlaceholder')}
               required
             />
           </div>
           <div>
-            <Label>Variety</Label>
+            <Label>{t('farmer.crops.variety')}</Label>
             <Input
               value={formData.variety}
               onChange={(e) => setFormData({ ...formData, variety: e.target.value })}
-              placeholder="e.g., Basmati, IR-64"
+              placeholder={t('farmer.crops.varietyPlaceholder')}
             />
           </div>
           <div>
-            <Label>Status</Label>
+            <Label>{t('farmer.crops.status')}</Label>
             <Select 
               value={formData.status} 
               onValueChange={(v) => setFormData({ ...formData, status: v as any })}
@@ -116,18 +118,18 @@ const EditCropDialog = ({ crop, open, onOpenChange }: EditCropDialogProps) => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="growing">Growing</SelectItem>
-                <SelectItem value="one_week">1 Week to Harvest</SelectItem>
-                <SelectItem value="ready">Ready to Harvest</SelectItem>
-                <SelectItem value="harvested">Harvested</SelectItem>
+                <SelectItem value="growing">{t('enum.crop_status.growing')}</SelectItem>
+                <SelectItem value="one_week">{t('enum.crop_status.one_week')}</SelectItem>
+                <SelectItem value="ready">{t('enum.crop_status.ready')}</SelectItem>
+                <SelectItem value="harvested">{t('enum.crop_status.harvested')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div>
-            <Label>Farmland</Label>
+            <Label>{t('farmer.farmlands.title')}</Label>
             <Select value={formData.land_id} onValueChange={(v) => setFormData({ ...formData, land_id: v })}>
               <SelectTrigger>
-                <SelectValue placeholder="Select farmland" />
+                <SelectValue placeholder={t('farmer.crops.selectFarmland')} />
               </SelectTrigger>
               <SelectContent>
                 {farmlands?.map((land) => (
@@ -140,7 +142,7 @@ const EditCropDialog = ({ crop, open, onOpenChange }: EditCropDialogProps) => {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Sowing Date</Label>
+              <Label>{t('farmer.crops.sowingDate')}</Label>
               <Input
                 type="date"
                 value={formData.sowing_date}
@@ -148,7 +150,7 @@ const EditCropDialog = ({ crop, open, onOpenChange }: EditCropDialogProps) => {
               />
             </div>
             <div>
-              <Label>Est. Harvest Date</Label>
+              <Label>{t('farmer.crops.harvestDate')}</Label>
               <Input
                 type="date"
                 value={formData.harvest_estimate}
@@ -158,24 +160,24 @@ const EditCropDialog = ({ crop, open, onOpenChange }: EditCropDialogProps) => {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Est. Quantity</Label>
+              <Label>{t('farmer.crops.expectedQuantity')}</Label>
               <Input
                 type="number"
                 value={formData.estimated_quantity}
                 onChange={(e) => setFormData({ ...formData, estimated_quantity: e.target.value })}
-                placeholder="e.g., 50"
+                placeholder="50"
               />
             </div>
             <div>
-              <Label>Unit</Label>
+              <Label>{t('common.unit')}</Label>
               <Select value={formData.quantity_unit} onValueChange={(v) => setFormData({ ...formData, quantity_unit: v })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="quintals">Quintals</SelectItem>
-                  <SelectItem value="kg">Kg</SelectItem>
-                  <SelectItem value="tonnes">Tonnes</SelectItem>
+                  <SelectItem value="quintals">{t('enum.units.quintals')}</SelectItem>
+                  <SelectItem value="kg">{t('enum.units.kg')}</SelectItem>
+                  <SelectItem value="tonnes">{t('enum.units.tonnes')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -184,10 +186,10 @@ const EditCropDialog = ({ crop, open, onOpenChange }: EditCropDialogProps) => {
             {isSaving ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
+                {t('common.saving')}
               </>
             ) : (
-              'Save Changes'
+              t('common.saveChanges')
             )}
           </Button>
         </form>
