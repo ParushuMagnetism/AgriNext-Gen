@@ -7,6 +7,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Upload, ChevronDown, FileImage, FileText, Loader2 } from 'lucide-react';
 import { useUploadSoilReport, SoilReportFormData } from '@/hooks/useSoilReports';
+import { toast } from 'sonner';
+import imageCompression from 'browser-image-compression';
+import { FILE_SIZE_LIMITS, validateFileSize, isImageFile, isPdfFile, getErrorMessage, createRetryAction } from '@/lib/error-utils';
 
 interface SoilReportUploadDialogProps {
   open: boolean;
@@ -24,6 +27,7 @@ export default function SoilReportUploadDialog({
   const uploadMutation = useUploadSoilReport();
   const [file, setFile] = useState<File | null>(null);
   const [showOptionalFields, setShowOptionalFields] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [formData, setFormData] = useState<SoilReportFormData>({
     report_date: new Date().toISOString().split('T')[0],
     lab_name: '',
@@ -36,53 +40,102 @@ export default function SoilReportUploadDialog({
     potassium: null,
   });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      const isImage = selectedFile.type.startsWith('image/');
-      const isPdf = selectedFile.type === 'application/pdf';
-      if (!isImage && !isPdf) {
-        alert('Please select an image or PDF file');
+    if (!selectedFile) return;
+
+    const isImage = isImageFile(selectedFile);
+    const isPdf = isPdfFile(selectedFile);
+    
+    if (!isImage && !isPdf) {
+      toast.error('Please select an image or PDF file');
+      return;
+    }
+
+    // Validate file size based on type
+    if (isPdf) {
+      const validation = validateFileSize(selectedFile, FILE_SIZE_LIMITS.PDF_MAX_MB);
+      if (!validation.valid) {
+        toast.error(validation.message);
         return;
       }
       setFile(selectedFile);
+    } else if (isImage) {
+      const validation = validateFileSize(selectedFile, FILE_SIZE_LIMITS.IMAGE_MAX_MB);
+      if (!validation.valid) {
+        toast.error(validation.message);
+        return;
+      }
+
+      // Compress if needed
+      let processedFile = selectedFile;
+      const sizeMB = selectedFile.size / (1024 * 1024);
+      
+      if (sizeMB > FILE_SIZE_LIMITS.IMAGE_COMPRESS_TARGET_MB) {
+        setIsCompressing(true);
+        try {
+          processedFile = await imageCompression(selectedFile, {
+            maxSizeMB: FILE_SIZE_LIMITS.IMAGE_COMPRESS_TARGET_MB,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
+          });
+          const compressedSizeMB = processedFile.size / (1024 * 1024);
+          console.log(`Image compressed: ${sizeMB.toFixed(2)}MB → ${compressedSizeMB.toFixed(2)}MB`);
+        } catch (error) {
+          console.error('Compression failed:', error);
+          toast.error('Failed to compress image. Please try a smaller file.');
+          setIsCompressing(false);
+          return;
+        }
+        setIsCompressing(false);
+      }
+      setFile(processedFile);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
-      alert('Please select a file to upload');
+      toast.error('Please select a file to upload');
       return;
     }
 
-    await uploadMutation.mutateAsync({
-      farmlandId,
-      file,
-      formData,
-    });
+    try {
+      await uploadMutation.mutateAsync({
+        farmlandId,
+        file,
+        formData,
+      });
 
-    // Reset form on success
-    setFile(null);
-    setFormData({
-      report_date: new Date().toISOString().split('T')[0],
-      lab_name: '',
-      notes: '',
-      ph: null,
-      ec: null,
-      organic_carbon: null,
-      nitrogen: null,
-      phosphorus: null,
-      potassium: null,
-    });
-    setShowOptionalFields(false);
-    onOpenChange(false);
+      // Reset form on success
+      setFile(null);
+      setFormData({
+        report_date: new Date().toISOString().split('T')[0],
+        lab_name: '',
+        notes: '',
+        ph: null,
+        ec: null,
+        organic_carbon: null,
+        nitrogen: null,
+        phosphorus: null,
+        potassium: null,
+      });
+      setShowOptionalFields(false);
+      onOpenChange(false);
+    } catch (error) {
+      const message = getErrorMessage(error);
+      toast.error(`Upload failed: ${message}`, {
+        action: createRetryAction(() => handleSubmit(e)),
+      });
+    }
   };
 
   const handleNumericChange = (field: keyof SoilReportFormData, value: string) => {
     const numValue = value === '' ? null : parseFloat(value);
     setFormData({ ...formData, [field]: numValue });
   };
+
+  const isLoading = uploadMutation.isPending || isCompressing;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -104,6 +157,7 @@ export default function SoilReportUploadDialog({
               value={formData.report_date}
               onChange={(e) => setFormData({ ...formData, report_date: e.target.value })}
               required
+              disabled={isLoading}
             />
           </div>
 
@@ -124,24 +178,30 @@ export default function SoilReportUploadDialog({
                     variant="ghost"
                     size="sm"
                     onClick={() => setFile(null)}
+                    disabled={isLoading}
                   >
                     Change
                   </Button>
                 </div>
               ) : (
                 <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/30 transition-colors">
-                  <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                  {isCompressing ? (
+                    <Loader2 className="h-8 w-8 text-muted-foreground mb-2 animate-spin" />
+                  ) : (
+                    <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                  )}
                   <span className="text-sm text-muted-foreground">
-                    Click to upload or drag & drop
+                    {isCompressing ? 'Compressing image...' : 'Click to upload or drag & drop'}
                   </span>
                   <span className="text-xs text-muted-foreground mt-1">
-                    JPG, PNG, WebP, or PDF (max 10MB)
+                    Images: max {FILE_SIZE_LIMITS.IMAGE_MAX_MB}MB • PDF: max {FILE_SIZE_LIMITS.PDF_MAX_MB}MB
                   </span>
                   <input
                     type="file"
                     className="hidden"
                     accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf"
                     onChange={handleFileChange}
+                    disabled={isLoading}
                   />
                 </label>
               )}
@@ -156,6 +216,7 @@ export default function SoilReportUploadDialog({
               value={formData.lab_name}
               onChange={(e) => setFormData({ ...formData, lab_name: e.target.value })}
               placeholder="e.g., Krishi Vigyan Kendra"
+              disabled={isLoading}
             />
           </div>
 
@@ -168,13 +229,14 @@ export default function SoilReportUploadDialog({
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               placeholder="Any additional notes about this report..."
               rows={2}
+              disabled={isLoading}
             />
           </div>
 
           {/* Optional Numeric Fields */}
           <Collapsible open={showOptionalFields} onOpenChange={setShowOptionalFields}>
             <CollapsibleTrigger asChild>
-              <Button type="button" variant="ghost" size="sm" className="w-full justify-between">
+              <Button type="button" variant="ghost" size="sm" className="w-full justify-between" disabled={isLoading}>
                 <span>Add Soil Values (optional)</span>
                 <ChevronDown className={`h-4 w-4 transition-transform ${showOptionalFields ? 'rotate-180' : ''}`} />
               </Button>
@@ -195,6 +257,7 @@ export default function SoilReportUploadDialog({
                     value={formData.ph ?? ''}
                     onChange={(e) => handleNumericChange('ph', e.target.value)}
                     placeholder="e.g., 6.5"
+                    disabled={isLoading}
                   />
                 </div>
                 <div>
@@ -207,6 +270,7 @@ export default function SoilReportUploadDialog({
                     value={formData.ec ?? ''}
                     onChange={(e) => handleNumericChange('ec', e.target.value)}
                     placeholder="e.g., 0.5"
+                    disabled={isLoading}
                   />
                 </div>
                 <div>
@@ -219,6 +283,7 @@ export default function SoilReportUploadDialog({
                     value={formData.nitrogen ?? ''}
                     onChange={(e) => handleNumericChange('nitrogen', e.target.value)}
                     placeholder="e.g., 280"
+                    disabled={isLoading}
                   />
                 </div>
                 <div>
@@ -231,6 +296,7 @@ export default function SoilReportUploadDialog({
                     value={formData.phosphorus ?? ''}
                     onChange={(e) => handleNumericChange('phosphorus', e.target.value)}
                     placeholder="e.g., 45"
+                    disabled={isLoading}
                   />
                 </div>
                 <div>
@@ -243,6 +309,7 @@ export default function SoilReportUploadDialog({
                     value={formData.potassium ?? ''}
                     onChange={(e) => handleNumericChange('potassium', e.target.value)}
                     placeholder="e.g., 320"
+                    disabled={isLoading}
                   />
                 </div>
                 <div>
@@ -255,17 +322,18 @@ export default function SoilReportUploadDialog({
                     value={formData.organic_carbon ?? ''}
                     onChange={(e) => handleNumericChange('organic_carbon', e.target.value)}
                     placeholder="e.g., 0.75"
+                    disabled={isLoading}
                   />
                 </div>
               </div>
             </CollapsibleContent>
           </Collapsible>
 
-          <Button type="submit" className="w-full" disabled={uploadMutation.isPending || !file}>
-            {uploadMutation.isPending ? (
+          <Button type="submit" className="w-full" disabled={isLoading || !file}>
+            {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Uploading...
+                {isCompressing ? 'Compressing...' : 'Uploading...'}
               </>
             ) : (
               <>

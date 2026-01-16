@@ -116,6 +116,27 @@ serve(async (req) => {
       );
     }
 
+    // Phase 5: Enforce proof requirement for picked_up and delivered
+    if (new_status === "picked_up" && (!proof_paths || proof_paths.length === 0)) {
+      const existingPickupProofs = trip.pickup_proofs || [];
+      if (existingPickupProofs.length === 0) {
+        return new Response(
+          JSON.stringify({ error: "Proof photo required before confirming pickup" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    if (new_status === "delivered" && (!proof_paths || proof_paths.length === 0)) {
+      const existingDeliveryProofs = trip.delivery_proofs || [];
+      if (existingDeliveryProofs.length === 0) {
+        return new Response(
+          JSON.stringify({ error: "Proof photo required before confirming delivery" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     // Build update object for trips table
     const tripUpdate: Record<string, any> = {
       status: new_status,

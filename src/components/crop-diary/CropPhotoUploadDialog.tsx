@@ -4,8 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Camera, Upload, X, Image } from 'lucide-react';
+import { Camera, Upload, X, Loader2 } from 'lucide-react';
 import { useUploadCropMedia } from '@/hooks/useCropDiary';
+import { toast } from 'sonner';
+import imageCompression from 'browser-image-compression';
+import { FILE_SIZE_LIMITS, validateFileSize, isImageFile, getErrorMessage, createRetryAction } from '@/lib/error-utils';
 
 interface CropPhotoUploadDialogProps {
   cropId: string;
@@ -18,17 +21,54 @@ const CropPhotoUploadDialog = ({ cropId, open, onOpenChange }: CropPhotoUploadDi
   const [preview, setPreview] = useState<string | null>(null);
   const [caption, setCaption] = useState('');
   const [monthTag, setMonthTag] = useState('');
+  const [isCompressing, setIsCompressing] = useState(false);
 
   const uploadMutation = useUploadCropMedia();
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      const reader = new FileReader();
-      reader.onloadend = () => setPreview(reader.result as string);
-      reader.readAsDataURL(selectedFile);
+    if (!selectedFile) return;
+
+    // Validate file type
+    if (!isImageFile(selectedFile)) {
+      toast.error('Please select an image file (JPG, PNG, WebP)');
+      return;
     }
+
+    // Validate file size
+    const validation = validateFileSize(selectedFile, FILE_SIZE_LIMITS.IMAGE_MAX_MB);
+    if (!validation.valid) {
+      toast.error(validation.message);
+      return;
+    }
+
+    // Compress if needed
+    let processedFile = selectedFile;
+    const sizeMB = selectedFile.size / (1024 * 1024);
+    
+    if (sizeMB > FILE_SIZE_LIMITS.IMAGE_COMPRESS_TARGET_MB) {
+      setIsCompressing(true);
+      try {
+        processedFile = await imageCompression(selectedFile, {
+          maxSizeMB: FILE_SIZE_LIMITS.IMAGE_COMPRESS_TARGET_MB,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        });
+        const compressedSizeMB = processedFile.size / (1024 * 1024);
+        console.log(`Image compressed: ${sizeMB.toFixed(2)}MB → ${compressedSizeMB.toFixed(2)}MB`);
+      } catch (error) {
+        console.error('Compression failed:', error);
+        toast.error('Failed to compress image. Please try a smaller file.');
+        setIsCompressing(false);
+        return;
+      }
+      setIsCompressing(false);
+    }
+
+    setFile(processedFile);
+    const reader = new FileReader();
+    reader.onloadend = () => setPreview(reader.result as string);
+    reader.readAsDataURL(processedFile);
   };
 
   const clearFile = () => {
@@ -43,19 +83,28 @@ const CropPhotoUploadDialog = ({ cropId, open, onOpenChange }: CropPhotoUploadDi
     const tags: string[] = [];
     if (monthTag) tags.push(monthTag);
 
-    await uploadMutation.mutateAsync({
-      cropId,
-      file,
-      caption: caption || undefined,
-      tags: tags.length > 0 ? tags : undefined,
-    });
+    try {
+      await uploadMutation.mutateAsync({
+        cropId,
+        file,
+        caption: caption || undefined,
+        tags: tags.length > 0 ? tags : undefined,
+      });
 
-    setFile(null);
-    setPreview(null);
-    setCaption('');
-    setMonthTag('');
-    onOpenChange(false);
+      setFile(null);
+      setPreview(null);
+      setCaption('');
+      setMonthTag('');
+      onOpenChange(false);
+    } catch (error) {
+      const message = getErrorMessage(error);
+      toast.error(`Upload failed: ${message}`, {
+        action: createRetryAction(() => handleSubmit(e)),
+      });
+    }
   };
+
+  const isLoading = uploadMutation.isPending || isCompressing;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -80,18 +129,30 @@ const CropPhotoUploadDialog = ({ cropId, open, onOpenChange }: CropPhotoUploadDi
                 capture="environment"
                 onChange={handleFileChange}
                 className="hidden"
+                disabled={isLoading}
               />
               <label
                 htmlFor="photo-upload"
                 className="cursor-pointer flex flex-col items-center gap-3"
               >
                 <div className="p-4 rounded-full bg-primary/10">
-                  <Camera className="h-8 w-8 text-primary" />
+                  {isCompressing ? (
+                    <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                  ) : (
+                    <Camera className="h-8 w-8 text-primary" />
+                  )}
                 </div>
                 <div>
-                  <p className="font-medium">Take Photo or Upload</p>
+                  <p className="font-medium">
+                    {isCompressing ? 'Compressing...' : 'Take Photo or Upload'}
+                  </p>
                   <p className="text-sm text-muted-foreground">
-                    Tap to open camera or select from gallery
+                    {isCompressing 
+                      ? 'Optimizing image for upload' 
+                      : 'Tap to open camera or select from gallery'}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Max {FILE_SIZE_LIMITS.IMAGE_MAX_MB}MB • Auto-compressed to {FILE_SIZE_LIMITS.IMAGE_COMPRESS_TARGET_MB}MB
                   </p>
                 </div>
               </label>
@@ -109,6 +170,7 @@ const CropPhotoUploadDialog = ({ cropId, open, onOpenChange }: CropPhotoUploadDi
                 size="icon"
                 className="absolute top-2 right-2"
                 onClick={clearFile}
+                disabled={isLoading}
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -121,12 +183,13 @@ const CropPhotoUploadDialog = ({ cropId, open, onOpenChange }: CropPhotoUploadDi
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
               placeholder="Describe what's happening..."
+              disabled={isLoading}
             />
           </div>
 
           <div>
             <Label>Month Tag (Optional)</Label>
-            <Select value={monthTag} onValueChange={setMonthTag}>
+            <Select value={monthTag} onValueChange={setMonthTag} disabled={isLoading}>
               <SelectTrigger>
                 <SelectValue placeholder="Select month..." />
               </SelectTrigger>
@@ -144,10 +207,13 @@ const CropPhotoUploadDialog = ({ cropId, open, onOpenChange }: CropPhotoUploadDi
           <Button
             type="submit"
             className="w-full"
-            disabled={!file || uploadMutation.isPending}
+            disabled={!file || isLoading}
           >
-            {uploadMutation.isPending ? (
-              'Uploading...'
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                {isCompressing ? 'Compressing...' : 'Uploading...'}
+              </>
             ) : (
               <>
                 <Upload className="h-4 w-4 mr-2" />

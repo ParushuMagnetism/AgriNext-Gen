@@ -3,6 +3,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
+/**
+ * IMPORTANT: All trip mutations (accept, status update) are handled via useTrips.tsx secure hooks.
+ * This file contains ONLY read queries for logistics dashboard data.
+ * DO NOT add mutation hooks here - use useAcceptLoadSecure and useUpdateTripStatusSecure from useTrips.tsx
+ */
+
 export interface Transporter {
   id: string;
   user_id: string;
@@ -257,80 +263,6 @@ export const useVehicles = () => {
       return data as Vehicle[];
     },
     enabled: !!transporter?.id,
-  });
-};
-
-// Hook to accept a load
-export const useAcceptLoad = () => {
-  const queryClient = useQueryClient();
-  const { data: transporter } = useTransporterProfile();
-  
-  return useMutation({
-    mutationFn: async ({ requestId, vehicleId }: { requestId: string; vehicleId?: string }) => {
-      if (!transporter) throw new Error('Transporter profile not found');
-      
-      const { error } = await supabase
-        .from('transport_requests')
-        .update({
-          status: 'assigned',
-          transporter_id: transporter.user_id,
-          vehicle_id: vehicleId || null,
-        })
-        .eq('id', requestId);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['available-loads'] });
-      queryClient.invalidateQueries({ queryKey: ['active-trips'] });
-      toast.success('Load accepted successfully!');
-    },
-    onError: (error) => {
-      toast.error('Failed to accept load: ' + error.message);
-    },
-  });
-};
-
-// Hook to update trip status
-export const useUpdateTripStatus = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async ({ 
-      requestId, 
-      status, 
-      pickupPhotoUrl, 
-      deliveryPhotoUrl,
-      distanceKm,
-    }: { 
-      requestId: string; 
-      status: TransportRequest['status'];
-      pickupPhotoUrl?: string;
-      deliveryPhotoUrl?: string;
-      distanceKm?: number;
-    }) => {
-      const updateData: any = { status };
-      
-      if (pickupPhotoUrl) updateData.pickup_photo_url = pickupPhotoUrl;
-      if (deliveryPhotoUrl) updateData.delivery_photo_url = deliveryPhotoUrl;
-      if (distanceKm) updateData.distance_km = distanceKm;
-      if (status === 'delivered') updateData.completed_at = new Date().toISOString();
-      
-      const { error } = await supabase
-        .from('transport_requests')
-        .update(updateData)
-        .eq('id', requestId);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['active-trips'] });
-      queryClient.invalidateQueries({ queryKey: ['completed-trips'] });
-      toast.success('Trip status updated!');
-    },
-    onError: (error) => {
-      toast.error('Failed to update status: ' + error.message);
-    },
   });
 };
 
