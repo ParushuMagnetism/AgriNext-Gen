@@ -168,6 +168,7 @@ export const kn = {
     completed: 'ಪೂರ್ಣಗೊಂಡಿದೆ',
     myVehicles: 'ನನ್ನ ವಾಹನಗಳು',
     myTasks: 'ನನ್ನ ಕಾರ್ಯಗಳು',
+    myFarmers: 'ನನ್ನ ರೈತರು',
     farmersAndCrops: 'ರೈತರು ಮತ್ತು ಬೆಳೆಗಳು',
     farmers: 'ರೈತರು',
     buyers: 'ಖರೀದಿದಾರರು',
