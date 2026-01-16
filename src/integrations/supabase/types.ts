@@ -1316,6 +1316,92 @@ export type Database = {
         }
         Relationships: []
       }
+      soil_test_reports: {
+        Row: {
+          consent_at: string | null
+          consent_captured: boolean | null
+          consent_note: string | null
+          created_at: string
+          ec: number | null
+          extracted_data: Json | null
+          farmer_id: string
+          farmland_id: string
+          id: string
+          lab_name: string | null
+          nitrogen: number | null
+          notes: string | null
+          organic_carbon: number | null
+          ph: number | null
+          phosphorus: number | null
+          potassium: number | null
+          report_date: string
+          report_file_path: string
+          report_file_type: string
+          report_mime_type: string | null
+          source_role: string
+          updated_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          consent_at?: string | null
+          consent_captured?: boolean | null
+          consent_note?: string | null
+          created_at?: string
+          ec?: number | null
+          extracted_data?: Json | null
+          farmer_id: string
+          farmland_id: string
+          id?: string
+          lab_name?: string | null
+          nitrogen?: number | null
+          notes?: string | null
+          organic_carbon?: number | null
+          ph?: number | null
+          phosphorus?: number | null
+          potassium?: number | null
+          report_date: string
+          report_file_path: string
+          report_file_type: string
+          report_mime_type?: string | null
+          source_role?: string
+          updated_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          consent_at?: string | null
+          consent_captured?: boolean | null
+          consent_note?: string | null
+          created_at?: string
+          ec?: number | null
+          extracted_data?: Json | null
+          farmer_id?: string
+          farmland_id?: string
+          id?: string
+          lab_name?: string | null
+          nitrogen?: number | null
+          notes?: string | null
+          organic_carbon?: number | null
+          ph?: number | null
+          phosphorus?: number | null
+          potassium?: number | null
+          report_date?: string
+          report_file_path?: string
+          report_file_type?: string
+          report_mime_type?: string | null
+          source_role?: string
+          updated_at?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "soil_test_reports_farmland_id_fkey"
+            columns: ["farmland_id"]
+            isOneToOne: false
+            referencedRelation: "farmlands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transport_requests: {
         Row: {
           completed_at: string | null
@@ -1735,7 +1821,29 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      farmland_soil_latest: {
+        Row: {
+          created_at: string | null
+          ec: number | null
+          farmland_id: string | null
+          last_test_date: string | null
+          latest_report_id: string | null
+          nitrogen: number | null
+          organic_carbon: number | null
+          ph: number | null
+          phosphorus: number | null
+          potassium: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "soil_test_reports_farmland_id_fkey"
+            columns: ["farmland_id"]
+            isOneToOne: false
+            referencedRelation: "farmlands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       farmer_update_order_status: {
