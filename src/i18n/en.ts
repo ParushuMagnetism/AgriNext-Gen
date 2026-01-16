@@ -1,0 +1,280 @@
+// English translations
+export const en = {
+  // Common
+  common: {
+    save: 'Save',
+    cancel: 'Cancel',
+    delete: 'Delete',
+    edit: 'Edit',
+    add: 'Add',
+    search: 'Search',
+    filter: 'Filter',
+    loading: 'Loading...',
+    retry: 'Retry',
+    viewAll: 'View All',
+    back: 'Back',
+    next: 'Next',
+    submit: 'Submit',
+    confirm: 'Confirm',
+    close: 'Close',
+    yes: 'Yes',
+    no: 'No',
+    error: 'Error',
+    success: 'Success',
+    warning: 'Warning',
+  },
+
+  // Navigation / Sidebar
+  nav: {
+    dashboard: 'Dashboard',
+    crops: 'My Crops',
+    farmlands: 'Farmlands',
+    transport: 'Transport',
+    listings: 'Listings',
+    orders: 'Orders',
+    earnings: 'Earnings',
+    settings: 'Settings',
+    notifications: 'Notifications',
+    cropDiary: 'Crop Diary',
+    logout: 'Logout',
+  },
+
+  // Dashboard
+  dashboard: {
+    welcome: 'Welcome',
+    locationNotSet: 'Location not set',
+    profileCompletion: 'Profile Completion',
+    completeProfile: 'Complete your profile to unlock all features',
+    almostThere: 'Almost there! Add a few more details',
+    justALittle: 'Just a little more to complete your profile',
+    totalLand: 'Total Land',
+    activeCrops: 'Active Crops',
+    readyToHarvest: 'Ready to Harvest',
+    pendingTransport: 'Pending Transport',
+  },
+
+  // Crops
+  crops: {
+    title: 'My Crops',
+    addCrop: 'Add Crop',
+    addNewCrop: 'Add New Crop',
+    cropName: 'Crop Name',
+    variety: 'Variety',
+    farmland: 'Farmland',
+    sowingDate: 'Sowing Date',
+    harvestDate: 'Harvest Date',
+    expectedQuantity: 'Expected Quantity',
+    unit: 'Unit',
+    status: 'Status',
+    growing: 'Growing',
+    oneWeek: '1 Week',
+    ready: 'Ready',
+    harvested: 'Harvested',
+    totalCrops: 'Total Crops',
+    noCropsYet: 'No crops added yet',
+    startByAdding: 'Start by adding your first crop to track its growth and manage harvests.',
+    addFirstCrop: 'Add Your First Crop',
+    requestTransport: 'Request Transport',
+    viewDiary: 'View Diary',
+    deleteCrop: 'Delete Crop',
+  },
+
+  // Farmlands
+  farmlands: {
+    title: 'Farmlands',
+    addFarmland: 'Add Farmland',
+    addNewFarmland: 'Add New Farmland',
+    plotName: 'Name / Plot ID',
+    area: 'Area',
+    soilType: 'Soil Type',
+    village: 'Village',
+    district: 'District',
+    totalPlots: 'Total Plots',
+    totalAcres: 'Total Acres',
+    soilTypes: 'Soil Types',
+    villages: 'Villages',
+    noFarmlandsYet: 'No farmlands added yet',
+    addFarmlandsToTrack: 'Add your farmlands to track crops, manage harvests, and get better insights.',
+    addFirstFarmland: 'Add Your First Farmland',
+    soilReports: 'Soil Reports',
+  },
+
+  // Transport
+  transport: {
+    title: 'Transport Requests',
+    newRequest: 'New Request',
+    requestTransport: 'Request Transport',
+    activeRequests: 'Active Requests',
+    completed: 'Completed',
+    inTransit: 'In Transit',
+    totalRequests: 'Total Requests',
+    quantity: 'Quantity',
+    pickupLocation: 'Pickup Location',
+    preferredDate: 'Preferred Date',
+    preferredTime: 'Preferred Time',
+    notes: 'Notes',
+    status: 'Status',
+    requested: 'Requested',
+    assigned: 'Assigned',
+    enRoute: 'En Route',
+    pickedUp: 'Picked Up',
+    delivered: 'Delivered',
+    cancelled: 'Cancelled',
+    noTransportYet: 'No transport requests yet',
+    whenReady: 'When your crops are ready, request transport to get them to market.',
+    createFirstRequest: 'Create Your First Request',
+  },
+
+  // Listings
+  listings: {
+    title: 'My Listings',
+    addListing: 'Add Listing',
+    productName: 'Product Name',
+    description: 'Description',
+    category: 'Category',
+    price: 'Price',
+    location: 'Location',
+    active: 'Active',
+    inactive: 'Inactive',
+    noListingsYet: 'No listings yet',
+    startSelling: 'Start selling by creating your first product listing.',
+    addFirstListing: 'Add Your First Listing',
+  },
+
+  // Orders
+  orders: {
+    title: 'Orders',
+    orderId: 'Order ID',
+    buyer: 'Buyer',
+    product: 'Product',
+    total: 'Total',
+    date: 'Date',
+    status: 'Status',
+    pending: 'Pending',
+    confirmed: 'Confirmed',
+    shipped: 'Shipped',
+    rejected: 'Rejected',
+    noOrdersYet: "You haven't received any orders yet.",
+    viewDetails: 'View',
+    confirmOrder: 'Confirm Order',
+    rejectOrder: 'Reject',
+    markShipped: 'Mark as Shipped',
+    markDelivered: 'Mark as Delivered',
+  },
+
+  // Earnings
+  earnings: {
+    title: 'Earnings',
+    financialOverview: 'Financial Overview',
+    trackEarnings: 'Track your earnings and manage payments',
+    totalSales: 'Total Sales',
+    pendingPayments: 'Pending Payments',
+    completedOrders: 'Completed Orders',
+    noEarningsYet: 'No earnings yet',
+    startSelling: 'Start selling to see your earnings here.',
+    completedOrdersInfo: 'completed orders',
+    pendingOrdersInfo: 'pending orders',
+    fromSales: 'From completed sales',
+    recentTransactions: 'Recent Transactions',
+    noTransactions: 'No transactions yet',
+    createListing: 'Create a Listing',
+  },
+
+  // Settings
+  settings: {
+    title: 'Settings',
+    profileInfo: 'Profile Information',
+    updateProfile: 'Update your personal information and contact details',
+    fullName: 'Full Name',
+    phoneNumber: 'Phone Number',
+    saveChanges: 'Save Changes',
+    saving: 'Saving...',
+    preferences: 'Preferences',
+    pushNotifications: 'Push Notifications',
+    receiveAlerts: 'Receive alerts about your crops and orders',
+    language: 'Language',
+    english: 'English',
+    kannada: 'ಕನ್ನಡ',
+    accountSecurity: 'Account Security',
+    managePassword: 'Manage your password and security settings',
+    configure: 'Configure',
+    change: 'Change',
+    manage: 'Manage',
+  },
+
+  // Weather
+  weather: {
+    title: 'Weather Today',
+    humidity: 'Humidity',
+    wind: 'Wind',
+    feels: 'Feels',
+    updated: 'Updated',
+    cached: '(cached)',
+    offline: '(offline)',
+    setLocation: 'Set your location to see weather',
+  },
+
+  // Market Prices
+  marketPrices: {
+    title: 'Karnataka Mandi Prices',
+    pricesFor: 'Prices for',
+    yourCrops: 'Prices for your crops',
+    todaysRates: "Today's market rates",
+    setDistrict: 'Set your district to see personalized local mandi prices',
+    noPriceData: 'No price data available',
+    addCropsForPrices: 'Add crops to see relevant market prices',
+    priceForecast: 'Price Forecast',
+    dataUpdated: 'Data updated',
+    statewidePrices: 'Statewide prices',
+  },
+
+  // Advisories
+  advisories: {
+    title: 'Advisories & Alerts',
+    setDistrictForAlerts: 'Set your district to see local advisories and alerts',
+    noNotifications: 'No notifications yet',
+    viewAll: 'View all notifications',
+  },
+
+  // Empty States
+  emptyStates: {
+    noCrops: 'No crops added yet',
+    noFarmlands: 'No farmlands added yet',
+    noTransport: 'No transport requests yet',
+    noListings: 'No listings yet',
+    noOrders: 'No orders yet',
+  },
+
+  // Location Prompt
+  locationPrompt: {
+    setLocation: 'Set Your Location',
+    whyImportant: 'Your location helps us show local weather, market prices, and advisories.',
+    setNow: 'Set Location Now',
+  },
+
+  // Validation
+  validation: {
+    required: 'This field is required',
+    invalidPhone: 'Please enter a valid phone number',
+    invalidEmail: 'Please enter a valid email',
+  },
+
+  // Toast Messages
+  toast: {
+    profileUpdated: 'Profile updated successfully',
+    cropAdded: 'Crop added successfully',
+    cropDeleted: 'Crop deleted',
+    farmlandAdded: 'Farmland added successfully',
+    farmlandDeleted: 'Farmland deleted',
+    transportRequested: 'Transport request submitted',
+    listingCreated: 'Listing created successfully',
+    listingUpdated: 'Listing updated successfully',
+    listingDeleted: 'Listing deleted successfully',
+    orderUpdated: 'Order status updated',
+    languageChanged: 'Language changed',
+    errorOccurred: 'An error occurred',
+    tryAgain: 'Please try again',
+  },
+};
+
+export default en;

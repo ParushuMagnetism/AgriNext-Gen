@@ -1,0 +1,280 @@
+// Kannada translations (ಕನ್ನಡ)
+export const kn = {
+  // Common
+  common: {
+    save: 'ಉಳಿಸಿ',
+    cancel: 'ರದ್ದುಮಾಡಿ',
+    delete: 'ಅಳಿಸಿ',
+    edit: 'ಬದಲಾಯಿಸಿ',
+    add: 'ಸೇರಿಸಿ',
+    search: 'ಹುಡುಕಿ',
+    filter: 'ಫಿಲ್ಟರ್',
+    loading: 'ಲೋಡ್ ಆಗುತ್ತಿದೆ...',
+    retry: 'ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
+    viewAll: 'ಎಲ್ಲಾ ನೋಡಿ',
+    back: 'ಹಿಂದೆ',
+    next: 'ಮುಂದೆ',
+    submit: 'ಸಲ್ಲಿಸಿ',
+    confirm: 'ದೃಢೀಕರಿಸಿ',
+    close: 'ಮುಚ್ಚಿ',
+    yes: 'ಹೌದು',
+    no: 'ಇಲ್ಲ',
+    error: 'ದೋಷ',
+    success: 'ಯಶಸ್ವಿ',
+    warning: 'ಎಚ್ಚರಿಕೆ',
+  },
+
+  // Navigation / Sidebar
+  nav: {
+    dashboard: 'ಡ್ಯಾಶ್‌ಬೋರ್ಡ್',
+    crops: 'ನನ್ನ ಬೆಳೆಗಳು',
+    farmlands: 'ಕೃಷಿ ಭೂಮಿ',
+    transport: 'ಸಾರಿಗೆ',
+    listings: 'ಪಟ್ಟಿಗಳು',
+    orders: 'ಆರ್ಡರ್‌ಗಳು',
+    earnings: 'ಆದಾಯ',
+    settings: 'ಸೆಟ್ಟಿಂಗ್ಸ್',
+    notifications: 'ಅಧಿಸೂಚನೆಗಳು',
+    cropDiary: 'ಬೆಳೆ ಡೈರಿ',
+    logout: 'ಲಾಗ್ ಔಟ್',
+  },
+
+  // Dashboard
+  dashboard: {
+    welcome: 'ಸ್ವಾಗತ',
+    locationNotSet: 'ಸ್ಥಳ ಸೆಟ್ ಮಾಡಿಲ್ಲ',
+    profileCompletion: 'ಪ್ರೊಫೈಲ್ ಪೂರ್ಣತೆ',
+    completeProfile: 'ಎಲ್ಲಾ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ಪೂರ್ಣಗೊಳಿಸಿ',
+    almostThere: 'ಬಹುತೇಕ ಮುಗಿದಿದೆ! ಇನ್ನೂ ಕೆಲವು ವಿವರಗಳನ್ನು ಸೇರಿಸಿ',
+    justALittle: 'ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ಪೂರ್ಣಗೊಳಿಸಲು ಇನ್ನೂ ಸ್ವಲ್ಪ',
+    totalLand: 'ಒಟ್ಟು ಭೂಮಿ',
+    activeCrops: 'ಸಕ್ರಿಯ ಬೆಳೆಗಳು',
+    readyToHarvest: 'ಕೊಯ್ಲಿಗೆ ಸಿದ್ಧ',
+    pendingTransport: 'ಬಾಕಿ ಸಾರಿಗೆ',
+  },
+
+  // Crops
+  crops: {
+    title: 'ನನ್ನ ಬೆಳೆಗಳು',
+    addCrop: 'ಬೆಳೆ ಸೇರಿಸಿ',
+    addNewCrop: 'ಹೊಸ ಬೆಳೆ ಸೇರಿಸಿ',
+    cropName: 'ಬೆಳೆ ಹೆಸರು',
+    variety: 'ತಳಿ',
+    farmland: 'ಕೃಷಿ ಭೂಮಿ',
+    sowingDate: 'ಬಿತ್ತನೆ ದಿನಾಂಕ',
+    harvestDate: 'ಕೊಯ್ಲು ದಿನಾಂಕ',
+    expectedQuantity: 'ನಿರೀಕ್ಷಿತ ಪ್ರಮಾಣ',
+    unit: 'ಯೂನಿಟ್',
+    status: 'ಸ್ಥಿತಿ',
+    growing: 'ಬೆಳೆಯುತ್ತಿದೆ',
+    oneWeek: '1 ವಾರ',
+    ready: 'ಸಿದ್ಧ',
+    harvested: 'ಕೊಯ್ಲು ಮಾಡಲಾಗಿದೆ',
+    totalCrops: 'ಒಟ್ಟು ಬೆಳೆಗಳು',
+    noCropsYet: 'ಇನ್ನೂ ಬೆಳೆಗಳನ್ನು ಸೇರಿಸಿಲ್ಲ',
+    startByAdding: 'ಬೆಳವಣಿಗೆ ಟ್ರ್ಯಾಕ್ ಮಾಡಲು ಮತ್ತು ಕೊಯ್ಲು ನಿರ್ವಹಿಸಲು ನಿಮ್ಮ ಮೊದಲ ಬೆಳೆ ಸೇರಿಸಿ.',
+    addFirstCrop: 'ನಿಮ್ಮ ಮೊದಲ ಬೆಳೆ ಸೇರಿಸಿ',
+    requestTransport: 'ಸಾರಿಗೆ ವಿನಂತಿಸಿ',
+    viewDiary: 'ಡೈರಿ ನೋಡಿ',
+    deleteCrop: 'ಬೆಳೆ ಅಳಿಸಿ',
+  },
+
+  // Farmlands
+  farmlands: {
+    title: 'ಕೃಷಿ ಭೂಮಿ',
+    addFarmland: 'ಭೂಮಿ ಸೇರಿಸಿ',
+    addNewFarmland: 'ಹೊಸ ಭೂಮಿ ಸೇರಿಸಿ',
+    plotName: 'ಹೆಸರು / ಪ್ಲಾಟ್ ಐಡಿ',
+    area: 'ವಿಸ್ತೀರ್ಣ',
+    soilType: 'ಮಣ್ಣಿನ ಪ್ರಕಾರ',
+    village: 'ಹಳ್ಳಿ',
+    district: 'ಜಿಲ್ಲೆ',
+    totalPlots: 'ಒಟ್ಟು ಪ್ಲಾಟ್‌ಗಳು',
+    totalAcres: 'ಒಟ್ಟು ಎಕರೆ',
+    soilTypes: 'ಮಣ್ಣಿನ ಪ್ರಕಾರಗಳು',
+    villages: 'ಹಳ್ಳಿಗಳು',
+    noFarmlandsYet: 'ಇನ್ನೂ ಭೂಮಿ ಸೇರಿಸಿಲ್ಲ',
+    addFarmlandsToTrack: 'ಬೆಳೆಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಲು, ಕೊಯ್ಲು ನಿರ್ವಹಿಸಲು ಮತ್ತು ಉತ್ತಮ ಒಳನೋಟಗಳನ್ನು ಪಡೆಯಲು ನಿಮ್ಮ ಭೂಮಿ ಸೇರಿಸಿ.',
+    addFirstFarmland: 'ನಿಮ್ಮ ಮೊದಲ ಭೂಮಿ ಸೇರಿಸಿ',
+    soilReports: 'ಮಣ್ಣಿನ ವರದಿಗಳು',
+  },
+
+  // Transport
+  transport: {
+    title: 'ಸಾರಿಗೆ ವಿನಂತಿಗಳು',
+    newRequest: 'ಹೊಸ ವಿನಂತಿ',
+    requestTransport: 'ಸಾರಿಗೆ ವಿನಂತಿಸಿ',
+    activeRequests: 'ಸಕ್ರಿಯ ವಿನಂತಿಗಳು',
+    completed: 'ಪೂರ್ಣಗೊಂಡಿದೆ',
+    inTransit: 'ಸಾಗಣೆಯಲ್ಲಿ',
+    totalRequests: 'ಒಟ್ಟು ವಿನಂತಿಗಳು',
+    quantity: 'ಪ್ರಮಾಣ',
+    pickupLocation: 'ಪಿಕ್ಅಪ್ ಸ್ಥಳ',
+    preferredDate: 'ಆದ್ಯತೆಯ ದಿನಾಂಕ',
+    preferredTime: 'ಆದ್ಯತೆಯ ಸಮಯ',
+    notes: 'ಟಿಪ್ಪಣಿಗಳು',
+    status: 'ಸ್ಥಿತಿ',
+    requested: 'ವಿನಂತಿಸಲಾಗಿದೆ',
+    assigned: 'ನಿಯೋಜಿಸಲಾಗಿದೆ',
+    enRoute: 'ಮಾರ್ಗದಲ್ಲಿ',
+    pickedUp: 'ಪಿಕ್ ಅಪ್ ಮಾಡಲಾಗಿದೆ',
+    delivered: 'ತಲುಪಿಸಲಾಗಿದೆ',
+    cancelled: 'ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ',
+    noTransportYet: 'ಇನ್ನೂ ಸಾರಿಗೆ ವಿನಂತಿಗಳಿಲ್ಲ',
+    whenReady: 'ನಿಮ್ಮ ಬೆಳೆಗಳು ಸಿದ್ಧವಾದಾಗ, ಮಾರುಕಟ್ಟೆಗೆ ತಲುಪಿಸಲು ಸಾರಿಗೆ ವಿನಂತಿಸಿ.',
+    createFirstRequest: 'ನಿಮ್ಮ ಮೊದಲ ವಿನಂತಿ ರಚಿಸಿ',
+  },
+
+  // Listings
+  listings: {
+    title: 'ನನ್ನ ಪಟ್ಟಿಗಳು',
+    addListing: 'ಪಟ್ಟಿ ಸೇರಿಸಿ',
+    productName: 'ಉತ್ಪನ್ನ ಹೆಸರು',
+    description: 'ವಿವರಣೆ',
+    category: 'ವರ್ಗ',
+    price: 'ಬೆಲೆ',
+    location: 'ಸ್ಥಳ',
+    active: 'ಸಕ್ರಿಯ',
+    inactive: 'ನಿಷ್ಕ್ರಿಯ',
+    noListingsYet: 'ಇನ್ನೂ ಪಟ್ಟಿಗಳಿಲ್ಲ',
+    startSelling: 'ನಿಮ್ಮ ಮೊದಲ ಉತ್ಪನ್ನ ಪಟ್ಟಿಯನ್ನು ರಚಿಸುವ ಮೂಲಕ ಮಾರಾಟ ಪ್ರಾರಂಭಿಸಿ.',
+    addFirstListing: 'ನಿಮ್ಮ ಮೊದಲ ಪಟ್ಟಿ ಸೇರಿಸಿ',
+  },
+
+  // Orders
+  orders: {
+    title: 'ಆರ್ಡರ್‌ಗಳು',
+    orderId: 'ಆರ್ಡರ್ ಐಡಿ',
+    buyer: 'ಖರೀದಿದಾರ',
+    product: 'ಉತ್ಪನ್ನ',
+    total: 'ಒಟ್ಟು',
+    date: 'ದಿನಾಂಕ',
+    status: 'ಸ್ಥಿತಿ',
+    pending: 'ಬಾಕಿ',
+    confirmed: 'ದೃಢೀಕರಿಸಲಾಗಿದೆ',
+    shipped: 'ಕಳುಹಿಸಲಾಗಿದೆ',
+    rejected: 'ತಿರಸ್ಕರಿಸಲಾಗಿದೆ',
+    noOrdersYet: 'ನೀವು ಇನ್ನೂ ಯಾವುದೇ ಆರ್ಡರ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸಿಲ್ಲ.',
+    viewDetails: 'ನೋಡಿ',
+    confirmOrder: 'ಆರ್ಡರ್ ದೃಢೀಕರಿಸಿ',
+    rejectOrder: 'ತಿರಸ್ಕರಿಸಿ',
+    markShipped: 'ಕಳುಹಿಸಲಾಗಿದೆ ಎಂದು ಗುರುತಿಸಿ',
+    markDelivered: 'ತಲುಪಿಸಲಾಗಿದೆ ಎಂದು ಗುರುತಿಸಿ',
+  },
+
+  // Earnings
+  earnings: {
+    title: 'ಆದಾಯ',
+    financialOverview: 'ಆರ್ಥಿಕ ಸಮೀಕ್ಷೆ',
+    trackEarnings: 'ನಿಮ್ಮ ಆದಾಯ ಟ್ರ್ಯಾಕ್ ಮಾಡಿ ಮತ್ತು ಪಾವತಿಗಳನ್ನು ನಿರ್ವಹಿಸಿ',
+    totalSales: 'ಒಟ್ಟು ಮಾರಾಟ',
+    pendingPayments: 'ಬಾಕಿ ಪಾವತಿಗಳು',
+    completedOrders: 'ಪೂರ್ಣಗೊಂಡ ಆರ್ಡರ್‌ಗಳು',
+    noEarningsYet: 'ಇನ್ನೂ ಆದಾಯವಿಲ್ಲ',
+    startSelling: 'ನಿಮ್ಮ ಆದಾಯ ಇಲ್ಲಿ ನೋಡಲು ಮಾರಾಟ ಪ್ರಾರಂಭಿಸಿ.',
+    completedOrdersInfo: 'ಪೂರ್ಣಗೊಂಡ ಆರ್ಡರ್‌ಗಳು',
+    pendingOrdersInfo: 'ಬಾಕಿ ಆರ್ಡರ್‌ಗಳು',
+    fromSales: 'ಪೂರ್ಣಗೊಂಡ ಮಾರಾಟದಿಂದ',
+    recentTransactions: 'ಇತ್ತೀಚಿನ ವಹಿವಾಟುಗಳು',
+    noTransactions: 'ಇನ್ನೂ ವಹಿವಾಟುಗಳಿಲ್ಲ',
+    createListing: 'ಪಟ್ಟಿ ರಚಿಸಿ',
+  },
+
+  // Settings
+  settings: {
+    title: 'ಸೆಟ್ಟಿಂಗ್ಸ್',
+    profileInfo: 'ಪ್ರೊಫೈಲ್ ಮಾಹಿತಿ',
+    updateProfile: 'ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿ ಮತ್ತು ಸಂಪರ್ಕ ವಿವರಗಳನ್ನು ನವೀಕರಿಸಿ',
+    fullName: 'ಪೂರ್ಣ ಹೆಸರು',
+    phoneNumber: 'ಫೋನ್ ಸಂಖ್ಯೆ',
+    saveChanges: 'ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಿ',
+    saving: 'ಉಳಿಸಲಾಗುತ್ತಿದೆ...',
+    preferences: 'ಆದ್ಯತೆಗಳು',
+    pushNotifications: 'ಪುಶ್ ಅಧಿಸೂಚನೆಗಳು',
+    receiveAlerts: 'ನಿಮ್ಮ ಬೆಳೆಗಳು ಮತ್ತು ಆರ್ಡರ್‌ಗಳ ಬಗ್ಗೆ ಎಚ್ಚರಿಕೆಗಳನ್ನು ಸ್ವೀಕರಿಸಿ',
+    language: 'ಭಾಷೆ',
+    english: 'English',
+    kannada: 'ಕನ್ನಡ',
+    accountSecurity: 'ಖಾತೆ ಭದ್ರತೆ',
+    managePassword: 'ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ಮತ್ತು ಭದ್ರತಾ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸಿ',
+    configure: 'ಕಾನ್ಫಿಗರ್ ಮಾಡಿ',
+    change: 'ಬದಲಾಯಿಸಿ',
+    manage: 'ನಿರ್ವಹಿಸಿ',
+  },
+
+  // Weather
+  weather: {
+    title: 'ಇಂದಿನ ಹವಾಮಾನ',
+    humidity: 'ತೇವಾಂಶ',
+    wind: 'ಗಾಳಿ',
+    feels: 'ಅನುಭವ',
+    updated: 'ನವೀಕರಿಸಲಾಗಿದೆ',
+    cached: '(ಕ್ಯಾಶ್)',
+    offline: '(ಆಫ್‌ಲೈನ್)',
+    setLocation: 'ಹವಾಮಾನ ನೋಡಲು ನಿಮ್ಮ ಸ್ಥಳ ಸೆಟ್ ಮಾಡಿ',
+  },
+
+  // Market Prices
+  marketPrices: {
+    title: 'ಕರ್ನಾಟಕ ಮಂಡಿ ಬೆಲೆಗಳು',
+    pricesFor: 'ಬೆಲೆಗಳು',
+    yourCrops: 'ನಿಮ್ಮ ಬೆಳೆಗಳ ಬೆಲೆಗಳು',
+    todaysRates: 'ಇಂದಿನ ಮಾರುಕಟ್ಟೆ ದರಗಳು',
+    setDistrict: 'ವೈಯಕ್ತಿಕ ಸ್ಥಳೀಯ ಮಂಡಿ ಬೆಲೆಗಳನ್ನು ನೋಡಲು ನಿಮ್ಮ ಜಿಲ್ಲೆಯನ್ನು ಸೆಟ್ ಮಾಡಿ',
+    noPriceData: 'ಬೆಲೆ ಡೇಟಾ ಲಭ್ಯವಿಲ್ಲ',
+    addCropsForPrices: 'ಸಂಬಂಧಿತ ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳನ್ನು ನೋಡಲು ಬೆಳೆಗಳನ್ನು ಸೇರಿಸಿ',
+    priceForecast: 'ಬೆಲೆ ಮುನ್ಸೂಚನೆ',
+    dataUpdated: 'ಡೇಟಾ ನವೀಕರಿಸಲಾಗಿದೆ',
+    statewidePrices: 'ರಾಜ್ಯವ್ಯಾಪಿ ಬೆಲೆಗಳು',
+  },
+
+  // Advisories
+  advisories: {
+    title: 'ಸಲಹೆಗಳು ಮತ್ತು ಎಚ್ಚರಿಕೆಗಳು',
+    setDistrictForAlerts: 'ಸ್ಥಳೀಯ ಸಲಹೆಗಳು ಮತ್ತು ಎಚ್ಚರಿಕೆಗಳನ್ನು ನೋಡಲು ನಿಮ್ಮ ಜಿಲ್ಲೆಯನ್ನು ಸೆಟ್ ಮಾಡಿ',
+    noNotifications: 'ಇನ್ನೂ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ',
+    viewAll: 'ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ನೋಡಿ',
+  },
+
+  // Empty States
+  emptyStates: {
+    noCrops: 'ಇನ್ನೂ ಬೆಳೆಗಳನ್ನು ಸೇರಿಸಿಲ್ಲ',
+    noFarmlands: 'ಇನ್ನೂ ಭೂಮಿ ಸೇರಿಸಿಲ್ಲ',
+    noTransport: 'ಇನ್ನೂ ಸಾರಿಗೆ ವಿನಂತಿಗಳಿಲ್ಲ',
+    noListings: 'ಇನ್ನೂ ಪಟ್ಟಿಗಳಿಲ್ಲ',
+    noOrders: 'ಇನ್ನೂ ಆರ್ಡರ್‌ಗಳಿಲ್ಲ',
+  },
+
+  // Location Prompt
+  locationPrompt: {
+    setLocation: 'ನಿಮ್ಮ ಸ್ಥಳ ಸೆಟ್ ಮಾಡಿ',
+    whyImportant: 'ನಿಮ್ಮ ಸ್ಥಳ ಸ್ಥಳೀಯ ಹವಾಮಾನ, ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳು ಮತ್ತು ಸಲಹೆಗಳನ್ನು ತೋರಿಸಲು ಸಹಾಯ ಮಾಡುತ್ತದೆ.',
+    setNow: 'ಈಗ ಸ್ಥಳ ಸೆಟ್ ಮಾಡಿ',
+  },
+
+  // Validation
+  validation: {
+    required: 'ಈ ಕ್ಷೇತ್ರ ಅಗತ್ಯವಿದೆ',
+    invalidPhone: 'ಮಾನ್ಯ ಫೋನ್ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ',
+    invalidEmail: 'ಮಾನ್ಯ ಇಮೇಲ್ ನಮೂದಿಸಿ',
+  },
+
+  // Toast Messages
+  toast: {
+    profileUpdated: 'ಪ್ರೊಫೈಲ್ ಯಶಸ್ವಿಯಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ',
+    cropAdded: 'ಬೆಳೆ ಯಶಸ್ವಿಯಾಗಿ ಸೇರಿಸಲಾಗಿದೆ',
+    cropDeleted: 'ಬೆಳೆ ಅಳಿಸಲಾಗಿದೆ',
+    farmlandAdded: 'ಭೂಮಿ ಯಶಸ್ವಿಯಾಗಿ ಸೇರಿಸಲಾಗಿದೆ',
+    farmlandDeleted: 'ಭೂಮಿ ಅಳಿಸಲಾಗಿದೆ',
+    transportRequested: 'ಸಾರಿಗೆ ವಿನಂತಿ ಸಲ್ಲಿಸಲಾಗಿದೆ',
+    listingCreated: 'ಪಟ್ಟಿ ಯಶಸ್ವಿಯಾಗಿ ರಚಿಸಲಾಗಿದೆ',
+    listingUpdated: 'ಪಟ್ಟಿ ಯಶಸ್ವಿಯಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ',
+    listingDeleted: 'ಪಟ್ಟಿ ಯಶಸ್ವಿಯಾಗಿ ಅಳಿಸಲಾಗಿದೆ',
+    orderUpdated: 'ಆರ್ಡರ್ ಸ್ಥಿತಿ ನವೀಕರಿಸಲಾಗಿದೆ',
+    languageChanged: 'ಭಾಷೆ ಬದಲಾಗಿದೆ',
+    errorOccurred: 'ದೋಷ ಸಂಭವಿಸಿದೆ',
+    tryAgain: 'ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
+  },
+};
+
+export default kn;
