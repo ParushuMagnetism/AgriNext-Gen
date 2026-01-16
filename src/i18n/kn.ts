@@ -388,20 +388,33 @@ export const kn = {
   // Settings
   settings: {
     title: 'ಸೆಟ್ಟಿಂಗ್ಸ್',
+    profile_information: 'ಪ್ರೊಫೈಲ್ ಮಾಹಿತಿ',
     profileInfo: 'ಪ್ರೊಫೈಲ್ ಮಾಹಿತಿ',
+    update_info: 'ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿ ಮತ್ತು ಸಂಪರ್ಕ ವಿವರಗಳನ್ನು ನವೀಕರಿಸಿ',
     updateProfile: 'ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿ ಮತ್ತು ಸಂಪರ್ಕ ವಿವರಗಳನ್ನು ನವೀಕರಿಸಿ',
+    full_name: 'ಪೂರ್ಣ ಹೆಸರು',
     fullName: 'ಪೂರ್ಣ ಹೆಸರು',
+    full_name_placeholder: 'ನಿಮ್ಮ ಪೂರ್ಣ ಹೆಸರು',
+    phone: 'ಫೋನ್ ಸಂಖ್ಯೆ',
     phoneNumber: 'ಫೋನ್ ಸಂಖ್ಯೆ',
+    village: 'ಹಳ್ಳಿ',
+    village_placeholder: 'ನಿಮ್ಮ ಹಳ್ಳಿ ಹೆಸರು',
+    district: 'ಜಿಲ್ಲೆ',
+    district_placeholder: 'ನಿಮ್ಮ ಜಿಲ್ಲೆ',
     saveChanges: 'ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಿ',
     saving: 'ಉಳಿಸಲಾಗುತ್ತಿದೆ...',
     preferences: 'ಆದ್ಯತೆಗಳು',
+    push_notifications: 'ಪುಶ್ ಅಧಿಸೂಚನೆಗಳು',
     pushNotifications: 'ಪುಶ್ ಅಧಿಸೂಚನೆಗಳು',
+    push_notifications_desc: 'ನಿಮ್ಮ ಬೆಳೆಗಳು ಮತ್ತು ಆರ್ಡರ್‌ಗಳ ಬಗ್ಗೆ ಎಚ್ಚರಿಕೆಗಳನ್ನು ಸ್ವೀಕರಿಸಿ',
     receiveAlerts: 'ನಿಮ್ಮ ಬೆಳೆಗಳು ಮತ್ತು ಆರ್ಡರ್‌ಗಳ ಬಗ್ಗೆ ಎಚ್ಚರಿಕೆಗಳನ್ನು ಸ್ವೀಕರಿಸಿ',
     language: 'ಭಾಷೆ',
     languageLabel: 'Language / ಭಾಷೆ',
     english: 'English',
     kannada: 'ಕನ್ನಡ',
+    account_security: 'ಖಾತೆ ಭದ್ರತೆ',
     accountSecurity: 'ಖಾತೆ ಭದ್ರತೆ',
+    account_security_desc: 'ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ಮತ್ತು ಭದ್ರತಾ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸಿ',
     managePassword: 'ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ಮತ್ತು ಭದ್ರತಾ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸಿ',
     configure: 'ಕಾನ್ಫಿಗರ್ ಮಾಡಿ',
     change: 'ಬದಲಾಯಿಸಿ',
@@ -475,28 +488,8 @@ export const kn = {
     required: 'ಈ ಕ್ಷೇತ್ರ ಅಗತ್ಯವಿದೆ',
     invalidPhone: 'ಮಾನ್ಯ ಫೋನ್ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ',
     invalidEmail: 'ಮಾನ್ಯ ಇಮೇಲ್ ನಮೂದಿಸಿ',
+    invalid_email: 'ಮಾನ್ಯ ಇಮೇಲ್ ನಮೂದಿಸಿ',
     minLength: 'ಕನಿಷ್ಠ {min} ಅಕ್ಷರಗಳಿರಬೇಕು',
-  },
-
-  // Toast Messages
-  toast: {
-    profileUpdated: 'ಪ್ರೊಫೈಲ್ ಯಶಸ್ವಿಯಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ',
-    cropAdded: 'ಬೆಳೆ ಯಶಸ್ವಿಯಾಗಿ ಸೇರಿಸಲಾಗಿದೆ',
-    cropDeleted: 'ಬೆಳೆ ಅಳಿಸಲಾಗಿದೆ',
-    farmlandAdded: 'ಭೂಮಿ ಯಶಸ್ವಿಯಾಗಿ ಸೇರಿಸಲಾಗಿದೆ',
-    farmlandDeleted: 'ಭೂಮಿ ಅಳಿಸಲಾಗಿದೆ',
-    transportRequested: 'ಸಾರಿಗೆ ವಿನಂತಿ ಸಲ್ಲಿಸಲಾಗಿದೆ',
-    listingCreated: 'ಪಟ್ಟಿ ಯಶಸ್ವಿಯಾಗಿ ರಚಿಸಲಾಗಿದೆ',
-    listingUpdated: 'ಪಟ್ಟಿ ಯಶಸ್ವಿಯಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ',
-    listingDeleted: 'ಪಟ್ಟಿ ಯಶಸ್ವಿಯಾಗಿ ಅಳಿಸಲಾಗಿದೆ',
-    orderUpdated: 'ಆರ್ಡರ್ ಸ್ಥಿತಿ ನವೀಕರಿಸಲಾಗಿದೆ',
-    languageChanged: 'ಭಾಷೆ ಬದಲಾಗಿದೆ',
-    errorOccurred: 'ದೋಷ ಸಂಭವಿಸಿದೆ',
-    tryAgain: 'ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
-    dataSynced: 'ಡೇಟಾ ಯಶಸ್ವಿಯಾಗಿ ಸಿಂಕ್ ಆಗಿದೆ',
-    loadAccepted: 'ಲೋಡ್ ಯಶಸ್ವಿಯಾಗಿ ಸ್ವೀಕರಿಸಲಾಗಿದೆ',
-    tripUpdated: 'ಟ್ರಿಪ್ ಸ್ಥಿತಿ ನವೀಕರಿಸಲಾಗಿದೆ',
-    messageSent: 'ಸಂದೇಶ ಯಶಸ್ವಿಯಾಗಿ ಕಳುಹಿಸಲಾಗಿದೆ',
   },
 
   // Marketplace
@@ -637,7 +630,36 @@ export const kn = {
     },
   },
 
-  // Notifications
+  // Notifications (header dropdown)
+  notifications: {
+    view_all: 'ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ನೋಡಿ',
+    viewAll: 'ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ನೋಡಿ',
+    no_notifications: 'ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ',
+    noNotifications: 'ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ',
+  },
+
+  // Toast Messages
+  toast: {
+    profileUpdated: 'ಪ್ರೊಫೈಲ್ ಯಶಸ್ವಿಯಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ',
+    cropAdded: 'ಬೆಳೆ ಯಶಸ್ವಿಯಾಗಿ ಸೇರಿಸಲಾಗಿದೆ',
+    cropDeleted: 'ಬೆಳೆ ಅಳಿಸಲಾಗಿದೆ',
+    farmlandAdded: 'ಭೂಮಿ ಯಶಸ್ವಿಯಾಗಿ ಸೇರಿಸಲಾಗಿದೆ',
+    farmlandDeleted: 'ಭೂಮಿ ಅಳಿಸಲಾಗಿದೆ',
+    transportRequested: 'ಸಾರಿಗೆ ವಿನಂತಿ ಸಲ್ಲಿಸಲಾಗಿದೆ',
+    listingCreated: 'ಪಟ್ಟಿ ಯಶಸ್ವಿಯಾಗಿ ರಚಿಸಲಾಗಿದೆ',
+    listingUpdated: 'ಪಟ್ಟಿ ಯಶಸ್ವಿಯಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ',
+    listingDeleted: 'ಪಟ್ಟಿ ಯಶಸ್ವಿಯಾಗಿ ಅಳಿಸಲಾಗಿದೆ',
+    orderUpdated: 'ಆರ್ಡರ್ ಸ್ಥಿತಿ ನವೀಕರಿಸಲಾಗಿದೆ',
+    languageChanged: 'ಭಾಷೆ ಬದಲಾಯಿಸಲಾಗಿದೆ',
+    errorOccurred: 'ದೋಷ ಸಂಭವಿಸಿದೆ',
+    tryAgain: 'ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
+    dataSynced: 'ಡೇಟಾ ಯಶಸ್ವಿಯಾಗಿ ಸಿಂಕ್ ಆಗಿದೆ',
+    loadAccepted: 'ಲೋಡ್ ಯಶಸ್ವಿಯಾಗಿ ಸ್ವೀಕರಿಸಲಾಗಿದೆ',
+    tripUpdated: 'ಟ್ರಿಪ್ ಸ್ಥಿತಿ ನವೀಕರಿಸಲಾಗಿದೆ',
+    messageSent: 'ಸಂದೇಶ ಯಶಸ್ವಿಯಾಗಿ ಕಳುಹಿಸಲಾಗಿದೆ',
+  },
+
+  // Notifications Page
   notificationsPage: {
     title: 'ಅಧಿಸೂಚನೆಗಳು',
     markAllRead: 'ಎಲ್ಲವನ್ನೂ ಓದಿದ ಎಂದು ಗುರುತಿಸಿ',

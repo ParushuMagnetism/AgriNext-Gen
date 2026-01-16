@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_scopes: {
+        Row: {
+          active: boolean | null
+          admin_user_id: string
+          created_at: string | null
+          id: string
+          scope_level: string
+          scope_value: string
+        }
+        Insert: {
+          active?: boolean | null
+          admin_user_id: string
+          created_at?: string | null
+          id?: string
+          scope_level: string
+          scope_value: string
+        }
+        Update: {
+          active?: boolean | null
+          admin_user_id?: string
+          created_at?: string | null
+          id?: string
+          scope_level?: string
+          scope_value?: string
+        }
+        Relationships: []
+      }
       admin_users: {
         Row: {
           assigned_district: string | null
@@ -103,26 +130,41 @@ export type Database = {
       }
       agent_farmer_assignments: {
         Row: {
+          active: boolean | null
           agent_id: string
+          assigned_at: string | null
+          assigned_by: string | null
           created_at: string | null
           farmer_id: string
+          updated_at: string | null
         }
         Insert: {
+          active?: boolean | null
           agent_id: string
+          assigned_at?: string | null
+          assigned_by?: string | null
           created_at?: string | null
           farmer_id: string
+          updated_at?: string | null
         }
         Update: {
+          active?: boolean | null
           agent_id?: string
+          assigned_at?: string | null
+          assigned_by?: string | null
           created_at?: string | null
           farmer_id?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
       agent_tasks: {
         Row: {
           agent_id: string
+          completed_at: string | null
           created_at: string
+          created_by: string | null
+          created_by_role: string | null
           crop_id: string | null
           due_date: string
           farmer_id: string
@@ -135,7 +177,10 @@ export type Database = {
         }
         Insert: {
           agent_id: string
+          completed_at?: string | null
           created_at?: string
+          created_by?: string | null
+          created_by_role?: string | null
           crop_id?: string | null
           due_date?: string
           farmer_id: string
@@ -148,7 +193,10 @@ export type Database = {
         }
         Update: {
           agent_id?: string
+          completed_at?: string | null
           created_at?: string
+          created_by?: string | null
+          created_by_role?: string | null
           crop_id?: string | null
           due_date?: string
           farmer_id?: string
@@ -165,6 +213,47 @@ export type Database = {
             columns: ["crop_id"]
             isOneToOne: false
             referencedRelation: "crops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_visits: {
+        Row: {
+          agent_id: string
+          check_in_at: string
+          check_out_at: string | null
+          created_at: string | null
+          farmer_id: string
+          id: string
+          notes: string | null
+          task_id: string | null
+        }
+        Insert: {
+          agent_id: string
+          check_in_at?: string
+          check_out_at?: string | null
+          created_at?: string | null
+          farmer_id: string
+          id?: string
+          notes?: string | null
+          task_id?: string | null
+        }
+        Update: {
+          agent_id?: string
+          check_in_at?: string
+          check_out_at?: string | null
+          created_at?: string | null
+          farmer_id?: string
+          id?: string
+          notes?: string | null
+          task_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_visits_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "agent_tasks"
             referencedColumns: ["id"]
           },
         ]
@@ -2232,6 +2321,16 @@ export type Database = {
       }
     }
     Functions: {
+      admin_scope_match: {
+        Args: {
+          row_district: string
+          row_state: string
+          row_taluk: string
+          row_village: string
+          user_uuid: string
+        }
+        Returns: boolean
+      }
       farmer_update_order_status: {
         Args: { p_new_status: string; p_order_id: string }
         Returns: boolean
@@ -2241,6 +2340,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_agent_assigned_to_farmer: {
+        Args: { agent_uuid: string; farmer_uuid: string }
         Returns: boolean
       }
       normalize_crop_name: { Args: { input_name: string }; Returns: string }
