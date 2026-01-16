@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/useAuth';
 import { useFarmerNotifications, useFarmerProfile } from '@/hooks/useFarmerDashboard';
+import { useLanguage } from '@/hooks/useLanguage';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
@@ -25,6 +26,7 @@ interface DashboardHeaderProps {
 
 const DashboardHeader = ({ title, onMenuClick }: DashboardHeaderProps) => {
   const { user, signOut, userRole } = useAuth();
+  const { t } = useLanguage();
   const { data: notifications } = useFarmerNotifications();
   const { data: profile } = useFarmerProfile();
   const queryClient = useQueryClient();
@@ -152,15 +154,15 @@ const DashboardHeader = ({ title, onMenuClick }: DashboardHeaderProps) => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-80">
             <DropdownMenuLabel className="flex items-center justify-between">
-              <span>Notifications</span>
+              <span>{t('nav.notifications')}</span>
               {unreadCount > 0 && (
-                <span className="text-xs text-muted-foreground">{unreadCount} unread</span>
+                <span className="text-xs text-muted-foreground">{unreadCount} {t('common.unread')}</span>
               )}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             {recentNotifications.length === 0 ? (
               <div className="py-6 text-center text-sm text-muted-foreground">
-                No notifications yet
+                {t('notifications.no_notifications')}
               </div>
             ) : (
               <>
@@ -196,7 +198,7 @@ const DashboardHeader = ({ title, onMenuClick }: DashboardHeaderProps) => {
                   className="text-center justify-center text-primary cursor-pointer"
                   onClick={() => navigate(getNotificationPath())}
                 >
-                  View all notifications
+                  {t('notifications.view_all')}
                 </DropdownMenuItem>
               </>
             )}
@@ -218,20 +220,20 @@ const DashboardHeader = ({ title, onMenuClick }: DashboardHeaderProps) => {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium">{profile?.full_name || 'User'}</p>
+                <p className="text-sm font-medium">{profile?.full_name || t('common.user')}</p>
                 <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => navigate(getSettingsPath())}>
-              Profile Settings
+              {t('settings.profile_settings')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem 
               className="text-destructive focus:text-destructive"
               onClick={signOut}
             >
-              Sign Out
+              {t('auth.sign_out')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

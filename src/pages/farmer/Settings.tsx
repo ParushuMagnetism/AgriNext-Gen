@@ -15,8 +15,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   User, 
-  MapPin, 
-  Phone, 
   Save,
   Loader2,
   Shield,
@@ -30,7 +28,7 @@ const SettingsPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { language, setLanguage, isLoading: languageLoading } = useLanguage();
+  const { language, setLanguage, isLoading: languageLoading, t } = useLanguage();
   const [isSaving, setIsSaving] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -69,10 +67,10 @@ const SettingsPage = () => {
 
       if (error) throw error;
       
-      toast({ title: 'Profile updated successfully' });
+      toast({ title: t('toast.profile_updated') });
       queryClient.invalidateQueries({ queryKey: ['farmer-profile', user.id] });
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
     } finally {
       setIsSaving(false);
     }
@@ -85,7 +83,7 @@ const SettingsPage = () => {
 
   if (isLoading) {
     return (
-      <DashboardLayout title="Settings">
+      <DashboardLayout title={t('nav.settings')}>
         <div className="space-y-6">
           <Skeleton className="h-48 rounded-xl" />
           <Skeleton className="h-64 rounded-xl" />
@@ -95,17 +93,17 @@ const SettingsPage = () => {
   }
 
   return (
-    <DashboardLayout title="Settings">
+    <DashboardLayout title={t('nav.settings')}>
       <div className="max-w-3xl space-y-6">
         {/* Profile Section */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5 text-primary" />
-              Profile Information
+              {t('settings.profile_information')}
             </CardTitle>
             <CardDescription>
-              Update your personal information and contact details
+              {t('settings.update_info')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -119,7 +117,7 @@ const SettingsPage = () => {
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h3 className="font-semibold">{formData.full_name || 'Farmer'}</h3>
+                  <h3 className="font-semibold">{formData.full_name || t('roles.farmer')}</h3>
                   <p className="text-sm text-muted-foreground">{user?.email}</p>
                 </div>
               </div>
@@ -130,16 +128,16 @@ const SettingsPage = () => {
               <div className="grid gap-4">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="full_name">Full Name</Label>
+                    <Label htmlFor="full_name">{t('settings.full_name')}</Label>
                     <Input
                       id="full_name"
                       value={formData.full_name}
                       onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                      placeholder="Your full name"
+                      placeholder={t('settings.full_name_placeholder')}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
+                    <Label htmlFor="phone">{t('settings.phone')}</Label>
                     <Input
                       id="phone"
                       value={formData.phone}
@@ -151,21 +149,21 @@ const SettingsPage = () => {
                 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="village">Village</Label>
+                    <Label htmlFor="village">{t('settings.village')}</Label>
                     <Input
                       id="village"
                       value={formData.village}
                       onChange={(e) => setFormData({ ...formData, village: e.target.value })}
-                      placeholder="Your village name"
+                      placeholder={t('settings.village_placeholder')}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="district">District</Label>
+                    <Label htmlFor="district">{t('settings.district')}</Label>
                     <Input
                       id="district"
                       value={formData.district}
                       onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                      placeholder="Your district"
+                      placeholder={t('settings.district_placeholder')}
                     />
                   </div>
                 </div>
@@ -176,12 +174,12 @@ const SettingsPage = () => {
                   {isSaving ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Saving...
+                      {t('common.saving')}
                     </>
                   ) : (
                     <>
                       <Save className="h-4 w-4 mr-2" />
-                      Save Changes
+                      {t('common.save_changes')}
                     </>
                   )}
                 </Button>
@@ -195,7 +193,7 @@ const SettingsPage = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Bell className="h-5 w-5 text-primary" />
-              Preferences
+              {t('settings.preferences')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -203,11 +201,11 @@ const SettingsPage = () => {
               <div className="flex items-center gap-3">
                 <Bell className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="font-medium">Push Notifications</p>
-                  <p className="text-sm text-muted-foreground">Receive alerts about your crops and orders</p>
+                  <p className="font-medium">{t('settings.push_notifications')}</p>
+                  <p className="text-sm text-muted-foreground">{t('settings.push_notifications_desc')}</p>
                 </div>
               </div>
-              <Button variant="outline" size="sm">Configure</Button>
+              <Button variant="outline" size="sm">{t('settings.configure')}</Button>
             </div>
             
             {/* Language Toggle */}
@@ -215,7 +213,7 @@ const SettingsPage = () => {
               <div className="flex items-center gap-3">
                 <Globe className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="font-medium">Language / ಭಾಷೆ</p>
+                  <p className="font-medium">{t('settings.language')}</p>
                   <p className="text-sm text-muted-foreground">
                     {language === 'en' ? 'English' : 'ಕನ್ನಡ'}
                   </p>
@@ -247,11 +245,11 @@ const SettingsPage = () => {
               <div className="flex items-center gap-3">
                 <Shield className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="font-medium">Account Security</p>
-                  <p className="text-sm text-muted-foreground">Manage your password and security settings</p>
+                  <p className="font-medium">{t('settings.account_security')}</p>
+                  <p className="text-sm text-muted-foreground">{t('settings.account_security_desc')}</p>
                 </div>
               </div>
-              <Button variant="outline" size="sm">Manage</Button>
+              <Button variant="outline" size="sm">{t('settings.manage')}</Button>
             </div>
           </CardContent>
         </Card>

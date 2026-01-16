@@ -8,14 +8,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import type { Database } from "@/integrations/supabase/types";
+import { useLanguage } from "@/hooks/useLanguage";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
-const roles: { id: AppRole; label: string; icon: typeof Users; description: string }[] = [
-  { id: "farmer", label: "Farmer", icon: Users, description: "Sell your produce directly" },
-  { id: "buyer", label: "Buyer", icon: ShoppingBag, description: "Source quality products" },
-  { id: "agent", label: "Agent", icon: ClipboardList, description: "Collect field data" },
-  { id: "logistics", label: "Logistics", icon: Truck, description: "Deliver goods" },
+const getRoles = (t: (key: string) => string): { id: AppRole; label: string; icon: typeof Users; description: string }[] => [
+  { id: "farmer", label: t("roles.farmer"), icon: Users, description: t("roles.farmer_description") },
+  { id: "buyer", label: t("roles.buyer"), icon: ShoppingBag, description: t("roles.buyer_description") },
+  { id: "agent", label: t("roles.agent"), icon: ClipboardList, description: t("roles.agent_description") },
+  { id: "logistics", label: t("roles.logistics"), icon: Truck, description: t("roles.logistics_description") },
 ];
 
 const roleRoutes: Record<string, string> = {
@@ -27,6 +28,8 @@ const roleRoutes: Record<string, string> = {
 };
 
 const Signup = () => {
+  const { t } = useLanguage();
+  const roles = getRoles(t);
   const [step, setStep] = useState(1);
   const [selectedRole, setSelectedRole] = useState<AppRole | "">("");
   const [formData, setFormData] = useState({
@@ -51,19 +54,19 @@ const Signup = () => {
   // Input validation
   const validateForm = useCallback(() => {
     if (!formData.name.trim()) {
-      return "Please enter your full name";
+      return t("validation.name_required");
     }
     if (!formData.email.trim()) {
-      return "Please enter your email address";
+      return t("validation.email_required");
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      return "Please enter a valid email address";
+      return t("validation.invalid_email");
     }
     if (formData.password.length < 6) {
-      return "Password must be at least 6 characters";
+      return t("validation.password_min");
     }
     return null;
-  }, [formData]);
+  }, [formData, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,7 +82,7 @@ const Signup = () => {
       if (validationError) {
         setError(validationError);
         toast({
-          title: "Validation Error",
+          title: t("common.error"),
           description: validationError,
           variant: "destructive",
         });
@@ -107,16 +110,16 @@ const Signup = () => {
 
         if (authError) {
           if (authError.message.includes("already registered")) {
-            setError("This email is already registered. Please sign in instead.");
+            setError(t("auth.email_exists"));
             toast({
-              title: "Account exists",
-              description: "This email is already registered. Please sign in instead.",
+              title: t("auth.account_exists"),
+              description: t("auth.email_exists"),
               variant: "destructive",
             });
           } else {
             setError(authError.message);
             toast({
-              title: "Signup failed",
+              title: t("auth.signup_failed"),
               description: authError.message,
               variant: "destructive",
             });
@@ -163,8 +166,8 @@ const Signup = () => {
           await refreshRole();
 
           toast({
-            title: "Account created!",
-            description: "Welcome to AgriNext Gen. You're now signed in.",
+            title: t("auth.account_created"),
+            description: t("auth.welcome_agrinext"),
           });
 
           // Navigate to the appropriate dashboard
@@ -172,10 +175,10 @@ const Signup = () => {
         }
       } catch (error) {
         console.error("Signup error:", error);
-        setError("An unexpected error occurred. Please try again.");
+        setError(t("common.error"));
         toast({
-          title: "Error",
-          description: "An unexpected error occurred. Please try again.",
+          title: t("common.error"),
+          description: t("common.error"),
           variant: "destructive",
         });
       } finally {
@@ -228,10 +231,10 @@ const Signup = () => {
               {/* Step 1: Role Selection */}
               <div className="mb-8">
                 <h1 className="text-3xl font-display font-bold text-foreground mb-2">
-                  Join AgriNext Gen
+                  {t("auth.join_agrinext")}
                 </h1>
                 <p className="text-muted-foreground">
-                  Select your role to get started
+                  {t("auth.select_role")}
                 </p>
               </div>
 
@@ -268,7 +271,7 @@ const Signup = () => {
                   size="lg"
                   disabled={!selectedRole}
                 >
-                  Continue
+                  {t("common.continue")}
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </form>
@@ -286,26 +289,26 @@ const Signup = () => {
                   disabled={isLoading}
                   type="button"
                 >
-                  ← Back
+                  ← {t("common.back")}
                 </button>
                 <h1 className="text-3xl font-display font-bold text-foreground mb-2">
-                  Create your account
+                  {t("auth.create_account")}
                 </h1>
                 <p className="text-muted-foreground">
-                  Fill in your details as a{" "}
+                  {t("auth.fill_details")}{" "}
                   <span className="text-primary font-medium capitalize">{selectedRoleInfo?.label}</span>
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
+                  <Label htmlFor="name">{t("auth.full_name")}</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <Input
                       id="name"
                       type="text"
-                      placeholder="Your full name"
+                      placeholder={t("auth.name_placeholder")}
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
                       className="pl-10 h-12"
@@ -317,13 +320,13 @@ const Signup = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t("auth.email")}</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <Input
                       id="email"
                       type="email"
-                      placeholder="you@example.com"
+                      placeholder={t("auth.email_placeholder")}
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       className="pl-10 h-12"
@@ -335,7 +338,7 @@ const Signup = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number (Optional)</Label>
+                  <Label htmlFor="phone">{t("auth.phone_optional")}</Label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <Input
@@ -352,7 +355,7 @@ const Signup = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t("auth.password")}</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <Input
@@ -368,18 +371,18 @@ const Signup = () => {
                       autoComplete="new-password"
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground">At least 6 characters</p>
+                  <p className="text-xs text-muted-foreground">{t("auth.password_hint")}</p>
                 </div>
 
                 <Button type="submit" variant="hero" className="w-full" size="lg" disabled={isLoading}>
                   {isLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Creating account...
+                      {t("auth.creating_account")}
                     </>
                   ) : (
                     <>
-                      Create Account
+                      {t("auth.create_account")}
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </>
                   )}
@@ -390,9 +393,9 @@ const Signup = () => {
 
           {/* Login Link */}
           <p className="mt-8 text-center text-muted-foreground">
-            Already have an account?{" "}
+            {t("auth.have_account")}{" "}
             <Link to="/login" className="text-primary font-medium hover:underline">
-              Sign in
+              {t("auth.sign_in")}
             </Link>
           </p>
         </div>

@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
+import { useLanguage } from "@/hooks/useLanguage";
 
 const roleRoutes: Record<string, string> = {
   farmer: "/farmer/dashboard",
@@ -18,6 +19,7 @@ const roleRoutes: Record<string, string> = {
 };
 
 const Login = () => {
+  const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -45,20 +47,20 @@ const Login = () => {
     setError(null);
     
     if (!email.trim() || !password) {
-      setError("Please fill in all fields");
+      setError(t("validation.required"));
       toast({
-        title: "Error",
-        description: "Please fill in all fields",
+        title: t("common.error"),
+        description: t("validation.required"),
         variant: "destructive",
       });
       return;
     }
 
     if (!isValidEmail) {
-      setError("Please enter a valid email address");
+      setError(t("validation.invalid_email"));
       toast({
-        title: "Error",
-        description: "Please enter a valid email address",
+        title: t("common.error"),
+        description: t("validation.invalid_email"),
         variant: "destructive",
       });
       return;
@@ -75,11 +77,11 @@ const Login = () => {
       if (error) {
         let errorMessage = error.message;
         if (error.message.includes("Invalid login credentials")) {
-          errorMessage = "Invalid email or password. Please try again.";
+          errorMessage = t("auth.invalid_credentials");
         }
         setError(errorMessage);
         toast({
-          title: "Login failed",
+          title: t("auth.login_failed"),
           description: errorMessage,
           variant: "destructive",
         });
@@ -87,21 +89,21 @@ const Login = () => {
       }
 
       toast({
-        title: "Welcome back!",
-        description: "You have successfully signed in.",
+        title: t("auth.welcome_back"),
+        description: t("auth.login_success"),
       });
     } catch (error) {
-      const errorMessage = "An unexpected error occurred. Please try again.";
+      const errorMessage = t("common.error");
       setError(errorMessage);
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: errorMessage,
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
-  }, [email, password, isValidEmail, toast]);
+  }, [email, password, isValidEmail, toast, t]);
 
   return (
     <div className="min-h-screen flex">
@@ -121,10 +123,10 @@ const Login = () => {
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-display font-bold text-foreground mb-2">
-              Welcome back
+              {t("auth.welcome_back")}
             </h1>
             <p className="text-muted-foreground">
-              Sign in to your account to continue
+              {t("auth.sign_in_continue")}
             </p>
           </div>
 
@@ -139,13 +141,13 @@ const Login = () => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("auth.email")}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder={t("auth.email_placeholder")}
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
@@ -158,13 +160,13 @@ const Login = () => {
                 />
               </div>
               {!isValidEmail && (
-                <p className="text-xs text-destructive">Please enter a valid email address</p>
+                <p className="text-xs text-destructive">{t("validation.invalid_email")}</p>
               )}
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t("auth.password")}</Label>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -196,11 +198,11 @@ const Login = () => {
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Signing in...
+                  {t("auth.signing_in")}
                 </>
               ) : (
                 <>
-                  Sign In
+                  {t("auth.sign_in")}
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </>
               )}
@@ -210,7 +212,7 @@ const Login = () => {
           {/* Divider */}
           <div className="my-6 flex items-center gap-4">
             <div className="flex-1 h-px bg-border" />
-            <span className="text-sm text-muted-foreground">or continue with</span>
+            <span className="text-sm text-muted-foreground">{t("auth.or_continue_with")}</span>
             <div className="flex-1 h-px bg-border" />
           </div>
 
@@ -222,14 +224,14 @@ const Login = () => {
               <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            Continue with Google
+            {t("auth.continue_google")}
           </Button>
 
           {/* Sign Up Link */}
           <p className="mt-8 text-center text-muted-foreground">
-            Don't have an account?{" "}
+            {t("auth.no_account")}{" "}
             <Link to="/signup" className="text-primary font-medium hover:underline">
-              Sign up
+              {t("auth.sign_up")}
             </Link>
           </p>
         </div>
