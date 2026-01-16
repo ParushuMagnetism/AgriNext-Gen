@@ -3,6 +3,8 @@ export const en = {
   // Common
   common: {
     save: 'Save',
+    save_changes: 'Save Changes',
+    saving: 'Saving...',
     cancel: 'Cancel',
     delete: 'Delete',
     edit: 'Edit',
@@ -75,20 +77,32 @@ export const en = {
     tryAgain: 'Try again',
     live: 'Live',
     saved: 'Saved',
+    user: 'User',
+    unread: 'unread',
   },
 
   // Authentication
   auth: {
+    welcome_back: 'Welcome back',
     welcomeBack: 'Welcome back',
+    sign_in_continue: 'Sign in to your account to continue',
     signInToContinue: 'Sign in to your account to continue',
     email: 'Email',
     password: 'Password',
+    email_placeholder: 'you@example.com',
     emailPlaceholder: 'you@example.com',
     passwordPlaceholder: '••••••••',
+    signing_in: 'Signing in...',
     signingIn: 'Signing in...',
+    sign_in: 'Sign In',
+    or_continue_with: 'or continue with',
     orContinueWith: 'or continue with',
+    continue_google: 'Continue with Google',
     continueWithGoogle: 'Continue with Google',
+    no_account: "Don't have an account?",
     dontHaveAccount: "Don't have an account?",
+    sign_up: 'Sign Up',
+    already_have_account: 'Already have an account?',
     alreadyHaveAccount: 'Already have an account?',
     joinAgriNextGen: 'Join AgriNext Gen',
     selectRoleToStart: 'Select your role to get started',
@@ -105,6 +119,7 @@ export const en = {
     connectWithBuyers: 'Connect with buyers, manage your farm, and grow your agricultural business with India\'s leading agtech platform.',
     joinOurCommunity: 'Join Our Growing Community',
     becomePartOfNetwork: 'Become part of India\'s largest agricultural network. Connect, trade, and grow with thousands of farmers and buyers.',
+    invalid_credentials: 'Invalid email or password. Please try again.',
     invalidEmailPassword: 'Invalid email or password. Please try again.',
     pleaseEnterValidEmail: 'Please enter a valid email address',
     pleaseFillAllFields: 'Please fill in all fields',
@@ -112,7 +127,9 @@ export const en = {
     welcomeSignedIn: 'Welcome to AgriNext Gen. You\'re now signed in.',
     emailAlreadyRegistered: 'This email is already registered. Please sign in instead.',
     unexpectedError: 'An unexpected error occurred. Please try again.',
+    login_failed: 'Login failed',
     loginFailed: 'Login failed',
+    login_success: 'You have successfully signed in.',
     successfullySignedIn: 'You have successfully signed in.',
   },
 
@@ -236,6 +253,13 @@ export const en = {
     harvestDateHelp: 'When do you expect to harvest?',
     quantityHelp: 'How much crop do you expect to harvest?',
     tryAdjustingFilters: 'Try adjusting your search or filter to find what you\'re looking for.',
+  },
+
+  // Farmer specific
+  farmer: {
+    crops: {
+      viewAllCrops: 'View All Crops',
+    },
   },
 
   // Farmlands
@@ -364,20 +388,33 @@ export const en = {
   // Settings
   settings: {
     title: 'Settings',
+    profile_information: 'Profile Information',
     profileInfo: 'Profile Information',
+    update_info: 'Update your personal information and contact details',
     updateProfile: 'Update your personal information and contact details',
+    full_name: 'Full Name',
     fullName: 'Full Name',
+    full_name_placeholder: 'Your full name',
+    phone: 'Phone Number',
     phoneNumber: 'Phone Number',
+    village: 'Village',
+    village_placeholder: 'Your village name',
+    district: 'District',
+    district_placeholder: 'Your district',
     saveChanges: 'Save Changes',
     saving: 'Saving...',
     preferences: 'Preferences',
+    push_notifications: 'Push Notifications',
     pushNotifications: 'Push Notifications',
+    push_notifications_desc: 'Receive alerts about your crops and orders',
     receiveAlerts: 'Receive alerts about your crops and orders',
     language: 'Language',
     languageLabel: 'Language / ಭಾಷೆ',
     english: 'English',
     kannada: 'ಕನ್ನಡ',
+    account_security: 'Account Security',
     accountSecurity: 'Account Security',
+    account_security_desc: 'Manage your password and security settings',
     managePassword: 'Manage your password and security settings',
     configure: 'Configure',
     change: 'Change',
@@ -451,7 +488,16 @@ export const en = {
     required: 'This field is required',
     invalidPhone: 'Please enter a valid phone number',
     invalidEmail: 'Please enter a valid email',
+    invalid_email: 'Please enter a valid email',
     minLength: 'Must be at least {min} characters',
+  },
+
+  // Notifications
+  notifications: {
+    view_all: 'View all notifications',
+    viewAll: 'View all notifications',
+    no_notifications: 'No notifications yet',
+    noNotifications: 'No notifications yet',
   },
 
   // Toast Messages
