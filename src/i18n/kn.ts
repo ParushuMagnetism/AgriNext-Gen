@@ -3,6 +3,8 @@ export const kn = {
   // Common
   common: {
     save: 'ಉಳಿಸಿ',
+    save_changes: 'ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಿ',
+    saving: 'ಉಳಿಸಲಾಗುತ್ತಿದೆ...',
     cancel: 'ರದ್ದುಮಾಡಿ',
     delete: 'ಅಳಿಸಿ',
     edit: 'ಬದಲಾಯಿಸಿ',
@@ -75,20 +77,32 @@ export const kn = {
     tryAgain: 'ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
     live: 'ಲೈವ್',
     saved: 'ಉಳಿಸಲಾಗಿದೆ',
+    user: 'ಬಳಕೆದಾರ',
+    unread: 'ಓದದ',
   },
 
   // Authentication
   auth: {
+    welcome_back: 'ಮತ್ತೆ ಸ್ವಾಗತ',
     welcomeBack: 'ಮತ್ತೆ ಸ್ವಾಗತ',
+    sign_in_continue: 'ಮುಂದುವರಿಸಲು ನಿಮ್ಮ ಖಾತೆಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ',
     signInToContinue: 'ಮುಂದುವರಿಸಲು ನಿಮ್ಮ ಖಾತೆಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ',
     email: 'ಇಮೇಲ್',
     password: 'ಪಾಸ್‌ವರ್ಡ್',
+    email_placeholder: 'you@example.com',
     emailPlaceholder: 'you@example.com',
     passwordPlaceholder: '••••••••',
+    signing_in: 'ಸೈನ್ ಇನ್ ಆಗುತ್ತಿದೆ...',
     signingIn: 'ಸೈನ್ ಇನ್ ಆಗುತ್ತಿದೆ...',
+    sign_in: 'ಸೈನ್ ಇನ್',
+    or_continue_with: 'ಅಥವಾ ಮುಂದುವರಿಸಿ',
     orContinueWith: 'ಅಥವಾ ಮುಂದುವರಿಸಿ',
+    continue_google: 'Google ನೊಂದಿಗೆ ಮುಂದುವರಿಸಿ',
     continueWithGoogle: 'Google ನೊಂದಿಗೆ ಮುಂದುವರಿಸಿ',
+    no_account: 'ಖಾತೆ ಇಲ್ಲವೇ?',
     dontHaveAccount: 'ಖಾತೆ ಇಲ್ಲವೇ?',
+    sign_up: 'ಸೈನ್ ಅಪ್',
+    already_have_account: 'ಈಗಾಗಲೇ ಖಾತೆ ಇದೆಯೇ?',
     alreadyHaveAccount: 'ಈಗಾಗಲೇ ಖಾತೆ ಇದೆಯೇ?',
     joinAgriNextGen: 'ಆಗ್ರಿನೆಕ್ಸ್ಟ್ ಜೆನ್ ಸೇರಿ',
     selectRoleToStart: 'ಪ್ರಾರಂಭಿಸಲು ನಿಮ್ಮ ಪಾತ್ರವನ್ನು ಆಯ್ಕೆ ಮಾಡಿ',
@@ -105,6 +119,7 @@ export const kn = {
     connectWithBuyers: 'ಖರೀದಿದಾರರೊಂದಿಗೆ ಸಂಪರ್ಕಿಸಿ, ನಿಮ್ಮ ಜಮೀನು ನಿರ್ವಹಿಸಿ ಮತ್ತು ಭಾರತದ ಪ್ರಮುಖ ಕೃಷಿ ತಂತ್ರಜ್ಞಾನ ವೇದಿಕೆಯೊಂದಿಗೆ ಬೆಳೆಯಿರಿ.',
     joinOurCommunity: 'ನಮ್ಮ ಬೆಳೆಯುತ್ತಿರುವ ಸಮುದಾಯ ಸೇರಿ',
     becomePartOfNetwork: 'ಭಾರತದ ಅತಿದೊಡ್ಡ ಕೃಷಿ ಜಾಲದ ಭಾಗವಾಗಿ. ಸಾವಿರಾರು ರೈತರು ಮತ್ತು ಖರೀದಿದಾರರೊಂದಿಗೆ ಸಂಪರ್ಕಿಸಿ, ವ್ಯಾಪಾರ ಮಾಡಿ ಮತ್ತು ಬೆಳೆಯಿರಿ.',
+    invalid_credentials: 'ಅಮಾನ್ಯ ಇಮೇಲ್ ಅಥವಾ ಪಾಸ್‌ವರ್ಡ್. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
     invalidEmailPassword: 'ಅಮಾನ್ಯ ಇಮೇಲ್ ಅಥವಾ ಪಾಸ್‌ವರ್ಡ್. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
     pleaseEnterValidEmail: 'ದಯವಿಟ್ಟು ಮಾನ್ಯ ಇಮೇಲ್ ವಿಳಾಸ ನಮೂದಿಸಿ',
     pleaseFillAllFields: 'ದಯವಿಟ್ಟು ಎಲ್ಲಾ ಕ್ಷೇತ್ರಗಳನ್ನು ಭರ್ತಿ ಮಾಡಿ',
@@ -112,7 +127,9 @@ export const kn = {
     welcomeSignedIn: 'ಆಗ್ರಿನೆಕ್ಸ್ಟ್ ಜೆನ್‌ಗೆ ಸ್ವಾಗತ. ನೀವು ಈಗ ಸೈನ್ ಇನ್ ಆಗಿದ್ದೀರಿ.',
     emailAlreadyRegistered: 'ಈ ಇಮೇಲ್ ಈಗಾಗಲೇ ನೋಂದಾಯಿಸಲಾಗಿದೆ. ದಯವಿಟ್ಟು ಸೈನ್ ಇನ್ ಮಾಡಿ.',
     unexpectedError: 'ಅನಿರೀಕ್ಷಿತ ದೋಷ ಸಂಭವಿಸಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+    login_failed: 'ಲಾಗಿನ್ ವಿಫಲವಾಗಿದೆ',
     loginFailed: 'ಲಾಗಿನ್ ವಿಫಲವಾಗಿದೆ',
+    login_success: 'ನೀವು ಯಶಸ್ವಿಯಾಗಿ ಸೈನ್ ಇನ್ ಆಗಿದ್ದೀರಿ.',
     successfullySignedIn: 'ನೀವು ಯಶಸ್ವಿಯಾಗಿ ಸೈನ್ ಇನ್ ಆಗಿದ್ದೀರಿ.',
   },
 
@@ -236,6 +253,13 @@ export const kn = {
     harvestDateHelp: 'ಕೊಯ್ಲು ಯಾವಾಗ ಎಂದು ನಿರೀಕ್ಷಿಸುತ್ತೀರಿ?',
     quantityHelp: 'ಎಷ್ಟು ಬೆಳೆ ಕೊಯ್ಲು ಆಗುತ್ತದೆ ಎಂದು ನಿರೀಕ್ಷಿಸುತ್ತೀರಿ?',
     tryAdjustingFilters: 'ನೀವು ಹುಡುಕುತ್ತಿರುವುದನ್ನು ಕಂಡುಹಿಡಿಯಲು ನಿಮ್ಮ ಹುಡುಕಾಟ ಅಥವಾ ಫಿಲ್ಟರ್ ಅನ್ನು ಸರಿಹೊಂದಿಸಿ.',
+  },
+
+  // Farmer specific
+  farmer: {
+    crops: {
+      viewAllCrops: 'ಎಲ್ಲಾ ಬೆಳೆಗಳನ್ನು ನೋಡಿ',
+    },
   },
 
   // Farmlands
