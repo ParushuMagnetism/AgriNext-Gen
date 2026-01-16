@@ -5,14 +5,14 @@ import { toast } from 'sonner';
 
 // Types
 export interface AgentAssignment {
-  id: string;
+  id?: string;
   agent_id: string;
   farmer_id: string;
   assigned_by: string | null;
   active: boolean;
-  assigned_at: string;
-  created_at: string;
-  updated_at: string;
+  assigned_at: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 export interface AssignedFarmer {
@@ -45,8 +45,15 @@ export interface AgentVisit {
   check_in_at: string;
   check_out_at: string | null;
   notes: string | null;
-  created_at: string;
+  created_at: string | null;
 }
+
+// Helper to get supabase client with any type to avoid deep type inference issues
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getTable = (tableName: string): any => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (supabase as any).from(tableName);
+};
 
 // Hook to get assigned farmers for an agent
 export const useAssignedFarmers = () => {
@@ -57,9 +64,8 @@ export const useAssignedFarmers = () => {
     queryFn: async (): Promise<AssignedFarmer[]> => {
       if (!user?.id) return [];
 
-      // Get assignments
-      const { data: assignments, error: assignmentError } = await supabase
-        .from('agent_farmer_assignments')
+      // Get assignments using helper to avoid type issues
+      const { data: assignments, error: assignmentError } = await getTable('agent_farmer_assignments')
         .select('farmer_id')
         .eq('agent_id', user.id)
         .eq('active', true);
@@ -67,7 +73,7 @@ export const useAssignedFarmers = () => {
       if (assignmentError) throw assignmentError;
       if (!assignments?.length) return [];
 
-      const farmerIds = assignments.map(a => a.farmer_id);
+      const farmerIds = assignments.map((a: { farmer_id: string }) => a.farmer_id);
 
       // Get farmer profiles
       const { data: farmers, error: farmersError } = await supabase
@@ -129,8 +135,7 @@ export const useFarmerAgent = () => {
     queryFn: async (): Promise<FarmerAgent | null> => {
       if (!user?.id) return null;
 
-      const { data: assignment, error } = await supabase
-        .from('agent_farmer_assignments')
+      const { data: assignment, error } = await getTable('agent_farmer_assignments')
         .select('agent_id')
         .eq('farmer_id', user.id)
         .eq('active', true)
@@ -170,15 +175,14 @@ export const useFarmerAgentVisits = () => {
     queryFn: async (): Promise<AgentVisit[]> => {
       if (!user?.id) return [];
 
-      const { data, error } = await supabase
-        .from('agent_visits')
+      const { data, error } = await getTable('agent_visits')
         .select('*')
         .eq('farmer_id', user.id)
         .order('check_in_at', { ascending: false })
         .limit(10);
 
       if (error) throw error;
-      return data || [];
+      return (data as AgentVisit[]) || [];
     },
     enabled: !!user?.id
   });
@@ -208,7 +212,7 @@ export const useCreateHelpRequest = () => {
         .insert({
           farmer_id: user.id,
           agent_id: agentId,
-          task_type: taskType as any,
+          task_type: taskType as 'visit' | 'verify_crop' | 'harvest_check' | 'transport_assist',
           task_status: 'pending',
           notes,
           due_date: dueDate || new Date().toISOString().split('T')[0],
@@ -268,11 +272,10 @@ export const useStartVisit = () => {
     }: {
       farmerId: string;
       taskId?: string;
-    }) => {
+    }): Promise<AgentVisit> => {
       if (!user?.id) throw new Error('Not authenticated');
 
-      const { data, error } = await supabase
-        .from('agent_visits')
+      const { data, error } = await getTable('agent_visits')
         .insert({
           agent_id: user.id,
           farmer_id: farmerId,
@@ -282,10 +285,11 @@ export const useStartVisit = () => {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as AgentVisit;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agent-visits'] });
+      queryClient.invalidateQueries({ queryKey: ['active-visit'] });
       toast.success('Visit started');
     },
     onError: (error) => {
@@ -306,9 +310,8 @@ export const useEndVisit = () => {
     }: {
       visitId: string;
       notes?: string;
-    }) => {
-      const { data, error } = await supabase
-        .from('agent_visits')
+    }): Promise<AgentVisit> => {
+      const { data, error } = await getTable('agent_visits')
         .update({
           check_out_at: new Date().toISOString(),
           notes
@@ -318,10 +321,11 @@ export const useEndVisit = () => {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as AgentVisit;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agent-visits'] });
+      queryClient.invalidateQueries({ queryKey: ['active-visit'] });
       toast.success('Visit ended');
     },
     onError: (error) => {
@@ -340,8 +344,7 @@ export const useActiveVisit = () => {
     queryFn: async (): Promise<AgentVisit | null> => {
       if (!user?.id) return null;
 
-      const { data, error } = await supabase
-        .from('agent_visits')
+      const { data, error } = await getTable('agent_visits')
         .select('*')
         .eq('agent_id', user.id)
         .is('check_out_at', null)
@@ -349,7 +352,7 @@ export const useActiveVisit = () => {
         .maybeSingle();
 
       if (error) throw error;
-      return data;
+      return data as AgentVisit | null;
     },
     enabled: !!user?.id
   });
@@ -367,26 +370,23 @@ export const useAssignFarmerToAgent = () => {
     }: {
       farmerId: string;
       agentId: string;
-    }) => {
+    }): Promise<AgentAssignment> => {
       if (!user?.id) throw new Error('Not authenticated');
 
       // First deactivate any existing assignment for this farmer
-      await supabase
-        .from('agent_farmer_assignments')
-        .update({ active: false, updated_at: new Date().toISOString() })
+      await getTable('agent_farmer_assignments')
+        .update({ active: false })
         .eq('farmer_id', farmerId)
         .eq('active', true);
 
       // Create new assignment
-      const { data, error } = await supabase
-        .from('agent_farmer_assignments')
+      const { data, error } = await getTable('agent_farmer_assignments')
         .upsert({
           agent_id: agentId,
           farmer_id: farmerId,
           assigned_by: user.id,
           active: true,
-          assigned_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          assigned_at: new Date().toISOString()
         }, {
           onConflict: 'agent_id,farmer_id'
         })
@@ -394,11 +394,12 @@ export const useAssignFarmerToAgent = () => {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as AgentAssignment;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assigned-farmers'] });
       queryClient.invalidateQueries({ queryKey: ['agent-farmer-assignments'] });
+      queryClient.invalidateQueries({ queryKey: ['farmer-agent'] });
       toast.success('Farmer assigned to agent');
     },
     onError: (error) => {
@@ -408,26 +409,22 @@ export const useAssignFarmerToAgent = () => {
   });
 };
 
-// Helper function to unassign farmer
-async function unassignFarmerById(assignmentId: string): Promise<void> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const table = supabase.from('agent_farmer_assignments') as any;
-  const { error } = await table
-    .update({ active: false })
-    .eq('id', assignmentId);
-
-  if (error) throw error;
-}
-
 // Admin hook: Unassign farmer from agent
 export const useUnassignFarmer = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: unassignFarmerById,
+    mutationFn: async (assignmentId: string): Promise<void> => {
+      const { error } = await getTable('agent_farmer_assignments')
+        .update({ active: false })
+        .eq('id', assignmentId);
+
+      if (error) throw error;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assigned-farmers'] });
       queryClient.invalidateQueries({ queryKey: ['agent-farmer-assignments'] });
+      queryClient.invalidateQueries({ queryKey: ['farmer-agent'] });
       toast.success('Farmer unassigned');
     },
     onError: (error) => {
@@ -441,15 +438,75 @@ export const useUnassignFarmer = () => {
 export const useAllAssignments = () => {
   return useQuery({
     queryKey: ['agent-farmer-assignments'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('agent_farmer_assignments')
+    queryFn: async (): Promise<AgentAssignment[]> => {
+      const { data, error } = await getTable('agent_farmer_assignments')
         .select('*')
         .eq('active', true)
         .order('assigned_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data as AgentAssignment[]) || [];
     }
+  });
+};
+
+// Hook to update agent task status
+export const useUpdateAgentTaskStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      taskId,
+      status
+    }: {
+      taskId: string;
+      status: 'pending' | 'in_progress' | 'completed';
+    }) => {
+      const updateData: Record<string, unknown> = { task_status: status };
+      if (status === 'completed') {
+        updateData.completed_at = new Date().toISOString();
+      }
+
+      const { data, error } = await supabase
+        .from('agent_tasks')
+        .update(updateData)
+        .eq('id', taskId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agent-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['farmer-help-requests'] });
+      toast.success('Task status updated');
+    },
+    onError: (error) => {
+      console.error('Error updating task:', error);
+      toast.error('Failed to update task');
+    }
+  });
+};
+
+// Hook to get agent's tasks
+export const useAgentTasks = () => {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['agent-tasks', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+
+      const { data, error } = await supabase
+        .from('agent_tasks')
+        .select('*')
+        .eq('agent_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user?.id
   });
 };

@@ -56,6 +56,7 @@ const DashboardSidebar = ({ onClose }: DashboardSidebarProps) => {
   const agentNavItems = [
     { icon: LayoutDashboard, label: t('nav.dashboard'), href: '/agent/dashboard' },
     { icon: ClipboardList, label: t('nav.myTasks'), href: '/agent/tasks' },
+    { icon: Users, label: t('nav.myFarmers'), href: '/agent/my-farmers' },
     { icon: Users, label: t('nav.farmersAndCrops'), href: '/agent/farmers' },
     { icon: Truck, label: t('nav.transport'), href: '/agent/transport' },
   ];

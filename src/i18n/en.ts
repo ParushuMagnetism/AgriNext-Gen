@@ -168,6 +168,7 @@ export const en = {
     completed: 'Completed',
     myVehicles: 'My Vehicles',
     myTasks: 'My Tasks',
+    myFarmers: 'My Farmers',
     farmersAndCrops: 'Farmers & Crops',
     farmers: 'Farmers',
     buyers: 'Buyers',
