@@ -19,6 +19,7 @@ export type Database = {
           active: boolean | null
           admin_user_id: string
           created_at: string | null
+          demo_tag: string | null
           id: string
           scope_level: string
           scope_value: string
@@ -27,6 +28,7 @@ export type Database = {
           active?: boolean | null
           admin_user_id: string
           created_at?: string | null
+          demo_tag?: string | null
           id?: string
           scope_level: string
           scope_value: string
@@ -35,6 +37,7 @@ export type Database = {
           active?: boolean | null
           admin_user_id?: string
           created_at?: string | null
+          demo_tag?: string | null
           id?: string
           scope_level?: string
           scope_value?: string
@@ -45,6 +48,7 @@ export type Database = {
         Row: {
           assigned_district: string | null
           created_at: string
+          demo_tag: string | null
           email: string | null
           id: string
           name: string
@@ -56,6 +60,7 @@ export type Database = {
         Insert: {
           assigned_district?: string | null
           created_at?: string
+          demo_tag?: string | null
           email?: string | null
           id?: string
           name: string
@@ -67,6 +72,7 @@ export type Database = {
         Update: {
           assigned_district?: string | null
           created_at?: string
+          demo_tag?: string | null
           email?: string | null
           id?: string
           name?: string
@@ -83,6 +89,7 @@ export type Database = {
           created_at: string
           crop_health: string | null
           crop_type: string | null
+          demo_tag: string | null
           farm_location: string | null
           farmer_id: string | null
           id: string
@@ -99,6 +106,7 @@ export type Database = {
           created_at?: string
           crop_health?: string | null
           crop_type?: string | null
+          demo_tag?: string | null
           farm_location?: string | null
           farmer_id?: string | null
           id?: string
@@ -115,6 +123,7 @@ export type Database = {
           created_at?: string
           crop_health?: string | null
           crop_type?: string | null
+          demo_tag?: string | null
           farm_location?: string | null
           farmer_id?: string | null
           id?: string
@@ -135,6 +144,7 @@ export type Database = {
           assigned_at: string | null
           assigned_by: string | null
           created_at: string | null
+          demo_tag: string | null
           farmer_id: string
           updated_at: string | null
         }
@@ -144,6 +154,7 @@ export type Database = {
           assigned_at?: string | null
           assigned_by?: string | null
           created_at?: string | null
+          demo_tag?: string | null
           farmer_id: string
           updated_at?: string | null
         }
@@ -153,6 +164,7 @@ export type Database = {
           assigned_at?: string | null
           assigned_by?: string | null
           created_at?: string | null
+          demo_tag?: string | null
           farmer_id?: string
           updated_at?: string | null
         }
@@ -166,6 +178,7 @@ export type Database = {
           created_by: string | null
           created_by_role: string | null
           crop_id: string | null
+          demo_tag: string | null
           due_date: string
           farmer_id: string
           id: string
@@ -182,6 +195,7 @@ export type Database = {
           created_by?: string | null
           created_by_role?: string | null
           crop_id?: string | null
+          demo_tag?: string | null
           due_date?: string
           farmer_id: string
           id?: string
@@ -198,6 +212,7 @@ export type Database = {
           created_by?: string | null
           created_by_role?: string | null
           crop_id?: string | null
+          demo_tag?: string | null
           due_date?: string
           farmer_id?: string
           id?: string
@@ -223,6 +238,7 @@ export type Database = {
           check_in_at: string
           check_out_at: string | null
           created_at: string | null
+          demo_tag: string | null
           farmer_id: string
           id: string
           notes: string | null
@@ -233,6 +249,7 @@ export type Database = {
           check_in_at?: string
           check_out_at?: string | null
           created_at?: string | null
+          demo_tag?: string | null
           farmer_id: string
           id?: string
           notes?: string | null
@@ -243,6 +260,7 @@ export type Database = {
           check_in_at?: string
           check_out_at?: string | null
           created_at?: string | null
+          demo_tag?: string | null
           farmer_id?: string
           id?: string
           notes?: string | null
@@ -545,6 +563,7 @@ export type Database = {
           buyer_type: string | null
           company_name: string | null
           created_at: string
+          demo_tag: string | null
           district: string | null
           id: string
           name: string
@@ -557,6 +576,7 @@ export type Database = {
           buyer_type?: string | null
           company_name?: string | null
           created_at?: string
+          demo_tag?: string | null
           district?: string | null
           id?: string
           name: string
@@ -569,6 +589,7 @@ export type Database = {
           buyer_type?: string | null
           company_name?: string | null
           created_at?: string
+          demo_tag?: string | null
           district?: string | null
           id?: string
           name?: string
@@ -765,6 +786,7 @@ export type Database = {
         Row: {
           created_at: string
           crop_name: string
+          demo_tag: string | null
           estimated_quantity: number | null
           farmer_id: string
           growth_stage: string | null
@@ -783,6 +805,7 @@ export type Database = {
         Insert: {
           created_at?: string
           crop_name: string
+          demo_tag?: string | null
           estimated_quantity?: number | null
           farmer_id: string
           growth_stage?: string | null
@@ -801,6 +824,7 @@ export type Database = {
         Update: {
           created_at?: string
           crop_name?: string
+          demo_tag?: string | null
           estimated_quantity?: number | null
           farmer_id?: string
           growth_stage?: string | null
@@ -844,6 +868,57 @@ export type Database = {
           district?: string
           id?: string
           neighbor_district?: string
+        }
+        Relationships: []
+      }
+      escalations: {
+        Row: {
+          assigned_admin_id: string | null
+          category: string
+          created_at: string
+          created_by_agent_id: string
+          demo_tag: string | null
+          farmer_id: string
+          id: string
+          notes: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          severity: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_admin_id?: string | null
+          category: string
+          created_at?: string
+          created_by_agent_id: string
+          demo_tag?: string | null
+          farmer_id: string
+          id?: string
+          notes?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_admin_id?: string | null
+          category?: string
+          created_at?: string
+          created_by_agent_id?: string
+          demo_tag?: string | null
+          farmer_id?: string
+          id?: string
+          notes?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -948,6 +1023,7 @@ export type Database = {
           area: number
           area_unit: string
           created_at: string
+          demo_tag: string | null
           district: string | null
           farmer_id: string
           id: string
@@ -962,6 +1038,7 @@ export type Database = {
           area?: number
           area_unit?: string
           created_at?: string
+          demo_tag?: string | null
           district?: string | null
           farmer_id: string
           id?: string
@@ -976,6 +1053,7 @@ export type Database = {
           area?: number
           area_unit?: string
           created_at?: string
+          demo_tag?: string | null
           district?: string | null
           farmer_id?: string
           id?: string
@@ -1201,6 +1279,7 @@ export type Database = {
           crop_id: string | null
           delivery_address: string | null
           delivery_date: string | null
+          demo_tag: string | null
           farmer_id: string
           id: string
           notes: string | null
@@ -1218,6 +1297,7 @@ export type Database = {
           crop_id?: string | null
           delivery_address?: string | null
           delivery_date?: string | null
+          demo_tag?: string | null
           farmer_id: string
           id?: string
           notes?: string | null
@@ -1235,6 +1315,7 @@ export type Database = {
           crop_id?: string | null
           delivery_address?: string | null
           delivery_date?: string | null
+          demo_tag?: string | null
           farmer_id?: string
           id?: string
           notes?: string | null
@@ -1268,6 +1349,7 @@ export type Database = {
           created_at: string
           crop_name: string
           date: string
+          demo_tag: string | null
           district: string | null
           fetched_at: string | null
           id: string
@@ -1285,6 +1367,7 @@ export type Database = {
           created_at?: string
           crop_name: string
           date?: string
+          demo_tag?: string | null
           district?: string | null
           fetched_at?: string | null
           id?: string
@@ -1302,6 +1385,7 @@ export type Database = {
           created_at?: string
           crop_name?: string
           date?: string
+          demo_tag?: string | null
           district?: string | null
           fetched_at?: string | null
           id?: string
@@ -1321,6 +1405,7 @@ export type Database = {
         Row: {
           confidence: string | null
           crop_name: string
+          demo_tag: string | null
           district: string
           fetched_at: string | null
           freshness_minutes: number | null
@@ -1336,6 +1421,7 @@ export type Database = {
         Insert: {
           confidence?: string | null
           crop_name: string
+          demo_tag?: string | null
           district: string
           fetched_at?: string | null
           freshness_minutes?: number | null
@@ -1351,6 +1437,7 @@ export type Database = {
         Update: {
           confidence?: string | null
           crop_name?: string
+          demo_tag?: string | null
           district?: string
           fetched_at?: string | null
           freshness_minutes?: number | null
@@ -1458,6 +1545,7 @@ export type Database = {
       notifications: {
         Row: {
           created_at: string
+          demo_tag: string | null
           id: string
           is_read: boolean
           message: string
@@ -1467,6 +1555,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          demo_tag?: string | null
           id?: string
           is_read?: boolean
           message: string
@@ -1476,6 +1565,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          demo_tag?: string | null
           id?: string
           is_read?: boolean
           message?: string
@@ -1491,6 +1581,7 @@ export type Database = {
           confidence: string
           crop_name: string
           data_freshness_hours: number | null
+          demo_tag: string | null
           direction: string
           district: string
           generated_at: string
@@ -1503,6 +1594,7 @@ export type Database = {
           confidence?: string
           crop_name: string
           data_freshness_hours?: number | null
+          demo_tag?: string | null
           direction: string
           district: string
           generated_at?: string
@@ -1515,6 +1607,7 @@ export type Database = {
           confidence?: string
           crop_name?: string
           data_freshness_hours?: number | null
+          demo_tag?: string | null
           direction?: string
           district?: string
           generated_at?: string
@@ -1528,6 +1621,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          demo_tag: string | null
           district: string | null
           district_confidence: string | null
           district_source: string | null
@@ -1545,6 +1639,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          demo_tag?: string | null
           district?: string | null
           district_confidence?: string | null
           district_source?: string | null
@@ -1562,6 +1657,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          demo_tag?: string | null
           district?: string | null
           district_confidence?: string | null
           district_source?: string | null
@@ -1703,6 +1799,81 @@ export type Database = {
           },
         ]
       }
+      transport_issues: {
+        Row: {
+          created_at: string
+          demo_tag: string | null
+          description: string
+          evidence_notes: string | null
+          farmer_id: string
+          id: string
+          issue_code: string
+          reported_by_id: string
+          reported_by_role: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          severity: string
+          status: string
+          transport_request_id: string | null
+          transporter_id: string
+          trip_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          demo_tag?: string | null
+          description: string
+          evidence_notes?: string | null
+          farmer_id: string
+          id?: string
+          issue_code: string
+          reported_by_id: string
+          reported_by_role: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          transport_request_id?: string | null
+          transporter_id: string
+          trip_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          demo_tag?: string | null
+          description?: string
+          evidence_notes?: string | null
+          farmer_id?: string
+          id?: string
+          issue_code?: string
+          reported_by_id?: string
+          reported_by_role?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          transport_request_id?: string | null
+          transporter_id?: string
+          trip_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_issues_transport_request_id_fkey"
+            columns: ["transport_request_id"]
+            isOneToOne: false
+            referencedRelation: "transport_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_issues_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transport_requests: {
         Row: {
           assigned_at: string | null
@@ -1712,6 +1883,7 @@ export type Database = {
           created_at: string
           crop_id: string | null
           delivery_photo_url: string | null
+          demo_tag: string | null
           distance_km: number | null
           drop_location: string | null
           fare_estimate: number | null
@@ -1741,6 +1913,7 @@ export type Database = {
           created_at?: string
           crop_id?: string | null
           delivery_photo_url?: string | null
+          demo_tag?: string | null
           distance_km?: number | null
           drop_location?: string | null
           fare_estimate?: number | null
@@ -1770,6 +1943,7 @@ export type Database = {
           created_at?: string
           crop_id?: string | null
           delivery_photo_url?: string | null
+          demo_tag?: string | null
           distance_km?: number | null
           drop_location?: string | null
           fare_estimate?: number | null
@@ -1820,6 +1994,7 @@ export type Database = {
           actor_id: string
           actor_role: string
           created_at: string | null
+          demo_tag: string | null
           id: string
           new_status: string
           note: string | null
@@ -1831,6 +2006,7 @@ export type Database = {
           actor_id: string
           actor_role: string
           created_at?: string | null
+          demo_tag?: string | null
           id?: string
           new_status: string
           note?: string | null
@@ -1842,6 +2018,7 @@ export type Database = {
           actor_id?: string
           actor_role?: string
           created_at?: string | null
+          demo_tag?: string | null
           id?: string
           new_status?: string
           note?: string | null
@@ -1869,6 +2046,7 @@ export type Database = {
       transporters: {
         Row: {
           created_at: string
+          demo_tag: string | null
           id: string
           name: string
           operating_district: string | null
@@ -1882,6 +2060,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          demo_tag?: string | null
           id?: string
           name: string
           operating_district?: string | null
@@ -1895,6 +2074,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          demo_tag?: string | null
           id?: string
           name?: string
           operating_district?: string | null
@@ -1919,6 +2099,7 @@ export type Database = {
           delivery_otp_required: boolean | null
           delivery_otp_verified: boolean | null
           delivery_proofs: Json | null
+          demo_tag: string | null
           en_route_at: string | null
           id: string
           in_transit_at: string | null
@@ -1943,6 +2124,7 @@ export type Database = {
           delivery_otp_required?: boolean | null
           delivery_otp_verified?: boolean | null
           delivery_proofs?: Json | null
+          demo_tag?: string | null
           en_route_at?: string | null
           id?: string
           in_transit_at?: string | null
@@ -1967,6 +2149,7 @@ export type Database = {
           delivery_otp_required?: boolean | null
           delivery_otp_verified?: boolean | null
           delivery_proofs?: Json | null
+          demo_tag?: string | null
           en_route_at?: string | null
           id?: string
           in_transit_at?: string | null
@@ -2042,18 +2225,21 @@ export type Database = {
       user_roles: {
         Row: {
           created_at: string
+          demo_tag: string | null
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
           created_at?: string
+          demo_tag?: string | null
           id?: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
           created_at?: string
+          demo_tag?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
@@ -2064,6 +2250,7 @@ export type Database = {
         Row: {
           capacity: number
           created_at: string
+          demo_tag: string | null
           id: string
           is_active: boolean
           number_plate: string
@@ -2074,6 +2261,7 @@ export type Database = {
         Insert: {
           capacity?: number
           created_at?: string
+          demo_tag?: string | null
           id?: string
           is_active?: boolean
           number_plate: string
@@ -2084,6 +2272,7 @@ export type Database = {
         Update: {
           capacity?: number
           created_at?: string
+          demo_tag?: string | null
           id?: string
           is_active?: boolean
           number_plate?: string

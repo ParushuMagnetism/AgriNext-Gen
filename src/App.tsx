@@ -50,6 +50,7 @@ import AdminTransport from "./pages/admin/Transport";
 import AdminOrders from "./pages/admin/Orders";
 import AIConsole from "./pages/admin/AIConsole";
 import SeedData from "./pages/admin/SeedData";
+import MysuruDemoSeed from "./pages/admin/MysruDemoSeed";
 import DataHealth from "./pages/admin/DataHealth";
 const queryClient = new QueryClient();
 
