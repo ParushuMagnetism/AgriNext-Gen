@@ -3,6 +3,7 @@ import DashboardLayout from '@/layouts/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { useLanguage } from '@/hooks/useLanguage';
 import { 
   Plus, 
   Search, 
@@ -60,6 +61,7 @@ const categories = ['Vegetables', 'Fruits', 'Grains', 'Pulses', 'Dairy', 'Spices
 const FarmerListings = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -94,8 +96,8 @@ const FarmerListings = () => {
     } catch (error) {
       console.error('Error fetching listings:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to fetch listings',
+        title: t('common.error'),
+        description: t('farmer.listings.fetchError'),
         variant: 'destructive',
       });
     } finally {
@@ -125,14 +127,14 @@ const FarmerListings = () => {
           .eq('id', editingListing.id);
 
         if (error) throw error;
-        toast({ title: 'Success', description: 'Listing updated successfully' });
+        toast({ title: t('common.success'), description: t('farmer.listings.updateSuccess') });
       } else {
         const { error } = await supabase
           .from('listings')
           .insert([listingData]);
 
         if (error) throw error;
-        toast({ title: 'Success', description: 'Listing created successfully' });
+        toast({ title: t('common.success'), description: t('farmer.listings.createSuccess') });
       }
 
       setIsDialogOpen(false);
@@ -141,8 +143,8 @@ const FarmerListings = () => {
     } catch (error) {
       console.error('Error saving listing:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to save listing',
+        title: t('common.error'),
+        description: t('farmer.listings.saveError'),
         variant: 'destructive',
       });
     }
@@ -156,13 +158,13 @@ const FarmerListings = () => {
         .eq('id', id);
 
       if (error) throw error;
-      toast({ title: 'Success', description: 'Listing deleted successfully' });
+      toast({ title: t('common.success'), description: t('farmer.listings.deleteSuccess') });
       fetchListings();
     } catch (error) {
       console.error('Error deleting listing:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to delete listing',
+        title: t('common.error'),
+        description: t('farmer.listings.deleteError'),
         variant: 'destructive',
       });
     }
@@ -204,15 +206,15 @@ const FarmerListings = () => {
 
       if (error) throw error;
       toast({ 
-        title: 'Success', 
-        description: `Listing ${!currentStatus ? 'activated' : 'deactivated'} successfully` 
+        title: t('common.success'), 
+        description: !currentStatus ? t('farmer.listings.activated') : t('farmer.listings.deactivated')
       });
       fetchListings();
     } catch (error) {
       console.error('Error updating listing status:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to update listing status',
+        title: t('common.error'),
+        description: t('farmer.listings.statusError'),
         variant: 'destructive',
       });
     }
@@ -224,14 +226,14 @@ const FarmerListings = () => {
   );
 
   return (
-    <DashboardLayout title="My Listings">
+    <DashboardLayout title={t('farmer.listings.title')}>
       <div className="space-y-6">
         {/* Header Actions */}
         <div className="flex flex-col sm:flex-row gap-4 justify-between">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search listings..."
+              placeholder={t('farmer.listings.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
@@ -240,7 +242,7 @@ const FarmerListings = () => {
           <div className="flex gap-2">
             <Button variant="outline" className="gap-2">
               <Filter className="h-4 w-4" />
-              Filter
+              {t('common.filter')}
             </Button>
             <Dialog open={isDialogOpen} onOpenChange={(open) => {
               setIsDialogOpen(open);
@@ -249,67 +251,67 @@ const FarmerListings = () => {
               <DialogTrigger asChild>
                 <Button className="gap-2">
                   <Plus className="h-4 w-4" />
-                  Add Listing
+                  {t('farmer.listings.addListing')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                  <DialogTitle>{editingListing ? 'Edit Listing' : 'Add New Listing'}</DialogTitle>
+                  <DialogTitle>{editingListing ? t('farmer.listings.editListing') : t('farmer.listings.addNewListing')}</DialogTitle>
                   <DialogDescription>
-                    {editingListing ? 'Update your product listing details.' : 'Create a new product listing to sell on the marketplace.'}
+                    {editingListing ? t('farmer.listings.editDescription') : t('farmer.listings.addDescription')}
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="title">Product Name</Label>
+                    <Label htmlFor="title">{t('farmer.listings.productName')}</Label>
                     <Input
                       id="title"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      placeholder="e.g., Organic Tomatoes"
+                      placeholder={t('farmer.listings.productNamePlaceholder')}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
+                    <Label htmlFor="description">{t('farmer.listings.description')}</Label>
                     <Textarea
                       id="description"
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      placeholder="Describe your product..."
+                      placeholder={t('farmer.listings.descriptionPlaceholder')}
                       rows={3}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="category">Category</Label>
+                      <Label htmlFor="category">{t('farmer.listings.category')}</Label>
                       <Select
                         value={formData.category}
                         onValueChange={(value) => setFormData({ ...formData, category: value })}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
+                          <SelectValue placeholder={t('farmer.listings.selectCategory')} />
                         </SelectTrigger>
                         <SelectContent>
                           {categories.map((cat) => (
-                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                            <SelectItem key={cat} value={cat}>{t(`enum.categories.${cat.toLowerCase()}`)}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="location">Location</Label>
+                      <Label htmlFor="location">{t('farmer.listings.location')}</Label>
                       <Input
                         id="location"
                         value={formData.location}
                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                        placeholder="e.g., Karnataka"
+                        placeholder={t('farmer.listings.locationPlaceholder')}
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="price">Price (₹)</Label>
+                      <Label htmlFor="price">{t('farmer.listings.price')}</Label>
                       <Input
                         id="price"
                         type="number"
@@ -320,7 +322,7 @@ const FarmerListings = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="quantity">Quantity</Label>
+                      <Label htmlFor="quantity">{t('farmer.listings.quantity')}</Label>
                       <Input
                         id="quantity"
                         type="number"
@@ -331,7 +333,7 @@ const FarmerListings = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="unit">Unit</Label>
+                      <Label htmlFor="unit">{t('common.unit')}</Label>
                       <Select
                         value={formData.unit}
                         onValueChange={(value) => setFormData({ ...formData, unit: value })}
@@ -340,21 +342,21 @@ const FarmerListings = () => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="kg">kg</SelectItem>
-                          <SelectItem value="quintal">quintal</SelectItem>
-                          <SelectItem value="ton">ton</SelectItem>
-                          <SelectItem value="piece">piece</SelectItem>
-                          <SelectItem value="dozen">dozen</SelectItem>
+                          <SelectItem value="kg">{t('enum.units.kg')}</SelectItem>
+                          <SelectItem value="quintal">{t('enum.units.quintals')}</SelectItem>
+                          <SelectItem value="ton">{t('enum.units.tonnes')}</SelectItem>
+                          <SelectItem value="piece">{t('enum.units.piece')}</SelectItem>
+                          <SelectItem value="dozen">{t('enum.units.dozen')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
                   <DialogFooter>
                     <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                      Cancel
+                      {t('common.cancel')}
                     </Button>
                     <Button type="submit">
-                      {editingListing ? 'Update Listing' : 'Create Listing'}
+                      {editingListing ? t('farmer.listings.updateListing') : t('farmer.listings.createListing')}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -377,11 +379,11 @@ const FarmerListings = () => {
         ) : filteredListings.length === 0 ? (
           <div className="bg-card rounded-xl border border-border p-12 text-center">
             <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="font-display font-semibold text-lg text-foreground mb-2">No listings yet</h3>
-            <p className="text-muted-foreground mb-4">Start selling by creating your first product listing.</p>
+            <h3 className="font-display font-semibold text-lg text-foreground mb-2">{t('farmer.listings.noListingsYet')}</h3>
+            <p className="text-muted-foreground mb-4">{t('farmer.listings.startSelling')}</p>
             <Button onClick={() => setIsDialogOpen(true)} className="gap-2">
               <Plus className="h-4 w-4" />
-              Add Your First Listing
+              {t('farmer.listings.addFirstListing')}
             </Button>
           </div>
         ) : (
@@ -408,24 +410,24 @@ const FarmerListings = () => {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => handleEdit(listing)}>
                           <Edit className="h-4 w-4 mr-2" />
-                          Edit
+                          {t('common.edit')}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => toggleListingStatus(listing.id, listing.is_active)}>
                           <Eye className="h-4 w-4 mr-2" />
-                          {listing.is_active ? 'Deactivate' : 'Activate'}
+                          {listing.is_active ? t('farmer.listings.deactivate') : t('farmer.listings.activate')}
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           onClick={() => handleDelete(listing.id)}
                           className="text-destructive focus:text-destructive"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
+                          {t('common.delete')}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
                   <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                    {listing.description || 'No description provided'}
+                    {listing.description || t('farmer.listings.noDescription')}
                   </p>
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
                     <div>
@@ -433,11 +435,11 @@ const FarmerListings = () => {
                         ₹{listing.price}/{listing.unit}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {listing.quantity} {listing.unit} available
+                        {listing.quantity} {listing.unit} {t('farmer.listings.available')}
                       </p>
                     </div>
                     <Badge variant={listing.is_active ? 'default' : 'secondary'}>
-                      {listing.is_active ? 'Active' : 'Inactive'}
+                      {listing.is_active ? t('farmer.listings.active') : t('farmer.listings.inactive')}
                     </Badge>
                   </div>
                 </div>

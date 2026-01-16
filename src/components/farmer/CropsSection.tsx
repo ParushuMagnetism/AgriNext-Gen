@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useCrops, Crop, Farmland } from '@/hooks/useFarmerDashboard';
+import { useLanguage } from '@/hooks/useLanguage';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,21 +11,22 @@ import { useNavigate } from 'react-router-dom';
 import EditCropDialog from './EditCropDialog';
 import RequestTransportDialog from './RequestTransportDialog';
 
-const statusConfig = {
-  growing: { label: 'Growing', color: 'bg-muted text-muted-foreground', dotColor: 'bg-gray-400' },
-  one_week: { label: '1 Week to Harvest', color: 'bg-amber-100 text-amber-800', dotColor: 'bg-amber-500' },
-  ready: { label: 'Ready to Harvest', color: 'bg-emerald-100 text-emerald-800', dotColor: 'bg-emerald-500' },
-  harvested: { label: 'Harvested', color: 'bg-primary/10 text-primary', dotColor: 'bg-primary' },
-};
-
 const CropsSection = () => {
   const { data: crops, isLoading } = useCrops();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   
   const [editingCrop, setEditingCrop] = useState<(Crop & { farmland: Farmland | null }) | null>(null);
   const [transportCrop, setTransportCrop] = useState<(Crop & { farmland: Farmland | null }) | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [transportDialogOpen, setTransportDialogOpen] = useState(false);
+
+  const statusConfig = {
+    growing: { label: t('enum.crop_status.growing'), color: 'bg-muted text-muted-foreground', dotColor: 'bg-gray-400' },
+    one_week: { label: t('enum.crop_status.one_week'), color: 'bg-amber-100 text-amber-800', dotColor: 'bg-amber-500' },
+    ready: { label: t('enum.crop_status.ready'), color: 'bg-emerald-100 text-emerald-800', dotColor: 'bg-emerald-500' },
+    harvested: { label: t('enum.crop_status.harvested'), color: 'bg-primary/10 text-primary', dotColor: 'bg-primary' },
+  };
 
   const activeCrops = crops?.filter(c => c.status !== 'harvested') || [];
 
@@ -44,7 +46,7 @@ const CropsSection = () => {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Sprout className="h-5 w-5 text-primary" />
-            My Crops
+            {t('farmer.crops.myCrops')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -64,20 +66,20 @@ const CropsSection = () => {
         <CardHeader className="flex flex-row items-center justify-between pb-4">
           <CardTitle className="flex items-center gap-2">
             <Sprout className="h-5 w-5 text-primary" />
-            My Crops
+            {t('farmer.crops.myCrops')}
           </CardTitle>
           <Button size="sm" onClick={() => navigate('/farmer/crops')}>
             <Plus className="h-4 w-4 mr-1" />
-            Add Crop
+            {t('farmer.crops.addCrop')}
           </Button>
         </CardHeader>
         <CardContent>
           {activeCrops.length === 0 ? (
             <div className="text-center py-12">
               <Sprout className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground">No active crops yet</p>
+              <p className="text-muted-foreground">{t('farmer.crops.noActiveCrops')}</p>
               <Button variant="outline" className="mt-4" onClick={() => navigate('/farmer/crops')}>
-                Add Your First Crop
+                {t('farmer.crops.addFirstCrop')}
               </Button>
             </div>
           ) : (
@@ -114,13 +116,13 @@ const CropsSection = () => {
                       {crop.harvest_estimate && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Calendar className="h-4 w-4" />
-                          <span>Harvest: {format(new Date(crop.harvest_estimate), 'MMM d, yyyy')}</span>
+                          <span>{t('farmer.crops.harvest')}: {format(new Date(crop.harvest_estimate), 'MMM d, yyyy')}</span>
                         </div>
                       )}
                       {crop.estimated_quantity && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Scale className="h-4 w-4" />
-                          <span>Est. {crop.estimated_quantity} {crop.quantity_unit}</span>
+                          <span>{t('farmer.crops.estimated')} {crop.estimated_quantity} {crop.quantity_unit}</span>
                         </div>
                       )}
                     </div>
@@ -129,11 +131,11 @@ const CropsSection = () => {
                     <div className="flex gap-2 pt-3 border-t border-border/50">
                       <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEdit(crop)}>
                         <Edit className="h-4 w-4 mr-1" />
-                        Update
+                        {t('common.update')}
                       </Button>
                       <Button variant="default" size="sm" className="flex-1" onClick={() => handleTransport(crop)}>
                         <Truck className="h-4 w-4 mr-1" />
-                        Transport
+                        {t('farmer.transport.title')}
                       </Button>
                     </div>
                   </div>
@@ -145,7 +147,7 @@ const CropsSection = () => {
           {activeCrops.length > 6 && (
             <div className="mt-4 text-center">
               <Button variant="outline" onClick={() => navigate('/farmer/crops')}>
-                View All Crops ({activeCrops.length})
+                {t('farmer.crops.viewAllCrops')} ({activeCrops.length})
               </Button>
             </div>
           )}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/hooks/useLanguage';
 import { useCrops, Crop, Farmland } from '@/hooks/useFarmerDashboard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ interface RequestTransportDialogProps {
 const RequestTransportDialog = ({ crop, open, onOpenChange }: RequestTransportDialogProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const { data: crops } = useCrops();
   const [isSaving, setIsSaving] = useState(false);
@@ -69,7 +71,7 @@ const RequestTransportDialog = ({ crop, open, onOpenChange }: RequestTransportDi
 
       if (error) throw error;
 
-      toast({ title: 'Transport request created successfully' });
+      toast({ title: t('farmer.transport.requestSuccess') });
       onOpenChange(false);
       setFormData({
         crop_id: '',
@@ -83,7 +85,7 @@ const RequestTransportDialog = ({ crop, open, onOpenChange }: RequestTransportDi
       });
       queryClient.invalidateQueries({ queryKey: ['transport-requests', user.id] });
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
     } finally {
       setIsSaving(false);
     }
@@ -95,15 +97,15 @@ const RequestTransportDialog = ({ crop, open, onOpenChange }: RequestTransportDi
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Truck className="h-5 w-5 text-primary" />
-            Request Transport
+            {t('farmer.transport.requestTransport')}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label>Crop</Label>
+            <Label>{t('farmer.transport.crop')}</Label>
             <Select value={formData.crop_id} onValueChange={(v) => setFormData({ ...formData, crop_id: v })}>
               <SelectTrigger>
-                <SelectValue placeholder="Select crop (optional)" />
+                <SelectValue placeholder={t('farmer.transport.selectCrop')} />
               </SelectTrigger>
               <SelectContent>
                 {crops?.filter(c => c.status !== 'harvested').map((c) => (
@@ -116,49 +118,49 @@ const RequestTransportDialog = ({ crop, open, onOpenChange }: RequestTransportDi
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Quantity *</Label>
+              <Label>{t('farmer.transport.quantity')} *</Label>
               <Input
                 type="number"
                 value={formData.quantity}
                 onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                placeholder="e.g., 50"
+                placeholder="50"
                 required
               />
             </div>
             <div>
-              <Label>Unit</Label>
+              <Label>{t('common.unit')}</Label>
               <Select value={formData.quantity_unit} onValueChange={(v) => setFormData({ ...formData, quantity_unit: v })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="quintals">Quintals</SelectItem>
-                  <SelectItem value="kg">Kg</SelectItem>
-                  <SelectItem value="tonnes">Tonnes</SelectItem>
+                  <SelectItem value="quintals">{t('enum.units.quintals')}</SelectItem>
+                  <SelectItem value="kg">{t('enum.units.kg')}</SelectItem>
+                  <SelectItem value="tonnes">{t('enum.units.tonnes')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <div>
-            <Label>Pickup Location *</Label>
+            <Label>{t('farmer.transport.pickupLocation')} *</Label>
             <Input
               value={formData.pickup_location}
               onChange={(e) => setFormData({ ...formData, pickup_location: e.target.value })}
-              placeholder="Full address for pickup"
+              placeholder={t('farmer.transport.pickupPlaceholder')}
               required
             />
           </div>
           <div>
-            <Label>Village</Label>
+            <Label>{t('farmer.farmlands.village')}</Label>
             <Input
               value={formData.pickup_village}
               onChange={(e) => setFormData({ ...formData, pickup_village: e.target.value })}
-              placeholder="Village name"
+              placeholder={t('farmer.farmlands.villagePlaceholder')}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Preferred Date</Label>
+              <Label>{t('farmer.transport.preferredDate')}</Label>
               <Input
                 type="date"
                 value={formData.preferred_date}
@@ -166,20 +168,20 @@ const RequestTransportDialog = ({ crop, open, onOpenChange }: RequestTransportDi
               />
             </div>
             <div>
-              <Label>Preferred Time</Label>
+              <Label>{t('farmer.transport.preferredTime')}</Label>
               <Input
                 value={formData.preferred_time}
                 onChange={(e) => setFormData({ ...formData, preferred_time: e.target.value })}
-                placeholder="e.g., Morning"
+                placeholder={t('farmer.transport.timePlaceholder')}
               />
             </div>
           </div>
           <div>
-            <Label>Notes (optional)</Label>
+            <Label>{t('farmer.transport.notes')}</Label>
             <Textarea
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder="Any special instructions..."
+              placeholder={t('farmer.transport.notesPlaceholder')}
               rows={2}
             />
           </div>
@@ -187,10 +189,10 @@ const RequestTransportDialog = ({ crop, open, onOpenChange }: RequestTransportDi
             {isSaving ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Submitting...
+                {t('common.submitting')}
               </>
             ) : (
-              'Submit Request'
+              t('farmer.transport.submitRequest')
             )}
           </Button>
         </form>

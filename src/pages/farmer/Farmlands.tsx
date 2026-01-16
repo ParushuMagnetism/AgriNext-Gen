@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import { useFarmlands, Farmland } from '@/hooks/useFarmerDashboard';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/hooks/useLanguage';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ const FarmlandsPage = () => {
   const { data: farmlands, isLoading } = useFarmlands();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -66,12 +68,12 @@ const FarmlandsPage = () => {
 
       if (error) throw error;
 
-      toast({ title: 'Success!', description: 'Farmland added successfully.' });
+      toast({ title: t('common.success'), description: t('farmer.farmlands.addSuccess') });
       setIsDialogOpen(false);
       setFormData({ name: '', area: '', area_unit: 'acres', soil_type: '', village: '', district: '' });
       queryClient.invalidateQueries({ queryKey: ['farmlands', user.id] });
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
     }
   };
 
@@ -87,12 +89,12 @@ const FarmlandsPage = () => {
     try {
       const { error } = await supabase.from('farmlands').delete().eq('id', deletingFarmland.id);
       if (error) throw error;
-      toast({ title: 'Farmland deleted', description: `${deletingFarmland.name} has been removed.` });
+      toast({ title: t('farmer.farmlands.deleted'), description: t('farmer.farmlands.deleteSuccess') });
       queryClient.invalidateQueries({ queryKey: ['farmlands', user?.id] });
       setDeleteConfirmOpen(false);
       setDeletingFarmland(null);
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
     } finally {
       setIsDeleting(false);
     }
@@ -107,7 +109,7 @@ const FarmlandsPage = () => {
   }, {} as Record<string, number>);
 
   return (
-    <DashboardLayout title="Farmlands">
+    <DashboardLayout title={t('farmer.farmlands.title')}>
       <div className="space-y-6">
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -119,7 +121,7 @@ const FarmlandsPage = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{farmlands?.length || 0}</p>
-                  <p className="text-xs text-muted-foreground">Total Plots</p>
+                  <p className="text-xs text-muted-foreground">{t('farmer.farmlands.totalPlots')}</p>
                 </div>
               </div>
             </CardContent>
@@ -132,7 +134,7 @@ const FarmlandsPage = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{totalArea.toFixed(1)}</p>
-                  <p className="text-xs text-muted-foreground">Total Acres</p>
+                  <p className="text-xs text-muted-foreground">{t('farmer.farmlands.totalAcres')}</p>
                 </div>
               </div>
             </CardContent>
@@ -147,7 +149,7 @@ const FarmlandsPage = () => {
                   <p className="text-2xl font-bold">
                     {Object.keys(soilDistribution || {}).filter(k => k !== 'unknown').length}
                   </p>
-                  <p className="text-xs text-muted-foreground">Soil Types</p>
+                  <p className="text-xs text-muted-foreground">{t('farmer.farmlands.soilTypes')}</p>
                 </div>
               </div>
             </CardContent>
@@ -162,7 +164,7 @@ const FarmlandsPage = () => {
                   <p className="text-2xl font-bold">
                     {new Set(farmlands?.map(l => l.village).filter(Boolean)).size}
                   </p>
-                  <p className="text-xs text-muted-foreground">Villages</p>
+                  <p className="text-xs text-muted-foreground">{t('farmer.farmlands.villages')}</p>
                 </div>
               </div>
             </CardContent>
@@ -174,7 +176,7 @@ const FarmlandsPage = () => {
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by name or village..."
+              placeholder={t('farmer.farmlands.searchPlaceholder')}
               className="pl-10"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -184,97 +186,97 @@ const FarmlandsPage = () => {
             <DialogTrigger asChild>
               <Button size="lg">
                 <Plus className="h-4 w-4 mr-2" />
-                Add Farmland
+                {t('farmer.farmlands.addFarmland')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Add New Farmland</DialogTitle>
+                <DialogTitle>{t('farmer.farmlands.addNewFarmland')}</DialogTitle>
                 <DialogDescription>
-                  Register a new farmland plot. Fields marked with * are required.
+                  {t('farmer.farmlands.addFarmlandDescription')}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <Label className="flex items-center">
-                    Name / Plot ID *
-                    <HelpTooltip content="Give your farmland a name or use the survey number for easy identification" />
+                    {t('farmer.farmlands.plotName')} *
+                    <HelpTooltip content={t('farmer.farmlands.plotNameHelp')} />
                   </Label>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g., North Field, Survey #12"
+                    placeholder={t('farmer.farmlands.plotNamePlaceholder')}
                     required
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="flex items-center">
-                      Area *
-                      <HelpTooltip content="The total area of this farmland" />
+                      {t('farmer.farmlands.area')} *
+                      <HelpTooltip content={t('farmer.farmlands.areaHelp')} />
                     </Label>
                     <Input
                       type="number"
                       step="0.1"
                       value={formData.area}
                       onChange={(e) => setFormData({ ...formData, area: e.target.value })}
-                      placeholder="e.g., 5"
+                      placeholder="5"
                       required
                     />
                   </div>
                   <div>
-                    <Label>Unit</Label>
+                    <Label>{t('common.unit')}</Label>
                     <Select value={formData.area_unit} onValueChange={(v) => setFormData({ ...formData, area_unit: v })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="acres">Acres</SelectItem>
-                        <SelectItem value="hectares">Hectares</SelectItem>
-                        <SelectItem value="bigha">Bigha</SelectItem>
-                        <SelectItem value="guntha">Guntha</SelectItem>
+                        <SelectItem value="acres">{t('enum.area_units.acres')}</SelectItem>
+                        <SelectItem value="hectares">{t('enum.area_units.hectares')}</SelectItem>
+                        <SelectItem value="bigha">{t('enum.area_units.bigha')}</SelectItem>
+                        <SelectItem value="guntha">{t('enum.area_units.guntha')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
                 <div>
                   <Label className="flex items-center">
-                    Soil Type
-                    <HelpTooltip content="Knowing your soil type helps with crop recommendations" />
+                    {t('farmer.farmlands.soilType')}
+                    <HelpTooltip content={t('farmer.farmlands.soilTypeHelp')} />
                   </Label>
                   <Select value={formData.soil_type} onValueChange={(v) => setFormData({ ...formData, soil_type: v })}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select soil type" />
+                      <SelectValue placeholder={t('farmer.farmlands.selectSoilType')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="alluvial">Alluvial</SelectItem>
-                      <SelectItem value="black">Black (Regur)</SelectItem>
-                      <SelectItem value="red">Red</SelectItem>
-                      <SelectItem value="laterite">Laterite</SelectItem>
-                      <SelectItem value="sandy">Sandy</SelectItem>
-                      <SelectItem value="clay">Clay</SelectItem>
+                      <SelectItem value="alluvial">{t('enum.soil_types.alluvial')}</SelectItem>
+                      <SelectItem value="black">{t('enum.soil_types.black')}</SelectItem>
+                      <SelectItem value="red">{t('enum.soil_types.red')}</SelectItem>
+                      <SelectItem value="laterite">{t('enum.soil_types.laterite')}</SelectItem>
+                      <SelectItem value="sandy">{t('enum.soil_types.sandy')}</SelectItem>
+                      <SelectItem value="clay">{t('enum.soil_types.clay')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Village</Label>
+                    <Label>{t('farmer.farmlands.village')}</Label>
                     <Input
                       value={formData.village}
                       onChange={(e) => setFormData({ ...formData, village: e.target.value })}
-                      placeholder="Village name"
+                      placeholder={t('farmer.farmlands.villagePlaceholder')}
                     />
                   </div>
                   <div>
-                    <Label>District</Label>
+                    <Label>{t('farmer.farmlands.district')}</Label>
                     <Input
                       value={formData.district}
                       onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                      placeholder="District name"
+                      placeholder={t('farmer.farmlands.districtPlaceholder')}
                     />
                   </div>
                 </div>
-                <Button type="submit" className="w-full" size="lg">Add Farmland</Button>
+                <Button type="submit" className="w-full" size="lg">{t('farmer.farmlands.addFarmland')}</Button>
               </form>
             </DialogContent>
           </Dialog>
@@ -292,13 +294,13 @@ const FarmlandsPage = () => {
             <CardContent className="p-0">
               <EmptyState
                 icon={LandPlot}
-                title={searchQuery ? "No farmlands found" : "No farmlands added yet"}
+                title={searchQuery ? t('farmer.farmlands.noFarmlandsFound') : t('farmer.farmlands.noFarmlandsYet')}
                 description={
                   searchQuery 
-                    ? "Try adjusting your search to find what you're looking for."
-                    : "Add your farmlands to track crops, manage harvests, and get better insights."
+                    ? t('farmer.farmlands.adjustSearch')
+                    : t('farmer.farmlands.startAddingFarmlands')
                 }
-                actionLabel={searchQuery ? "Clear Search" : "Add Your First Farmland"}
+                actionLabel={searchQuery ? t('common.clearSearch') : t('farmer.farmlands.addFirstFarmland')}
                 onAction={() => {
                   if (searchQuery) {
                     setSearchQuery('');
@@ -335,7 +337,7 @@ const FarmlandsPage = () => {
                     {land.soil_type && (
                       <div className="flex items-center gap-2">
                         <Layers className="h-4 w-4 shrink-0" />
-                        <span className="capitalize">{land.soil_type} soil</span>
+                        <span className="capitalize">{t(`enum.soil_types.${land.soil_type}`)}</span>
                       </div>
                     )}
                   </div>
@@ -350,7 +352,7 @@ const FarmlandsPage = () => {
                       }}
                     >
                       <TestTube2 className="h-4 w-4 mr-1" />
-                      Soil Reports
+                      {t('farmer.farmlands.soilReports')}
                     </Button>
                     <Button 
                       variant="outline" 
@@ -393,9 +395,9 @@ const FarmlandsPage = () => {
       <ConfirmDialog
         open={deleteConfirmOpen}
         onOpenChange={setDeleteConfirmOpen}
-        title="Delete Farmland"
-        description={`Are you sure you want to delete "${deletingFarmland?.name}"? Any crops associated with this farmland will lose their location reference.`}
-        confirmText="Delete"
+        title={t('farmer.farmlands.deleteFarmland')}
+        description={t('farmer.farmlands.deleteConfirm')}
+        confirmText={t('common.delete')}
         variant="destructive"
         onConfirm={handleDeleteConfirm}
         loading={isDeleting}
