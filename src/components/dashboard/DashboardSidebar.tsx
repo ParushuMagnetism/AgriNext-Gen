@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/hooks/useLanguage';
 import { useFarmerNotifications } from '@/hooks/useFarmerDashboard';
 import { Button } from '@/components/ui/button';
 
@@ -28,52 +29,53 @@ interface DashboardSidebarProps {
 const DashboardSidebar = ({ onClose }: DashboardSidebarProps) => {
   const location = useLocation();
   const { signOut, userRole } = useAuth();
+  const { t } = useLanguage();
   const { data: notifications } = useFarmerNotifications();
   
   const unreadCount = notifications?.filter(n => !n.is_read).length || 0;
 
   // Farmer navigation items
   const farmerNavItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', href: '/farmer/dashboard' },
-    { icon: CropIcon, label: 'My Crops', href: '/farmer/crops' },
-    { icon: LandPlot, label: 'Farmlands', href: '/farmer/farmlands' },
-    { icon: Truck, label: 'Transport', href: '/farmer/transport' },
-    { icon: ShoppingBag, label: 'Listings', href: '/farmer/listings' },
-    { icon: Package, label: 'Orders', href: '/farmer/orders' },
-    { icon: DollarSign, label: 'Earnings', href: '/farmer/earnings' },
+    { icon: LayoutDashboard, label: t('nav.dashboard'), href: '/farmer/dashboard' },
+    { icon: CropIcon, label: t('nav.crops'), href: '/farmer/crops' },
+    { icon: LandPlot, label: t('nav.farmlands'), href: '/farmer/farmlands' },
+    { icon: Truck, label: t('nav.transport'), href: '/farmer/transport' },
+    { icon: ShoppingBag, label: t('nav.listings'), href: '/farmer/listings' },
+    { icon: Package, label: t('nav.orders'), href: '/farmer/orders' },
+    { icon: DollarSign, label: t('nav.earnings'), href: '/farmer/earnings' },
     { 
       icon: Bell, 
-      label: 'Notifications', 
+      label: t('nav.notifications'), 
       href: '/farmer/notifications',
       badge: unreadCount > 0 ? unreadCount : undefined
     },
-    { icon: Settings, label: 'Settings', href: '/farmer/settings' },
+    { icon: Settings, label: t('nav.settings'), href: '/farmer/settings' },
   ];
 
   // Agent navigation items
   const agentNavItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', href: '/agent/dashboard' },
-    { icon: ClipboardList, label: 'My Tasks', href: '/agent/tasks' },
-    { icon: Users, label: 'Farmers & Crops', href: '/agent/farmers' },
-    { icon: Truck, label: 'Transport', href: '/agent/transport' },
+    { icon: LayoutDashboard, label: t('nav.dashboard'), href: '/agent/dashboard' },
+    { icon: ClipboardList, label: t('nav.myTasks'), href: '/agent/tasks' },
+    { icon: Users, label: t('nav.farmersAndCrops'), href: '/agent/farmers' },
+    { icon: Truck, label: t('nav.transport'), href: '/agent/transport' },
   ];
 
   // Logistics navigation items
   const logisticsNavItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', href: '/logistics/dashboard' },
-    { icon: Package, label: 'Available Loads', href: '/logistics/loads' },
-    { icon: Truck, label: 'Active Trips', href: '/logistics/trips' },
-    { icon: CropIcon, label: 'Completed', href: '/logistics/completed' },
-    { icon: LandPlot, label: 'My Vehicles', href: '/logistics/vehicles' },
-    { icon: Settings, label: 'Profile', href: '/logistics/profile' },
+    { icon: LayoutDashboard, label: t('nav.dashboard'), href: '/logistics/dashboard' },
+    { icon: Package, label: t('nav.availableLoads'), href: '/logistics/loads' },
+    { icon: Truck, label: t('nav.activeTrips'), href: '/logistics/trips' },
+    { icon: CropIcon, label: t('nav.completed'), href: '/logistics/completed' },
+    { icon: LandPlot, label: t('nav.myVehicles'), href: '/logistics/vehicles' },
+    { icon: Settings, label: t('nav.profile'), href: '/logistics/profile' },
   ];
 
   // Buyer/Marketplace navigation items
   const buyerNavItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', href: '/marketplace/dashboard' },
-    { icon: ShoppingBag, label: 'Browse Products', href: '/marketplace/browse' },
-    { icon: Package, label: 'My Orders', href: '/marketplace/orders' },
-    { icon: Settings, label: 'Profile', href: '/marketplace/profile' },
+    { icon: LayoutDashboard, label: t('nav.dashboard'), href: '/marketplace/dashboard' },
+    { icon: ShoppingBag, label: t('nav.browseProducts'), href: '/marketplace/browse' },
+    { icon: Package, label: t('nav.myOrders'), href: '/marketplace/orders' },
+    { icon: Settings, label: t('nav.profile'), href: '/marketplace/profile' },
   ];
 
   // Admin navigation items
@@ -221,7 +223,7 @@ const DashboardSidebar = ({ onClose }: DashboardSidebarProps) => {
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
           >
             <LogOut className="h-5 w-5" />
-            Sign Out
+            {t('nav.logout')}
           </button>
         </div>
       </div>
