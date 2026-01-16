@@ -14,7 +14,9 @@ import {
   X,
   ClipboardList,
   Users,
-  Sparkles
+  Sparkles,
+  Database,
+  TestTube
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -90,6 +92,9 @@ const DashboardSidebar = ({ onClose }: DashboardSidebarProps) => {
     { icon: Package, label: 'Transport', href: '/admin/transport' },
     { icon: ClipboardList, label: 'Orders', href: '/admin/orders' },
     { icon: Sparkles, label: 'AI Console', href: '/admin/ai-console' },
+    { icon: Database, label: 'Seed Data', href: '/admin/seed-data' },
+    { icon: TestTube, label: 'Mysuru Demo', href: '/admin/mysuru-demo' },
+    { icon: Settings, label: 'Data Health', href: '/admin/data-health' },
   ];
 
   // Select nav items based on user role
