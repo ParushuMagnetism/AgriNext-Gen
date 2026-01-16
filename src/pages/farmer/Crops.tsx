@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Search, Sprout, Calendar, MapPin, Scale, Edit, Trash2, Truck } from 'lucide-react';
+import { Plus, Search, Sprout, Calendar, MapPin, Scale, Edit, Trash2, Truck, BookOpen } from 'lucide-react';
 import { format } from 'date-fns';
 import EditCropDialog from '@/components/farmer/EditCropDialog';
 import RequestTransportDialog from '@/components/farmer/RequestTransportDialog';
@@ -405,20 +405,22 @@ const CropsPage = () => {
                         </div>
                       )}
                     </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => {
+                    <div className="flex gap-2 flex-wrap">
+                      <Button variant="default" size="sm" className="flex-1" onClick={() => navigate(`/farmer/crops/${crop.id}`)}>
+                        <BookOpen className="h-4 w-4 mr-1" />
+                        Diary
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => {
                         setEditingCrop(crop);
                         setEditDialogOpen(true);
                       }}>
-                        <Edit className="h-4 w-4 mr-1" />
-                        Edit
+                        <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="default" size="sm" className="flex-1" onClick={() => {
+                      <Button variant="outline" size="sm" onClick={() => {
                         setTransportCrop(crop);
                         setTransportDialogOpen(true);
                       }}>
-                        <Truck className="h-4 w-4 mr-1" />
-                        Transport
+                        <Truck className="h-4 w-4" />
                       </Button>
                       <Button 
                         variant="outline" 

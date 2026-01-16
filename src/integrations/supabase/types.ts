@@ -101,6 +101,24 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_farmer_assignments: {
+        Row: {
+          agent_id: string
+          created_at: string | null
+          farmer_id: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string | null
+          farmer_id: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string | null
+          farmer_id?: string
+        }
+        Relationships: []
+      }
       agent_tasks: {
         Row: {
           agent_id: string
@@ -472,6 +490,75 @@ export type Database = {
         }
         Relationships: []
       }
+      crop_activity_logs: {
+        Row: {
+          activity_at: string | null
+          activity_type: string
+          consent_at: string | null
+          consent_captured: boolean | null
+          consent_note: string | null
+          created_at: string | null
+          created_by: string
+          creator_role: string
+          crop_id: string
+          id: string
+          media_id: string | null
+          meta: Json | null
+          notes: string | null
+          owner_farmer_id: string
+          severity: string | null
+        }
+        Insert: {
+          activity_at?: string | null
+          activity_type: string
+          consent_at?: string | null
+          consent_captured?: boolean | null
+          consent_note?: string | null
+          created_at?: string | null
+          created_by: string
+          creator_role?: string
+          crop_id: string
+          id?: string
+          media_id?: string | null
+          meta?: Json | null
+          notes?: string | null
+          owner_farmer_id: string
+          severity?: string | null
+        }
+        Update: {
+          activity_at?: string | null
+          activity_type?: string
+          consent_at?: string | null
+          consent_captured?: boolean | null
+          consent_note?: string | null
+          created_at?: string | null
+          created_by?: string
+          creator_role?: string
+          crop_id?: string
+          id?: string
+          media_id?: string | null
+          meta?: Json | null
+          notes?: string | null
+          owner_farmer_id?: string
+          severity?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crop_activity_logs_crop_id_fkey"
+            columns: ["crop_id"]
+            isOneToOne: false
+            referencedRelation: "crops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crop_activity_logs_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "crop_media"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crop_aliases: {
         Row: {
           alias: string
@@ -535,15 +622,69 @@ export type Database = {
         }
         Relationships: []
       }
+      crop_media: {
+        Row: {
+          caption: string | null
+          captured_at: string | null
+          created_at: string | null
+          crop_id: string
+          file_path: string
+          id: string
+          mime_type: string
+          owner_farmer_id: string
+          tags: string[] | null
+          uploaded_by: string
+          uploader_role: string
+        }
+        Insert: {
+          caption?: string | null
+          captured_at?: string | null
+          created_at?: string | null
+          crop_id: string
+          file_path: string
+          id?: string
+          mime_type: string
+          owner_farmer_id: string
+          tags?: string[] | null
+          uploaded_by: string
+          uploader_role?: string
+        }
+        Update: {
+          caption?: string | null
+          captured_at?: string | null
+          created_at?: string | null
+          crop_id?: string
+          file_path?: string
+          id?: string
+          mime_type?: string
+          owner_farmer_id?: string
+          tags?: string[] | null
+          uploaded_by?: string
+          uploader_role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crop_media_crop_id_fkey"
+            columns: ["crop_id"]
+            isOneToOne: false
+            referencedRelation: "crops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crops: {
         Row: {
           created_at: string
           crop_name: string
           estimated_quantity: number | null
           farmer_id: string
+          growth_stage: string | null
           harvest_estimate: string | null
+          health_status: string | null
           id: string
           land_id: string | null
+          last_observed_issue_at: string | null
+          last_photo_at: string | null
           quantity_unit: string | null
           sowing_date: string | null
           status: Database["public"]["Enums"]["crop_status"]
@@ -555,9 +696,13 @@ export type Database = {
           crop_name: string
           estimated_quantity?: number | null
           farmer_id: string
+          growth_stage?: string | null
           harvest_estimate?: string | null
+          health_status?: string | null
           id?: string
           land_id?: string | null
+          last_observed_issue_at?: string | null
+          last_photo_at?: string | null
           quantity_unit?: string | null
           sowing_date?: string | null
           status?: Database["public"]["Enums"]["crop_status"]
@@ -569,9 +714,13 @@ export type Database = {
           crop_name?: string
           estimated_quantity?: number | null
           farmer_id?: string
+          growth_stage?: string | null
           harvest_estimate?: string | null
+          health_status?: string | null
           id?: string
           land_id?: string | null
+          last_observed_issue_at?: string | null
+          last_photo_at?: string | null
           quantity_unit?: string | null
           sowing_date?: string | null
           status?: Database["public"]["Enums"]["crop_status"]

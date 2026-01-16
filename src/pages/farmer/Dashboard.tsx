@@ -12,6 +12,7 @@ import OnboardingTour from '@/components/farmer/OnboardingTour';
 import VoiceAssistant from '@/components/farmer/VoiceAssistant';
 import AgentNotesSection from '@/components/farmer/AgentNotesSection';
 import FarmerLocationPrompt from '@/components/farmer/FarmerLocationPrompt';
+import CropPhotoReminderWidget from '@/components/crop-diary/CropPhotoReminderWidget';
 import { useRealtimeSubscriptions } from '@/hooks/useRealtimeSubscriptions';
 
 const FarmerDashboard = () => {
@@ -40,6 +41,9 @@ const FarmerDashboard = () => {
             <FarmlandsSummary />
           </div>
         </div>
+
+        {/* Crop Photo Reminders */}
+        <CropPhotoReminderWidget />
 
         {/* My Crops Section */}
         <CropsSection />

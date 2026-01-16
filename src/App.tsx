@@ -16,6 +16,7 @@ import FarmerListings from "./pages/farmer/Listings";
 import FarmerOrders from "./pages/farmer/Orders";
 import FarmerEarnings from "./pages/farmer/Earnings";
 import FarmerCrops from "./pages/farmer/Crops";
+import FarmerCropDiary from "./pages/farmer/CropDiary";
 import FarmerFarmlands from "./pages/farmer/Farmlands";
 import FarmerTransport from "./pages/farmer/Transport";
 import FarmerNotifications from "./pages/farmer/Notifications";
@@ -86,6 +87,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["farmer"]}>
                   <FarmerCrops />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/farmer/crops/:cropId"
+              element={
+                <ProtectedRoute allowedRoles={["farmer"]}>
+                  <FarmerCropDiary />
                 </ProtectedRoute>
               }
             />
