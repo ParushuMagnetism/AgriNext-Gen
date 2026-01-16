@@ -20,8 +20,9 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Package, MapPin, Calendar, Search, Check, X, User } from 'lucide-react';
-import { useAvailableLoads, useAcceptLoad, useVehicles } from '@/hooks/useLogisticsDashboard';
+import { Package, MapPin, Calendar, Search, Check, X, User, Loader2 } from 'lucide-react';
+import { useAvailableLoads, useVehicles } from '@/hooks/useLogisticsDashboard';
+import { useAcceptLoadSecure } from '@/hooks/useTrips';
 import { format, parseISO } from 'date-fns';
 import {
   Select,
@@ -30,11 +31,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { getErrorMessage } from '@/lib/error-utils';
+import { toast } from 'sonner';
 
 const AvailableLoads = () => {
   const { data: loads, isLoading } = useAvailableLoads();
   const { data: vehicles } = useVehicles();
-  const acceptLoad = useAcceptLoad();
+  const acceptLoad = useAcceptLoadSecure();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLoad, setSelectedLoad] = useState<string | null>(null);
@@ -59,12 +62,21 @@ const AvailableLoads = () => {
   const handleConfirmAccept = () => {
     if (selectedLoad) {
       acceptLoad.mutate(
-        { requestId: selectedLoad, vehicleId: selectedVehicle || undefined },
+        { transportRequestId: selectedLoad, vehicleId: selectedVehicle || undefined },
         {
           onSuccess: () => {
             setIsDialogOpen(false);
             setSelectedLoad(null);
             setSelectedVehicle('');
+          },
+          onError: (error) => {
+            const message = getErrorMessage(error);
+            // Check for "already assigned" errors
+            if (message.toLowerCase().includes('already') || message.includes('ALREADY_ASSIGNED')) {
+              toast.error('This load has already been accepted by another transporter');
+            } else {
+              toast.error(`Failed to accept load: ${message}`);
+            }
           },
         }
       );
@@ -189,7 +201,11 @@ const AvailableLoads = () => {
                           onClick={() => handleAcceptClick(load.id)}
                           disabled={acceptLoad.isPending}
                         >
-                          <Check className="h-4 w-4 mr-1" />
+                          {acceptLoad.isPending && selectedLoad === load.id ? (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          ) : (
+                            <Check className="h-4 w-4 mr-1" />
+                          )}
                           Accept
                         </Button>
                       </TableCell>
@@ -232,13 +248,22 @@ const AvailableLoads = () => {
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={acceptLoad.isPending}>
               <X className="h-4 w-4 mr-1" />
               Cancel
             </Button>
             <Button onClick={handleConfirmAccept} disabled={acceptLoad.isPending}>
-              <Check className="h-4 w-4 mr-1" />
-              {acceptLoad.isPending ? 'Accepting...' : 'Confirm Accept'}
+              {acceptLoad.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  Accepting...
+                </>
+              ) : (
+                <>
+                  <Check className="h-4 w-4 mr-1" />
+                  Confirm Accept
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

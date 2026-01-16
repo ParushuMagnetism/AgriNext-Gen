@@ -10,8 +10,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Camera, Upload, X, Loader2 } from 'lucide-react';
+import { Camera, Upload, X, Loader2, AlertCircle } from 'lucide-react';
 import { useUploadProof, useUpdateTripStatusSecure } from '@/hooks/useTrips';
+import { toast } from 'sonner';
+import imageCompression from 'browser-image-compression';
+import { FILE_SIZE_LIMITS, validateFileSize, isImageFile, getErrorMessage, createRetryAction } from '@/lib/error-utils';
 
 interface ProofCaptureDialogProps {
   open: boolean;
@@ -34,20 +37,66 @@ export default function ProofCaptureDialog({
   const [previews, setPreviews] = useState<string[]>([]);
   const [actualWeight, setActualWeight] = useState('');
   const [notes, setNotes] = useState('');
+  const [isCompressing, setIsCompressing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const uploadProof = useUploadProof();
   const updateStatus = useUpdateTripStatusSecure();
 
-  const isLoading = uploadProof.isPending || updateStatus.isPending;
+  const isLoading = uploadProof.isPending || updateStatus.isPending || isCompressing;
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Proof is required for picked_up and delivered statuses
+  const proofRequired = ['picked_up', 'delivered'].includes(nextStatus);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length + photos.length > 3) {
-      return; // Max 3 photos
+      toast.error('Maximum 3 photos allowed');
+      return;
     }
 
-    const newPhotos = [...photos, ...files].slice(0, 3);
+    const validFiles: File[] = [];
+
+    for (const file of files) {
+      // Validate file type
+      if (!isImageFile(file)) {
+        toast.error(`${file.name} is not an image file`);
+        continue;
+      }
+
+      // Validate file size
+      const validation = validateFileSize(file, FILE_SIZE_LIMITS.IMAGE_MAX_MB);
+      if (!validation.valid) {
+        toast.error(`${file.name}: ${validation.message}`);
+        continue;
+      }
+
+      // Compress if needed
+      let processedFile = file;
+      const sizeMB = file.size / (1024 * 1024);
+      
+      if (sizeMB > FILE_SIZE_LIMITS.IMAGE_COMPRESS_TARGET_MB) {
+        setIsCompressing(true);
+        try {
+          processedFile = await imageCompression(file, {
+            maxSizeMB: FILE_SIZE_LIMITS.IMAGE_COMPRESS_TARGET_MB,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
+          });
+        } catch (error) {
+          console.error('Compression failed:', error);
+          toast.error(`Failed to compress ${file.name}`);
+          continue;
+        }
+        setIsCompressing(false);
+      }
+      
+      validFiles.push(processedFile);
+    }
+
+    if (validFiles.length === 0) return;
+
+    const newPhotos = [...photos, ...validFiles].slice(0, 3);
     setPhotos(newPhotos);
 
     // Create previews
@@ -65,6 +114,12 @@ export default function ProofCaptureDialog({
   };
 
   const handleSubmit = async () => {
+    // Check if proof is required but not provided
+    if (proofRequired && photos.length === 0) {
+      toast.error('At least one proof photo is required');
+      return;
+    }
+
     try {
       // Upload all photos first
       const uploadedPaths: string[] = [];
@@ -95,7 +150,10 @@ export default function ProofCaptureDialog({
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
-      // Error handled by mutations
+      const message = getErrorMessage(error);
+      toast.error(`Failed: ${message}`, {
+        action: createRetryAction(handleSubmit),
+      });
     }
   };
 
@@ -120,7 +178,15 @@ export default function ProofCaptureDialog({
         <div className="space-y-4 py-4">
           {/* Photo capture */}
           <div className="space-y-2">
-            <Label>Proof Photos (max 3)</Label>
+            <Label className="flex items-center gap-2">
+              Proof Photos (max 3)
+              {proofRequired && (
+                <span className="text-xs text-destructive flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  Required
+                </span>
+              )}
+            </Label>
             <div className="grid grid-cols-3 gap-2">
               {previews.map((preview, index) => (
                 <div key={index} className="relative aspect-square rounded-lg overflow-hidden border">
@@ -132,6 +198,7 @@ export default function ProofCaptureDialog({
                   <button
                     onClick={() => removePhoto(index)}
                     className="absolute top-1 right-1 p-1 bg-black/50 rounded-full text-white hover:bg-black/70"
+                    disabled={isLoading}
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -140,10 +207,15 @@ export default function ProofCaptureDialog({
               {photos.length < 3 && (
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="aspect-square rounded-lg border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                  disabled={isLoading}
+                  className="aspect-square rounded-lg border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors disabled:opacity-50"
                 >
-                  <Camera className="h-6 w-6 mb-1" />
-                  <span className="text-xs">Add</span>
+                  {isCompressing ? (
+                    <Loader2 className="h-6 w-6 mb-1 animate-spin" />
+                  ) : (
+                    <Camera className="h-6 w-6 mb-1" />
+                  )}
+                  <span className="text-xs">{isCompressing ? 'Processing' : 'Add'}</span>
                 </button>
               )}
             </div>
@@ -154,7 +226,11 @@ export default function ProofCaptureDialog({
               capture="environment"
               onChange={handleFileChange}
               className="hidden"
+              disabled={isLoading}
             />
+            <p className="text-xs text-muted-foreground">
+              Max {FILE_SIZE_LIMITS.IMAGE_MAX_MB}MB per photo • Auto-compressed
+            </p>
           </div>
 
           {/* Actual weight (for pickup) */}
@@ -167,6 +243,7 @@ export default function ProofCaptureDialog({
                 placeholder="Enter actual weight"
                 value={actualWeight}
                 onChange={(e) => setActualWeight(e.target.value)}
+                disabled={isLoading}
               />
             </div>
           )}
@@ -180,6 +257,7 @@ export default function ProofCaptureDialog({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
+              disabled={isLoading}
             />
           </div>
 
@@ -194,7 +272,10 @@ export default function ProofCaptureDialog({
           <Button variant="outline" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={isLoading}>
+          <Button 
+            onClick={handleSubmit} 
+            disabled={isLoading || (proofRequired && photos.length === 0)}
+          >
             {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />

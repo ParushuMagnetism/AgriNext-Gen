@@ -4,26 +4,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { 
   Truck, 
   MapPin, 
   Calendar, 
   Phone,
-  Play,
   Package,
-  CheckCircle2,
-  ExternalLink
+  ExternalLink,
+  Loader2
 } from 'lucide-react';
-import { useActiveTrips, useUpdateTripStatus, TransportRequest } from '@/hooks/useLogisticsDashboard';
+import { useActiveTrips, TransportRequest } from '@/hooks/useLogisticsDashboard';
+import { useTrips } from '@/hooks/useTrips';
 import { format, parseISO } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
@@ -41,53 +32,8 @@ const statusLabels: Record<string, string> = {
 
 const ActiveTrips = () => {
   const navigate = useNavigate();
-  const { data: trips, isLoading } = useActiveTrips();
-  const updateStatus = useUpdateTripStatus();
-  
-  const [selectedTrip, setSelectedTrip] = useState<TransportRequest | null>(null);
-  const [isPickupDialogOpen, setIsPickupDialogOpen] = useState(false);
-  const [pickupWeight, setPickupWeight] = useState('');
-
-  const handleStartTrip = (trip: TransportRequest) => {
-    updateStatus.mutate({ requestId: trip.id, status: 'en_route' });
-  };
-
-  const handlePickupComplete = (trip: TransportRequest) => {
-    setSelectedTrip(trip);
-    setIsPickupDialogOpen(true);
-  };
-
-  const handleConfirmPickup = () => {
-    if (selectedTrip) {
-      updateStatus.mutate(
-        { requestId: selectedTrip.id, status: 'picked_up' },
-        {
-          onSuccess: () => {
-            setIsPickupDialogOpen(false);
-            setSelectedTrip(null);
-            setPickupWeight('');
-          },
-        }
-      );
-    }
-  };
-
-  const handleMarkDelivered = (trip: TransportRequest) => {
-    updateStatus.mutate({ requestId: trip.id, status: 'delivered' });
-  };
-
-  const getNextAction = (status: string) => {
-    switch (status) {
-      case 'assigned':
-        return { label: 'Start Trip', action: handleStartTrip, icon: Play };
-      case 'en_route':
-        return { label: 'Pickup Complete', action: handlePickupComplete, icon: Package };
-      case 'picked_up':
-        return { label: 'Mark Delivered', action: handleMarkDelivered, icon: CheckCircle2 };
-      default:
-        return null;
-    }
-  };
+  // Use the trips hook to get trips from the trips table (proper entity)
+  const { data: trips, isLoading } = useTrips(['assigned', 'en_route', 'arrived', 'picked_up', 'in_transit']);
 
   const openGoogleMaps = (location: string) => {
     window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`, '_blank');
@@ -134,7 +80,7 @@ const ActiveTrips = () => {
       ) : (
         <div className="space-y-4">
           {trips.map((trip) => {
-            const nextAction = getNextAction(trip.status);
+            const request = trip.transport_request;
             
             return (
               <Card key={trip.id} className="hover:shadow-md transition-shadow">
@@ -151,8 +97,8 @@ const ActiveTrips = () => {
                             </span>
                           )}
                         </h3>
-                        <Badge className={statusColors[trip.status]}>
-                          {statusLabels[trip.status]}
+                        <Badge className={statusColors[trip.status] || 'bg-gray-100 text-gray-800'}>
+                          {trip.status.replace('_', ' ')}
                         </Badge>
                       </div>
 
@@ -163,13 +109,13 @@ const ActiveTrips = () => {
                         </div>
                         <div>
                           <p className="text-muted-foreground">Quantity</p>
-                          <p className="font-medium">{trip.quantity} {trip.quantity_unit || 'quintals'}</p>
+                          <p className="font-medium">{request?.quantity} {request?.quantity_unit || 'quintals'}</p>
                         </div>
                         <div className="flex items-start gap-1">
                           <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
                           <div>
                             <p className="text-muted-foreground">Pickup Location</p>
-                            <p className="font-medium">{trip.pickup_village || trip.pickup_location}</p>
+                            <p className="font-medium">{request?.pickup_village || request?.pickup_location}</p>
                           </div>
                         </div>
                         <div className="flex items-start gap-1">
@@ -177,39 +123,36 @@ const ActiveTrips = () => {
                           <div>
                             <p className="text-muted-foreground">Preferred Date</p>
                             <p className="font-medium">
-                              {trip.preferred_date 
-                                ? format(parseISO(trip.preferred_date), 'MMM d, yyyy')
+                              {request?.preferred_date 
+                                ? format(parseISO(request.preferred_date), 'MMM d, yyyy')
                                 : 'Flexible'}
-                              {trip.preferred_time && ` @ ${trip.preferred_time}`}
+                              {request?.preferred_time && ` @ ${request.preferred_time}`}
                             </p>
                           </div>
                         </div>
                       </div>
 
-                      {trip.notes && (
+                      {request?.notes && (
                         <div className="p-2 bg-muted/50 rounded text-sm">
-                          <p className="text-muted-foreground">Notes: {trip.notes}</p>
+                          <p className="text-muted-foreground">Notes: {request.notes}</p>
                         </div>
                       )}
                     </div>
 
                     {/* Actions */}
                     <div className="flex flex-col gap-2 min-w-[180px]">
-                      {nextAction && (
-                        <Button 
-                          onClick={() => nextAction.action(trip)}
-                          disabled={updateStatus.isPending}
-                          className="w-full"
-                        >
-                          <nextAction.icon className="h-4 w-4 mr-2" />
-                          {nextAction.label}
-                        </Button>
-                      )}
+                      <Button 
+                        onClick={() => navigate(`/logistics/trip/${trip.id}`)}
+                        className="w-full"
+                      >
+                        <Package className="h-4 w-4 mr-2" />
+                        Open Trip
+                      </Button>
                       
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => openGoogleMaps(trip.pickup_village || trip.pickup_location)}
+                        onClick={() => openGoogleMaps(request?.pickup_village || request?.pickup_location || '')}
                         className="w-full"
                       >
                         <ExternalLink className="h-4 w-4 mr-2" />
@@ -227,15 +170,6 @@ const ActiveTrips = () => {
                           Call Farmer
                         </Button>
                       )}
-
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => navigate(`/logistics/trip/${trip.id}`)}
-                        className="w-full"
-                      >
-                        View Details
-                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -244,43 +178,6 @@ const ActiveTrips = () => {
           })}
         </div>
       )}
-
-      {/* Pickup Confirmation Dialog */}
-      <Dialog open={isPickupDialogOpen} onOpenChange={setIsPickupDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Pickup</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <p className="text-muted-foreground">
-              Confirm that you have picked up the load from the farmer.
-            </p>
-            
-            <div className="space-y-2">
-              <Label htmlFor="weight">Actual Weight (optional)</Label>
-              <Input
-                id="weight"
-                type="number"
-                placeholder="Enter actual weight in quintals"
-                value={pickupWeight}
-                onChange={(e) => setPickupWeight(e.target.value)}
-              />
-            </div>
-
-            <p className="text-xs text-muted-foreground">
-              Note: Photo upload feature coming soon. For now, take photos manually for records.
-            </p>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsPickupDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleConfirmPickup} disabled={updateStatus.isPending}>
-              {updateStatus.isPending ? 'Confirming...' : 'Confirm Pickup'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
       </div>
     </DashboardLayout>
   );
