@@ -8,14 +8,10 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { format, parseISO } from 'date-fns';
 
 const taskTypeLabels: Record<string, { en: string; kn: string }> = {
-  visit_request: { en: 'Visit Request', kn: 'ಭೇಟಿ ವಿನಂತಿ' },
-  visit: { en: 'Visit', kn: 'ಭೇಟಿ' },
-  soil_upload: { en: 'Soil Test', kn: 'ಮಣ್ಣು ಪರೀಕ್ಷೆ' },
-  crop_update: { en: 'Crop Issue', kn: 'ಬೆಳೆ ಸಮಸ್ಯೆ' },
-  transport_help: { en: 'Transport Help', kn: 'ಸಾರಿಗೆ ಸಹಾಯ' },
-  verify_crop: { en: 'Verify Crop', kn: 'ಬೆಳೆ ಪರಿಶೀಲನೆ' },
+  visit: { en: 'Visit Request', kn: 'ಭೇಟಿ ವಿನಂತಿ' },
+  verify_crop: { en: 'Crop Verification', kn: 'ಬೆಳೆ ಪರಿಶೀಲನೆ' },
   harvest_check: { en: 'Harvest Check', kn: 'ಕೊಯ್ಲು ಪರಿಶೀಲನೆ' },
-  transport_assist: { en: 'Transport Assist', kn: 'ಸಾರಿಗೆ ಸಹಾಯ' },
+  transport_assist: { en: 'Transport Help', kn: 'ಸಾರಿಗೆ ಸಹಾಯ' },
 };
 
 const statusConfig: Record<

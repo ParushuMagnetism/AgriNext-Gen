@@ -36,10 +36,10 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 const taskTypes = [
-  { value: 'visit_request', label: 'Request Visit', labelKn: 'ಭೇಟಿ ವಿನಂತಿ' },
-  { value: 'soil_upload', label: 'Soil Test Help', labelKn: 'ಮಣ್ಣು ಪರೀಕ್ಷೆ ಸಹಾಯ' },
-  { value: 'crop_update', label: 'Crop Issue', labelKn: 'ಬೆಳೆ ಸಮಸ್ಯೆ' },
-  { value: 'transport_help', label: 'Transport Help', labelKn: 'ಸಾರಿಗೆ ಸಹಾಯ' },
+  { value: 'visit', label: 'Request Visit', labelKn: 'ಭೇಟಿ ವಿನಂತಿ' },
+  { value: 'verify_crop', label: 'Crop Verification', labelKn: 'ಬೆಳೆ ಪರಿಶೀಲನೆ' },
+  { value: 'harvest_check', label: 'Harvest Check', labelKn: 'ಕೊಯ್ಲು ಪರಿಶೀಲನೆ' },
+  { value: 'transport_assist', label: 'Transport Help', labelKn: 'ಸಾರಿಗೆ ಸಹಾಯ' },
 ];
 
 export default function MyAgentWidget() {
