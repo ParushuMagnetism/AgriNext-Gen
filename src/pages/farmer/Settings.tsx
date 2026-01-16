@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import { useFarmerProfile } from '@/hooks/useFarmerDashboard';
+import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -20,7 +21,8 @@ import {
   Loader2,
   Shield,
   Bell,
-  Globe
+  Globe,
+  Check
 } from 'lucide-react';
 
 const SettingsPage = () => {
@@ -28,6 +30,7 @@ const SettingsPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { language, setLanguage, isLoading: languageLoading } = useLanguage();
   const [isSaving, setIsSaving] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -187,7 +190,7 @@ const SettingsPage = () => {
           </CardContent>
         </Card>
 
-        {/* Quick Settings */}
+        {/* Preferences */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -207,15 +210,37 @@ const SettingsPage = () => {
               <Button variant="outline" size="sm">Configure</Button>
             </div>
             
+            {/* Language Toggle */}
             <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
               <div className="flex items-center gap-3">
                 <Globe className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="font-medium">Language</p>
-                  <p className="text-sm text-muted-foreground">English</p>
+                  <p className="font-medium">Language / ಭಾಷೆ</p>
+                  <p className="text-sm text-muted-foreground">
+                    {language === 'en' ? 'English' : 'ಕನ್ನಡ'}
+                  </p>
                 </div>
               </div>
-              <Button variant="outline" size="sm">Change</Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant={language === 'en' ? 'default' : 'outline'} 
+                  size="sm"
+                  onClick={() => setLanguage('en')}
+                  disabled={languageLoading}
+                >
+                  {language === 'en' && <Check className="h-3 w-3 mr-1" />}
+                  English
+                </Button>
+                <Button 
+                  variant={language === 'kn' ? 'default' : 'outline'} 
+                  size="sm"
+                  onClick={() => setLanguage('kn')}
+                  disabled={languageLoading}
+                >
+                  {language === 'kn' && <Check className="h-3 w-3 mr-1" />}
+                  ಕನ್ನಡ
+                </Button>
+              </div>
             </div>
 
             <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">

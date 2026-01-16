@@ -1387,6 +1387,7 @@ export type Database = {
           location: string | null
           phone: string | null
           pincode: string | null
+          preferred_language: string | null
           taluk: string | null
           total_land_area: number | null
           updated_at: string
@@ -1403,6 +1404,7 @@ export type Database = {
           location?: string | null
           phone?: string | null
           pincode?: string | null
+          preferred_language?: string | null
           taluk?: string | null
           total_land_area?: number | null
           updated_at?: string
@@ -1419,6 +1421,7 @@ export type Database = {
           location?: string | null
           phone?: string | null
           pincode?: string | null
+          preferred_language?: string | null
           taluk?: string | null
           total_land_area?: number | null
           updated_at?: string
