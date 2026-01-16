@@ -254,8 +254,8 @@ export const useAddActivityLog = () => {
           activity_type: activityType,
           notes: notes || null,
           severity: severity || null,
-          meta: meta || null,
-        })
+          meta: meta ? JSON.parse(JSON.stringify(meta)) : null,
+        } as any)
         .select()
         .single();
 
