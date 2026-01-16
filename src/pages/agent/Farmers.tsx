@@ -36,11 +36,13 @@ import {
   Phone,
   Calendar,
   Search,
-  Edit
+  Edit,
+  TestTube2
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import AgentSoilReportUploadDialog from '@/components/agent/AgentSoilReportUploadDialog';
 
 const statusColors: Record<string, string> = {
   growing: 'bg-gray-100 text-gray-800',
@@ -58,6 +60,8 @@ const AgentFarmers = () => {
   const [selectedCrop, setSelectedCrop] = useState<any>(null);
   const [newStatus, setNewStatus] = useState('');
   const [newQuantity, setNewQuantity] = useState('');
+  const [soilReportDialogOpen, setSoilReportDialogOpen] = useState(false);
+  const [selectedFarmerIdForSoil, setSelectedFarmerIdForSoil] = useState<string | undefined>();
 
   const filteredFarmers = farmers?.filter((f) =>
     f.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -149,12 +153,13 @@ const AgentFarmers = () => {
                         <TableHead>District</TableHead>
                         <TableHead>Phone</TableHead>
                         <TableHead>Active Crops</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {filteredFarmers?.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center py-12">
+                          <TableCell colSpan={6} className="text-center py-12">
                             <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
                             <p className="text-muted-foreground">No farmers found</p>
                           </TableCell>
@@ -186,6 +191,19 @@ const AgentFarmers = () => {
                               <Badge variant="secondary">
                                 {getCropCount(farmer.id)} crops
                               </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedFarmerIdForSoil(farmer.id);
+                                  setSoilReportDialogOpen(true);
+                                }}
+                              >
+                                <TestTube2 className="h-3 w-3 mr-1" />
+                                Soil Report
+                              </Button>
                             </TableCell>
                           </TableRow>
                         ))
@@ -331,6 +349,14 @@ const AgentFarmers = () => {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Agent Soil Report Upload Dialog */}
+        <AgentSoilReportUploadDialog
+          open={soilReportDialogOpen}
+          onOpenChange={setSoilReportDialogOpen}
+          farmers={farmers || []}
+          preselectedFarmerId={selectedFarmerIdForSoil}
+        />
       </div>
     </DashboardLayout>
   );

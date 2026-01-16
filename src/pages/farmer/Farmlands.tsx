@@ -12,11 +12,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Search, LandPlot, MapPin, Layers, Edit, Trash2, TreeDeciduous } from 'lucide-react';
+import { Plus, Search, LandPlot, MapPin, Layers, Edit, Trash2, TreeDeciduous, TestTube2 } from 'lucide-react';
 import EditFarmlandDialog from '@/components/farmer/EditFarmlandDialog';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
 import EmptyState from '@/components/farmer/EmptyState';
 import HelpTooltip from '@/components/farmer/HelpTooltip';
+import FarmlandSoilReportsPanel from '@/components/farmer/soil-reports/FarmlandSoilReportsPanel';
 
 const FarmlandsPage = () => {
   const { data: farmlands, isLoading } = useFarmlands();
@@ -31,6 +32,8 @@ const FarmlandsPage = () => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deletingFarmland, setDeletingFarmland] = useState<{ id: string; name: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [soilReportsFarmland, setSoilReportsFarmland] = useState<Farmland | null>(null);
+  const [soilReportsPanelOpen, setSoilReportsPanelOpen] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -342,12 +345,22 @@ const FarmlandsPage = () => {
                       size="sm" 
                       className="flex-1"
                       onClick={() => {
+                        setSoilReportsFarmland(land);
+                        setSoilReportsPanelOpen(true);
+                      }}
+                    >
+                      <TestTube2 className="h-4 w-4 mr-1" />
+                      Soil Reports
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
                         setEditingFarmland(land);
                         setEditDialogOpen(true);
                       }}
                     >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit
+                      <Edit className="h-4 w-4" />
                     </Button>
                     <Button 
                       variant="outline" 
@@ -369,6 +382,12 @@ const FarmlandsPage = () => {
         farmland={editingFarmland}
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
+      />
+
+      <FarmlandSoilReportsPanel
+        farmland={soilReportsFarmland}
+        open={soilReportsPanelOpen}
+        onOpenChange={setSoilReportsPanelOpen}
       />
 
       <ConfirmDialog
