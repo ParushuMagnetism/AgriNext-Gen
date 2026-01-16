@@ -400,6 +400,14 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/admin/mysuru-demo"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <MysuruDemoSeed />
+                </ProtectedRoute>
+              }
+            />
             
             <Route path="*" element={<NotFound />} />
           </Routes>
