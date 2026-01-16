@@ -1553,69 +1553,100 @@ export type Database = {
       }
       transport_requests: {
         Row: {
+          assigned_at: string | null
+          assigned_trip_id: string | null
+          cancellation_reason: string | null
           completed_at: string | null
           created_at: string
           crop_id: string | null
           delivery_photo_url: string | null
           distance_km: number | null
+          drop_location: string | null
+          fare_estimate: number | null
           farmer_id: string
           id: string
           notes: string | null
           pickup_location: string
           pickup_photo_url: string | null
           pickup_village: string | null
+          pickup_window_end: string | null
+          pickup_window_start: string | null
           preferred_date: string | null
           preferred_time: string | null
           quantity: number
           quantity_unit: string | null
           status: Database["public"]["Enums"]["transport_status"]
+          status_updated_at: string | null
           transporter_id: string | null
           updated_at: string
           vehicle_id: string | null
         }
         Insert: {
+          assigned_at?: string | null
+          assigned_trip_id?: string | null
+          cancellation_reason?: string | null
           completed_at?: string | null
           created_at?: string
           crop_id?: string | null
           delivery_photo_url?: string | null
           distance_km?: number | null
+          drop_location?: string | null
+          fare_estimate?: number | null
           farmer_id: string
           id?: string
           notes?: string | null
           pickup_location: string
           pickup_photo_url?: string | null
           pickup_village?: string | null
+          pickup_window_end?: string | null
+          pickup_window_start?: string | null
           preferred_date?: string | null
           preferred_time?: string | null
           quantity: number
           quantity_unit?: string | null
           status?: Database["public"]["Enums"]["transport_status"]
+          status_updated_at?: string | null
           transporter_id?: string | null
           updated_at?: string
           vehicle_id?: string | null
         }
         Update: {
+          assigned_at?: string | null
+          assigned_trip_id?: string | null
+          cancellation_reason?: string | null
           completed_at?: string | null
           created_at?: string
           crop_id?: string | null
           delivery_photo_url?: string | null
           distance_km?: number | null
+          drop_location?: string | null
+          fare_estimate?: number | null
           farmer_id?: string
           id?: string
           notes?: string | null
           pickup_location?: string
           pickup_photo_url?: string | null
           pickup_village?: string | null
+          pickup_window_end?: string | null
+          pickup_window_start?: string | null
           preferred_date?: string | null
           preferred_time?: string | null
           quantity?: number
           quantity_unit?: string | null
           status?: Database["public"]["Enums"]["transport_status"]
+          status_updated_at?: string | null
           transporter_id?: string | null
           updated_at?: string
           vehicle_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "transport_requests_assigned_trip_id_fkey"
+            columns: ["assigned_trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "transport_requests_crop_id_fkey"
             columns: ["crop_id"]
@@ -1628,6 +1659,57 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transport_status_events: {
+        Row: {
+          actor_id: string
+          actor_role: string
+          created_at: string | null
+          id: string
+          new_status: string
+          note: string | null
+          old_status: string | null
+          transport_request_id: string
+          trip_id: string | null
+        }
+        Insert: {
+          actor_id: string
+          actor_role: string
+          created_at?: string | null
+          id?: string
+          new_status: string
+          note?: string | null
+          old_status?: string | null
+          transport_request_id: string
+          trip_id?: string | null
+        }
+        Update: {
+          actor_id?: string
+          actor_role?: string
+          created_at?: string | null
+          id?: string
+          new_status?: string
+          note?: string | null
+          old_status?: string | null
+          transport_request_id?: string
+          trip_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_status_events_transport_request_id_fkey"
+            columns: ["transport_request_id"]
+            isOneToOne: false
+            referencedRelation: "transport_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_status_events_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
             referencedColumns: ["id"]
           },
         ]
@@ -1673,6 +1755,89 @@ export type Database = {
           vehicle_type?: string | null
         }
         Relationships: []
+      }
+      trips: {
+        Row: {
+          actual_weight_kg: number | null
+          arrived_at: string | null
+          assigned_at: string | null
+          cancelled_at: string | null
+          created_at: string | null
+          delivered_at: string | null
+          delivery_otp_required: boolean | null
+          delivery_otp_verified: boolean | null
+          delivery_proofs: Json | null
+          en_route_at: string | null
+          id: string
+          in_transit_at: string | null
+          issue_code: string | null
+          issue_notes: string | null
+          picked_up_at: string | null
+          pickup_otp_required: boolean | null
+          pickup_otp_verified: boolean | null
+          pickup_proofs: Json | null
+          status: string
+          transport_request_id: string
+          transporter_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          actual_weight_kg?: number | null
+          arrived_at?: string | null
+          assigned_at?: string | null
+          cancelled_at?: string | null
+          created_at?: string | null
+          delivered_at?: string | null
+          delivery_otp_required?: boolean | null
+          delivery_otp_verified?: boolean | null
+          delivery_proofs?: Json | null
+          en_route_at?: string | null
+          id?: string
+          in_transit_at?: string | null
+          issue_code?: string | null
+          issue_notes?: string | null
+          picked_up_at?: string | null
+          pickup_otp_required?: boolean | null
+          pickup_otp_verified?: boolean | null
+          pickup_proofs?: Json | null
+          status?: string
+          transport_request_id: string
+          transporter_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          actual_weight_kg?: number | null
+          arrived_at?: string | null
+          assigned_at?: string | null
+          cancelled_at?: string | null
+          created_at?: string | null
+          delivered_at?: string | null
+          delivery_otp_required?: boolean | null
+          delivery_otp_verified?: boolean | null
+          delivery_proofs?: Json | null
+          en_route_at?: string | null
+          id?: string
+          in_transit_at?: string | null
+          issue_code?: string | null
+          issue_notes?: string | null
+          picked_up_at?: string | null
+          pickup_otp_required?: boolean | null
+          pickup_otp_verified?: boolean | null
+          pickup_proofs?: Json | null
+          status?: string
+          transport_request_id?: string
+          transporter_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trips_transport_request_id_fkey"
+            columns: ["transport_request_id"]
+            isOneToOne: true
+            referencedRelation: "transport_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trusted_sources: {
         Row: {

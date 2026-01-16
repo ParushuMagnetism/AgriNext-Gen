@@ -24,3 +24,7 @@ verify_jwt = false
 [functions.tts-elevenlabs]
 
 [functions.save-agent-voice-note]
+
+[functions.accept-load]
+
+[functions.update-trip-status]
