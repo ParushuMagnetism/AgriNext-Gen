@@ -1,9 +1,9 @@
-import { useCrops, useMarketPrices, useAllMarketPrices, useFarmerProfile } from '@/hooks/useFarmerDashboard';
-import { usePriceForecasts } from '@/hooks/useMarketData';
+import { useCrops, useFarmerProfile } from '@/hooks/useFarmerDashboard';
+import { useMarketPricesTiered, usePriceForecasts } from '@/hooks/useMarketData';
 import { useIsDistrictValid } from '@/hooks/useKarnatakaDistricts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { TrendingUp, TrendingDown, Minus, IndianRupee, RefreshCw, Clock, MapPin, AlertCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, IndianRupee, RefreshCw, Clock, MapPin, AlertCircle, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
@@ -17,53 +17,28 @@ const MarketPricesWidget = () => {
   // Check if farmer has a valid Karnataka district
   const hasValidDistrict = useIsDistrictValid(profile?.district);
   
-  // Use farmer's crops prices if they have crops, otherwise show all prices
-  const { data: farmerPrices, isLoading: farmerLoading, refetch: refetchFarmer, isFetching: isFetchingFarmer } = useMarketPrices(cropNames);
-  const { data: allPrices, isLoading: allLoading, refetch: refetchAll, isFetching: isFetchingAll } = useAllMarketPrices();
+  // Use 3-tier fallback system
+  const { 
+    data: pricesData, 
+    isLoading: pricesLoading, 
+    refetch, 
+    isFetching,
+    error: pricesError 
+  } = useMarketPricesTiered(
+    hasValidDistrict ? profile?.district : null,
+    cropNames
+  );
+
   const { data: forecasts } = usePriceForecasts(cropNames);
   
-  const hasCrops = cropNames.length > 0;
-  const prices = hasCrops ? farmerPrices : allPrices;
-  const isLoading = profileLoading || (hasCrops ? farmerLoading : allLoading);
-  const isFetching = hasCrops ? isFetchingFarmer : isFetchingAll;
-  const refetch = hasCrops ? refetchFarmer : refetchAll;
-
-  // Group prices by crop name and market, get latest
-  const latestPrices = prices?.reduce((acc, price) => {
-    const key = `${price.crop_name}-${price.market_name}`;
-    if (!acc[key] || new Date(price.date) > new Date(acc[key].date)) {
-      acc[key] = price;
-    }
-    return acc;
-  }, {} as Record<string, typeof prices[0]>);
-
-  const pricesList = Object.values(latestPrices || {}).slice(0, 8);
+  const isLoading = profileLoading || pricesLoading;
+  const pricesList = pricesData?.data || [];
+  const tier = pricesData?.tier || 'C';
+  const tierLabel = pricesData?.label || 'Market Prices';
 
   // Get forecast for a crop
   const getForecast = (cropName: string) => {
     return forecasts?.find(f => f.crop_name === cropName);
-  };
-
-  const getTrendIcon = (trend: string | null) => {
-    switch (trend) {
-      case 'up':
-        return <TrendingUp className="h-4 w-4 text-emerald-600" />;
-      case 'down':
-        return <TrendingDown className="h-4 w-4 text-destructive" />;
-      default:
-        return <Minus className="h-4 w-4 text-muted-foreground" />;
-    }
-  };
-
-  const getTrendColor = (trend: string | null) => {
-    switch (trend) {
-      case 'up':
-        return 'text-emerald-600 bg-emerald-50';
-      case 'down':
-        return 'text-destructive bg-destructive/10';
-      default:
-        return 'text-muted-foreground bg-muted';
-    }
   };
 
   const getForecastBadge = (forecast: ReturnType<typeof getForecast>) => {
@@ -92,9 +67,9 @@ const MarketPricesWidget = () => {
   // Get the most recent fetched_at from prices
   const lastUpdated = pricesList.length > 0 
     ? pricesList.reduce((latest, price) => {
-        const fetchedAt = (price as any).fetched_at || price.date;
+        const fetchedAt = price.fetched_at || new Date().toISOString();
         return new Date(fetchedAt) > new Date(latest) ? fetchedAt : latest;
-      }, pricesList[0].date)
+      }, pricesList[0].fetched_at || new Date().toISOString())
     : null;
 
   if (isLoading) {
@@ -126,11 +101,7 @@ const MarketPricesWidget = () => {
             Karnataka Mandi Prices
           </CardTitle>
           <p className="text-xs text-muted-foreground mt-1">
-            {hasValidDistrict && profile?.district 
-              ? `Prices for ${profile.district}` 
-              : hasCrops 
-                ? 'Prices for your crops' 
-                : 'Today\'s market rates'}
+            {tierLabel}
           </p>
         </div>
         <Button 
@@ -143,31 +114,58 @@ const MarketPricesWidget = () => {
         </Button>
       </CardHeader>
       <CardContent>
-        {/* Show fallback message if district is not set */}
-        {!hasValidDistrict && (
+        {/* Show Tier C banner - district not set */}
+        {tier === 'C' && !hasValidDistrict && (
           <Alert className="mb-4 border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800">
-            <AlertCircle className="h-4 w-4 text-amber-600" />
+            <MapPin className="h-4 w-4 text-amber-600" />
             <AlertDescription className="text-amber-800 dark:text-amber-200 text-sm">
               Set your district to see personalized local mandi prices
             </AlertDescription>
           </Alert>
         )}
+
+        {/* Show Tier B info - no crops yet */}
+        {tier === 'B' && cropNames.length === 0 && (
+          <Alert className="mb-4 border-blue-200 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-800">
+            <Info className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800 dark:text-blue-200 text-sm">
+              Add your crops to see prices specific to your harvest
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Error state with retry */}
+        {pricesError && (
+          <div className="text-center py-8">
+            <AlertCircle className="h-10 w-10 mx-auto text-destructive/50 mb-3" />
+            <p className="text-muted-foreground text-sm mb-3">
+              Failed to load prices
+            </p>
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          </div>
+        )}
         
-        {pricesList.length === 0 ? (
+        {!pricesError && pricesList.length === 0 ? (
           <div className="text-center py-8">
             <IndianRupee className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
             <p className="text-muted-foreground text-sm">
               No price data available
             </p>
             <p className="text-xs text-muted-foreground/70 mt-1">
-              Add crops to see relevant market prices
+              Prices will appear once synced from mandis
             </p>
+            <Button variant="outline" size="sm" className="mt-4" onClick={() => refetch()}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
           </div>
-        ) : (
+        ) : !pricesError && (
           <div className="space-y-2">
             {pricesList.map((price) => {
               const forecast = getForecast(price.crop_name);
-              const fetchedAt = (price as any).fetched_at;
               
               return (
                 <div
@@ -175,8 +173,8 @@ const MarketPricesWidget = () => {
                   className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border/50 hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className={`p-1.5 rounded-md shrink-0 ${getTrendColor(price.trend_direction)}`}>
-                      {getTrendIcon(price.trend_direction)}
+                    <div className="p-1.5 rounded-md shrink-0 bg-primary/10 text-primary">
+                      <IndianRupee className="h-4 w-4" />
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
@@ -185,19 +183,24 @@ const MarketPricesWidget = () => {
                       </div>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <MapPin className="h-3 w-3" />
-                        <span className="truncate">{price.market_name}</span>
+                        <span className="truncate">{price.district}</span>
+                        {price.confidence && (
+                          <Badge variant="outline" className="text-[9px] px-1 py-0 ml-1">
+                            {price.confidence}
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   </div>
                   <div className="text-right shrink-0">
                     <p className="font-semibold text-foreground flex items-center gap-0.5 justify-end">
                       <IndianRupee className="h-3.5 w-3.5" />
-                      {price.modal_price.toLocaleString('en-IN')}
-                      <span className="text-xs text-muted-foreground font-normal">/qtl</span>
+                      {price.modal_price?.toLocaleString('en-IN') || 'N/A'}
+                      <span className="text-xs text-muted-foreground font-normal">/{price.unit || 'qtl'}</span>
                     </p>
-                    {price.min_price && price.max_price && (
+                    {price.sources_count && price.sources_count > 1 && (
                       <p className="text-xs text-muted-foreground">
-                        ₹{price.min_price.toLocaleString('en-IN')} - ₹{price.max_price.toLocaleString('en-IN')}
+                        {price.sources_count} sources
                       </p>
                     )}
                   </div>

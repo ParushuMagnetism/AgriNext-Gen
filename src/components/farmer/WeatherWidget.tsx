@@ -14,9 +14,11 @@ import {
   MapPin,
   RefreshCw,
   CloudLightning,
-  Clock
+  Clock,
+  AlertCircle
 } from 'lucide-react';
 import { useFarmerProfile } from '@/hooks/useFarmerDashboard';
+import { useIsDistrictValid } from '@/hooks/useKarnatakaDistricts';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -60,6 +62,9 @@ const getWeatherIcon = (icon: string) => {
 
 const WeatherWidget = () => {
   const { data: profile, isLoading: profileLoading } = useFarmerProfile();
+  const hasValidDistrict = useIsDistrictValid(profile?.district);
+  const hasLocation = !!(profile?.village || profile?.district || profile?.pincode);
+  
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -68,6 +73,12 @@ const WeatherWidget = () => {
   const [isStale, setIsStale] = useState(false);
 
   const fetchWeather = async (showRefreshSpinner = false) => {
+    // Don't fetch if no location set
+    if (!hasLocation) {
+      setIsLoading(false);
+      return;
+    }
+
     if (showRefreshSpinner) setIsRefreshing(true);
     else setIsLoading(true);
     
@@ -98,23 +109,8 @@ const WeatherWidget = () => {
     } catch (err) {
       console.error('Weather fetch error:', err);
       setError('Could not load weather');
-      
-      // Use fallback based on Karnataka climate
-      const month = new Date().getMonth();
-      const isMonsoon = month >= 5 && month <= 9;
-      const isWinter = month >= 11 || month <= 1;
-      const isSummer = month >= 2 && month <= 4;
-
-      setWeather({
-        temp_c: isSummer ? 34 : isWinter ? 22 : 28,
-        humidity: isMonsoon ? 80 : isWinter ? 50 : 60,
-        wind_kmh: 12,
-        description: isMonsoon ? 'Rainy' : isSummer ? 'Sunny' : 'Partly Cloudy',
-        icon: isMonsoon ? 'rain' : isSummer ? 'sun' : 'cloud',
-        forecast_short: 'Weather data unavailable',
-        fetched_at: new Date().toISOString(),
-        location: profile?.village || 'Karnataka',
-      });
+      // DO NOT use fake fallback data - show error state instead
+      setWeather(null);
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -122,10 +118,12 @@ const WeatherWidget = () => {
   };
 
   useEffect(() => {
-    if (!profileLoading) {
+    if (!profileLoading && hasLocation) {
       fetchWeather();
+    } else if (!profileLoading && !hasLocation) {
+      setIsLoading(false);
     }
-  }, [profileLoading, profile?.village]);
+  }, [profileLoading, hasLocation, profile?.village]);
 
   if (isLoading || profileLoading) {
     return (
@@ -143,6 +141,68 @@ const WeatherWidget = () => {
               <Skeleton className="h-8 w-16 bg-white/20" />
               <Skeleton className="h-4 w-24 bg-white/20" />
             </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // No location set - show prompt instead of fake weather
+  if (!hasLocation) {
+    return (
+      <Card className="bg-gradient-to-br from-slate-400 to-slate-500 text-white border-0 overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+        
+        <CardHeader className="pb-2 relative">
+          <CardTitle className="flex items-center gap-2 text-white/90 text-base">
+            <Cloud className="h-4 w-4" />
+            Weather Today
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="relative">
+          <div className="flex flex-col items-center justify-center py-4 text-center">
+            <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm mb-4">
+              <MapPin className="h-8 w-8 text-white/80" />
+            </div>
+            <p className="text-white/90 font-medium mb-1">Set your location</p>
+            <p className="text-white/60 text-sm mb-4">
+              Add your village or district to see local weather
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Error state with retry
+  if (error && !weather) {
+    return (
+      <Card className="bg-gradient-to-br from-slate-500 to-slate-600 text-white border-0 overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+        
+        <CardHeader className="pb-2 relative">
+          <CardTitle className="flex items-center gap-2 text-white/90 text-base">
+            <Cloud className="h-4 w-4" />
+            Weather Today
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="relative">
+          <div className="flex flex-col items-center justify-center py-4 text-center">
+            <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm mb-4">
+              <AlertCircle className="h-8 w-8 text-white/80" />
+            </div>
+            <p className="text-white/90 font-medium mb-1">Weather unavailable</p>
+            <p className="text-white/60 text-sm mb-4">{error}</p>
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              onClick={() => fetchWeather(true)}
+              disabled={isRefreshing}
+              className="bg-white/20 hover:bg-white/30 text-white"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Retry
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -231,7 +291,6 @@ const WeatherWidget = () => {
           <Clock className="h-3 w-3" />
           <span>Updated {lastUpdated}</span>
           {isStale && <span className="text-amber-300 ml-1">(cached)</span>}
-          {error && <span className="text-amber-300 ml-1">(offline)</span>}
         </div>
       </CardContent>
     </Card>
