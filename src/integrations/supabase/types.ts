@@ -737,6 +737,27 @@ export type Database = {
           },
         ]
       }
+      district_neighbors: {
+        Row: {
+          created_at: string | null
+          district: string
+          id: string
+          neighbor_district: string
+        }
+        Insert: {
+          created_at?: string | null
+          district: string
+          id?: string
+          neighbor_district: string
+        }
+        Update: {
+          created_at?: string | null
+          district?: string
+          id?: string
+          neighbor_district?: string
+        }
+        Relationships: []
+      }
       farm_pickups: {
         Row: {
           created_at: string
@@ -1213,7 +1234,10 @@ export type Database = {
           crop_name: string
           district: string
           fetched_at: string | null
+          freshness_minutes: number | null
           id: string
+          max_price: number | null
+          min_price: number | null
           modal_price: number | null
           sources_count: number | null
           sources_used: Json | null
@@ -1225,7 +1249,10 @@ export type Database = {
           crop_name: string
           district: string
           fetched_at?: string | null
+          freshness_minutes?: number | null
           id?: string
+          max_price?: number | null
+          min_price?: number | null
           modal_price?: number | null
           sources_count?: number | null
           sources_used?: Json | null
@@ -1237,7 +1264,10 @@ export type Database = {
           crop_name?: string
           district?: string
           fetched_at?: string | null
+          freshness_minutes?: number | null
           id?: string
+          max_price?: number | null
+          min_price?: number | null
           modal_price?: number | null
           sources_count?: number | null
           sources_used?: Json | null
@@ -1248,34 +1278,64 @@ export type Database = {
       }
       market_prices_raw: {
         Row: {
+          content_hash: string | null
+          crop_canonical: string | null
           crop_name: string
           district: string | null
+          error: string | null
           fetched_at: string | null
           id: string
           mandi_name: string | null
+          max_price: number | null
+          min_price: number | null
+          modal_price: number | null
           raw_json: Json | null
+          reliability_score: number | null
+          source_name: string | null
           source_url: string | null
           state: string | null
+          status: string | null
+          unit: string | null
         }
         Insert: {
+          content_hash?: string | null
+          crop_canonical?: string | null
           crop_name: string
           district?: string | null
+          error?: string | null
           fetched_at?: string | null
           id?: string
           mandi_name?: string | null
+          max_price?: number | null
+          min_price?: number | null
+          modal_price?: number | null
           raw_json?: Json | null
+          reliability_score?: number | null
+          source_name?: string | null
           source_url?: string | null
           state?: string | null
+          status?: string | null
+          unit?: string | null
         }
         Update: {
+          content_hash?: string | null
+          crop_canonical?: string | null
           crop_name?: string
           district?: string | null
+          error?: string | null
           fetched_at?: string | null
           id?: string
           mandi_name?: string | null
+          max_price?: number | null
+          min_price?: number | null
+          modal_price?: number | null
           raw_json?: Json | null
+          reliability_score?: number | null
+          source_name?: string | null
           source_url?: string | null
           state?: string | null
+          status?: string | null
+          unit?: string | null
         }
         Relationships: []
       }
@@ -2087,10 +2147,13 @@ export type Database = {
           endpoint: string
           error: string | null
           fetched_at: string
+          function_name: string | null
           http_status: number | null
           id: string
           latency_ms: number | null
           query: string | null
+          request_json: Json | null
+          response_meta: Json | null
           response_size: number | null
           segment_key: string | null
           source_id: string | null
@@ -2102,10 +2165,13 @@ export type Database = {
           endpoint: string
           error?: string | null
           fetched_at?: string
+          function_name?: string | null
           http_status?: number | null
           id?: string
           latency_ms?: number | null
           query?: string | null
+          request_json?: Json | null
+          response_meta?: Json | null
           response_size?: number | null
           segment_key?: string | null
           source_id?: string | null
@@ -2117,10 +2183,13 @@ export type Database = {
           endpoint?: string
           error?: string | null
           fetched_at?: string
+          function_name?: string | null
           http_status?: number | null
           id?: string
           latency_ms?: number | null
           query?: string | null
+          request_json?: Json | null
+          response_meta?: Json | null
           response_size?: number | null
           segment_key?: string | null
           source_id?: string | null
