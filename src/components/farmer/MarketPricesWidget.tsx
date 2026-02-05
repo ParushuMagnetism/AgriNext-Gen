@@ -26,9 +26,10 @@ import { Button } from '@/components/ui/button';
 import { formatDistanceToNow, differenceInHours } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { t } from '@/i18n';
+import { useLanguage } from '@/hooks/useLanguage';
 
 const MarketPricesWidget = () => {
+  const { t } = useLanguage();
   const { data: profile, isLoading: profileLoading } = useFarmerProfile();
   const { data: crops } = useCrops();
   const cropNames = [...new Set(crops?.map(c => c.crop_name) || [])];
