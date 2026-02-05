@@ -110,7 +110,7 @@ const DashboardHeader = ({ title, onMenuClick }: DashboardHeaderProps) => {
         <Button
           variant="ghost"
           size="icon"
-          className="lg:hidden"
+          className="md:hidden"
           onClick={onMenuClick}
         >
           <Menu className="h-5 w-5" />

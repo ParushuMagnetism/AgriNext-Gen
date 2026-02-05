@@ -26,9 +26,11 @@ import { Button } from '@/components/ui/button';
 
 interface DashboardSidebarProps {
   onClose?: () => void;
+  isOpen?: boolean;
+  isMobile?: boolean;
 }
 
-const DashboardSidebar = ({ onClose }: DashboardSidebarProps) => {
+const DashboardSidebar = ({ onClose, isOpen = true, isMobile = false }: DashboardSidebarProps) => {
   const location = useLocation();
   const { signOut, userRole } = useAuth();
   const { t } = useLanguage();
@@ -123,7 +125,16 @@ const DashboardSidebar = ({ onClose }: DashboardSidebarProps) => {
   };
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-sidebar border-r border-sidebar-border">
+    <aside 
+      className={cn(
+        "h-screen w-64 bg-sidebar border-r border-sidebar-border flex-shrink-0",
+        // Mobile: fixed drawer with transform
+        isMobile && "fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out",
+        isMobile && (isOpen ? "translate-x-0" : "-translate-x-full"),
+        // Desktop: static in document flow (handled by parent)
+        !isMobile && "relative"
+      )}
+    >
       <div className="flex h-full flex-col">
         {/* Logo */}
         <div className="flex h-16 items-center justify-between px-6 border-b border-sidebar-border">
