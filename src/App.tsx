@@ -52,6 +52,7 @@ import AIConsole from "./pages/admin/AIConsole";
 import SeedData from "./pages/admin/SeedData";
 import MysuruDemoSeed from "./pages/admin/MysruDemoSeed";
 import DataHealth from "./pages/admin/DataHealth";
+ import ListingTrace from "./pages/trace/ListingTrace";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -69,6 +70,9 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             
+             {/* Public trace routes - no auth required */}
+             <Route path="/trace/listing/:traceCode" element={<ListingTrace />} />
+             
             {/* Marketplace redirect for unauthenticated users */}
             <Route path="/marketplace" element={<Navigate to="/login" replace />} />
             
