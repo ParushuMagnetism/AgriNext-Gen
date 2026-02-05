@@ -33,19 +33,18 @@ const FarmerDashboard = () => {
         {/* Farmer Summary Header */}
         <FarmerSummaryCard />
 
-       {/* Agent Notes Section - Important updates from your agent */}
-       <AgentNotesSection />
-
         {/* Quick Actions */}
         <QuickActions />
 
-        {/* Weather + Farmlands Summary Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Key Info Row: Weather + Mandi Prices + Agent Notes */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <WeatherWidget />
-          <div className="lg:col-span-2">
-            <FarmlandsSummary />
-          </div>
+          <MarketPricesWidget />
+          <AgentNotesSection />
         </div>
+
+        {/* Farmlands Summary */}
+        <FarmlandsSummary />
 
         {/* Crop Photo Reminders */}
         <CropPhotoReminderWidget />
@@ -59,11 +58,8 @@ const FarmerDashboard = () => {
           <TransportSection />
         </div>
 
-        {/* Two column layout for Market Prices & Advisories */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <MarketPricesWidget />
-          <AdvisoriesList />
-        </div>
+        {/* Advisories */}
+        <AdvisoriesList />
 
         {/* My Agent + Help Requests */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
