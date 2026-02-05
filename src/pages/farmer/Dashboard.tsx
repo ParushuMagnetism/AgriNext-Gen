@@ -33,6 +33,9 @@ const FarmerDashboard = () => {
         {/* Farmer Summary Header */}
         <FarmerSummaryCard />
 
+       {/* Agent Notes Section - Important updates from your agent */}
+       <AgentNotesSection />
+
         {/* Quick Actions */}
         <QuickActions />
 
@@ -67,9 +70,6 @@ const FarmerDashboard = () => {
           <MyAgentWidget />
           <MyHelpRequests />
         </div>
-
-        {/* Agent Notes Section */}
-        <AgentNotesSection />
       </div>
       
       {/* Voice Assistant - Floating Button */}
