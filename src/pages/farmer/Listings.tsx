@@ -12,7 +12,8 @@ import {
   Eye, 
   MoreVertical,
   Package,
-  Filter
+   Filter,
+   QrCode
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -41,6 +42,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+ import ListingTraceQR from '@/components/listings/ListingTraceQR';
 
 interface Listing {
   id: string;
@@ -54,6 +56,10 @@ interface Listing {
   image_url: string | null;
   is_active: boolean;
   created_at: string;
+   trace_code: string | null;
+   trace_status: string;
+   inputs_summary: string | null;
+   test_report_urls: unknown;
 }
 
 const categories = ['Vegetables', 'Fruits', 'Grains', 'Pulses', 'Dairy', 'Spices', 'Other'];
@@ -220,6 +226,18 @@ const FarmerListings = () => {
     }
   };
 
+   const handleTraceCodeGenerated = (listingId: string, traceCode: string) => {
+     setListings(prev => prev.map(l => 
+       l.id === listingId ? { ...l, trace_code: traceCode } : l
+     ));
+   };
+ 
+   const handleTraceStatusChange = (listingId: string, newStatus: string) => {
+     setListings(prev => prev.map(l => 
+       l.id === listingId ? { ...l, trace_status: newStatus } : l
+     ));
+   };
+ 
   const filteredListings = listings.filter(listing =>
     listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     listing.category.toLowerCase().includes(searchQuery.toLowerCase())
@@ -429,6 +447,21 @@ const FarmerListings = () => {
                   <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
                     {listing.description || t('farmer.listings.noDescription')}
                   </p>
+                   {/* Trace QR Section */}
+                   <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
+                     <QrCode className="h-4 w-4 text-muted-foreground" />
+                     <span className="text-xs text-muted-foreground flex-1">
+                       {listing.trace_code || 'No trace code'}
+                     </span>
+                     <ListingTraceQR
+                       listingId={listing.id}
+                       traceCode={listing.trace_code}
+                       traceStatus={listing.trace_status || 'published'}
+                       productName={listing.title}
+                       onTraceCodeGenerated={(code) => handleTraceCodeGenerated(listing.id, code)}
+                       onStatusChange={(status) => handleTraceStatusChange(listing.id, status)}
+                     />
+                   </div>
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
                     <div>
                       <p className="text-lg font-semibold text-foreground">

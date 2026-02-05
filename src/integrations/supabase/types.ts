@@ -1162,12 +1162,16 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          inputs_summary: string | null
           is_active: boolean
           location: string | null
           price: number
           quantity: number
           seller_id: string
+          test_report_urls: Json
           title: string
+          trace_code: string | null
+          trace_status: string
           unit: string
           updated_at: string
         }
@@ -1177,12 +1181,16 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          inputs_summary?: string | null
           is_active?: boolean
           location?: string | null
           price: number
           quantity: number
           seller_id: string
+          test_report_urls?: Json
           title: string
+          trace_code?: string | null
+          trace_status?: string
           unit?: string
           updated_at?: string
         }
@@ -1192,12 +1200,16 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          inputs_summary?: string | null
           is_active?: boolean
           location?: string | null
           price?: number
           quantity?: number
           seller_id?: string
+          test_report_urls?: Json
           title?: string
+          trace_code?: string | null
+          trace_status?: string
           unit?: string
           updated_at?: string
         }
