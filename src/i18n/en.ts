@@ -261,6 +261,16 @@ export const en = {
     crops: {
       viewAllCrops: 'View All Crops',
     },
+   market: {
+     title: 'Mandi Prices',
+     staleData: 'Data may be outdated. Tap refresh for latest prices.',
+     setDistrict: 'Set your district for personalized prices.',
+     addCrops: 'Add crops to see more relevant prices.',
+     noData: 'No price data available',
+     syncPending: 'Price sync pending',
+     forecast: 'Price Forecast',
+     lastUpdated: 'Last updated',
+   },
   },
 
   // Farmlands
