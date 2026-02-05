@@ -171,14 +171,20 @@ const DashboardSidebar = ({ onClose }: DashboardSidebarProps) => {
             </div>
           </div>
           {/* Mobile close button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden text-sidebar-foreground hover:bg-sidebar-accent"
-            onClick={onClose}
-          >
-            <X className="h-5 w-5" />
-          </Button>
+          {onClose && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden text-sidebar-foreground hover:bg-sidebar-accent pointer-events-auto relative z-10"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
+              aria-label="Close sidebar"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          )}
         </div>
 
         {/* Navigation */}
