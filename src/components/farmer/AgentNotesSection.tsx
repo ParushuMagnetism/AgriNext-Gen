@@ -1,9 +1,8 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
   FileAudio, 
@@ -11,11 +10,14 @@ import {
   Pause, 
   User, 
   Calendar,
-  MessageSquare
+  MessageSquare,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface AgentVoiceNote {
   id: string;
@@ -39,6 +41,7 @@ const AgentNotesSection = () => {
   const { user } = useAuth();
   const [playingNoteId, setPlayingNoteId] = useState<string | null>(null);
   const [audioLoading, setAudioLoading] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const { data: notes, isLoading } = useQuery({
@@ -62,6 +65,14 @@ const AgentNotesSection = () => {
     },
     enabled: !!user?.id,
   });
+
+  // Show first 2 notes by default, expand to show all
+  const visibleNotes = useMemo(() => {
+    if (!notes) return [];
+    return isExpanded ? notes : notes.slice(0, 2);
+  }, [notes, isExpanded]);
+
+  const hasMoreNotes = (notes?.length || 0) > 2;
 
   const playAudio = useCallback(async (note: AgentVoiceNote) => {
     if (!note.audio_path) return;
@@ -109,19 +120,15 @@ const AgentNotesSection = () => {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
+      <Card className="overflow-hidden">
+        <CardHeader className="py-3 px-4">
+          <CardTitle className="text-base flex items-center gap-2">
             <FileAudio className="h-5 w-5 text-primary" />
             Agent Notes
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-20 w-full" />
-            ))}
-          </div>
+        <CardContent className="px-4 pb-3 pt-0">
+          <Skeleton className="h-12 w-full" />
         </CardContent>
       </Card>
     );
@@ -129,20 +136,17 @@ const AgentNotesSection = () => {
 
   if (!notes || notes.length === 0) {
     return (
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <FileAudio className="h-5 w-5 text-primary" />
+      <Card className="overflow-hidden">
+        <CardHeader className="py-3 px-4">
+          <CardTitle className="text-base flex items-center gap-2">
+            <FileAudio className="h-4 w-4 text-muted-foreground" />
             Agent Notes
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="text-center py-6 text-muted-foreground">
-            <MessageSquare className="h-10 w-10 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No agent notes yet</p>
-            <p className="text-xs mt-1">
-              Your field agent will leave notes here after visits
-            </p>
+        <CardContent className="px-4 pb-3 pt-0">
+          <div className="flex items-center gap-3 text-muted-foreground">
+            <MessageSquare className="h-4 w-4 opacity-50" />
+            <p className="text-sm">No notes from your agent yet</p>
           </div>
         </CardContent>
       </Card>
@@ -150,70 +154,89 @@ const AgentNotesSection = () => {
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center gap-2">
+    <Card className="overflow-hidden">
+      <CardHeader className="py-3 px-4">
+        <CardTitle className="text-base flex items-center gap-2">
           <FileAudio className="h-5 w-5 text-primary" />
           Agent Notes
-          <Badge variant="secondary" className="ml-auto">
+          <Badge variant="secondary" className="ml-auto text-xs">
             {notes.length} notes
           </Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
-        <ScrollArea className="h-[300px]">
-          <div className="p-4 space-y-3">
-            {notes.map((note) => (
-              <div
-                key={note.id}
-                className="p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <User className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">
-                        Field Agent
-                      </span>
-                      <Badge variant="outline" className="text-[10px] px-1.5">
-                        {languageLabels[note.language_code] || note.language_code}
-                      </Badge>
-                    </div>
-                    
-                    {note.note_text && (
-                      <p className="text-sm line-clamp-3">{note.note_text}</p>
-                    )}
-                    
-                    <div className="flex items-center gap-2 mt-2">
-                      <Calendar className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">
-                        {format(new Date(note.created_at), 'MMM d, yyyy h:mm a')}
-                      </span>
-                    </div>
+      <CardContent className="px-4 pb-3 pt-0">
+        <div className="space-y-2">
+          {visibleNotes.map((note) => (
+            <div
+              key={note.id}
+              className="p-2.5 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <User className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">
+                      Field Agent
+                    </span>
+                    <Badge variant="outline" className="text-[10px] px-1 py-0">
+                      {languageLabels[note.language_code] || note.language_code}
+                    </Badge>
+                    <span className="text-[10px] text-muted-foreground/70 ml-auto">
+                      {format(new Date(note.created_at), 'MMM d')}
+                    </span>
                   </div>
-
-                  {note.audio_path && (
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8 flex-shrink-0"
-                      onClick={() => playAudio(note)}
-                      disabled={audioLoading === note.id}
-                    >
-                      {audioLoading === note.id ? (
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                      ) : playingNoteId === note.id ? (
-                        <Pause className="h-4 w-4" />
-                      ) : (
-                        <Play className="h-4 w-4" />
-                      )}
-                    </Button>
+                  
+                  {note.note_text && (
+                    <p className={cn(
+                      "text-sm",
+                      !isExpanded && "line-clamp-2"
+                    )}>{note.note_text}</p>
                   )}
                 </div>
+
+                {note.audio_path && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 flex-shrink-0"
+                    onClick={() => playAudio(note)}
+                    disabled={audioLoading === note.id}
+                  >
+                    {audioLoading === note.id ? (
+                      <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                    ) : playingNoteId === note.id ? (
+                      <Pause className="h-3.5 w-3.5" />
+                    ) : (
+                      <Play className="h-3.5 w-3.5" />
+                    )}
+                  </Button>
+                )}
               </div>
-            ))}
-          </div>
-        </ScrollArea>
+            </div>
+          ))}
+        </div>
+
+        {/* Show more/less button */}
+        {hasMoreNotes && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full mt-2 h-7 text-xs text-muted-foreground hover:text-foreground"
+            onClick={() => setIsExpanded(!isExpanded)}
+          >
+            {isExpanded ? (
+              <>
+                <ChevronUp className="h-3 w-3 mr-1" />
+                Show less
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-3 w-3 mr-1" />
+                Show {notes.length - 2} more notes
+              </>
+            )}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
