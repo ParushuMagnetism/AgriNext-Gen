@@ -22,7 +22,7 @@ const FarmerDashboard = () => {
   useRealtimeSubscriptions();
 
   return (
-    <DashboardLayout title="My Crops">
+    <DashboardLayout title="My Crop">
       <div className="space-y-6">
         {/* Location Prompt - Shows if district is missing */}
         <FarmerLocationPrompt />
