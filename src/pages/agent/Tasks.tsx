@@ -176,13 +176,13 @@ const AgentTasks = () => {
                   <Label>Crop (Optional)</Label>
                   <Select 
                     value={newTask.crop_id} 
-                    onValueChange={(v) => setNewTask({ ...newTask, crop_id: v })}
+                    onValueChange={(v) => setNewTask({ ...newTask, crop_id: v === '__none__' ? '' : v })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select crop" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="__none__">None</SelectItem>
                       {crops?.filter(c => c.farmer_id === newTask.farmer_id).map((c) => (
                         <SelectItem key={c.id} value={c.id}>
                           {c.crop_name} - {c.status}
