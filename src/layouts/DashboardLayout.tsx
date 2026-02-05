@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   const closeSidebar = useCallback(() => {
     setSidebarOpen(false);
@@ -53,26 +55,28 @@ const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Mobile sidebar overlay - must be below sidebar but above content */}
+      {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm transition-opacity duration-300"
+          className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm transition-opacity duration-300"
           onClick={closeSidebar}
           onTouchEnd={closeSidebar}
           aria-hidden="true"
         />
       )}
       
-      {/* Sidebar - higher z-index than overlay */}
-      <div className={`
-        fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
-        <DashboardSidebar onClose={closeSidebar} />
+      {/* Desktop Sidebar - always visible on md+ screens */}
+      <div className="hidden md:block fixed inset-y-0 left-0 z-30">
+        <DashboardSidebar onClose={closeSidebar} isOpen={true} isMobile={false} />
+      </div>
+
+      {/* Mobile Sidebar Drawer - only rendered on mobile */}
+      <div className="md:hidden">
+        <DashboardSidebar onClose={closeSidebar} isOpen={sidebarOpen} isMobile={true} />
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-64">
+      <div className="md:pl-64">
         <DashboardHeader title={title} onMenuClick={openSidebar} />
         <main className="p-4 md:p-6">
           {children}
