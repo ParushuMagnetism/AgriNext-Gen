@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { 
   Cloud, 
   Sun, 
@@ -15,7 +16,8 @@ import {
   RefreshCw,
   CloudLightning,
   Clock,
-  AlertCircle
+  AlertCircle,
+  ChevronDown
 } from 'lucide-react';
 import { useFarmerProfile } from '@/hooks/useFarmerDashboard';
 import { useIsDistrictValid } from '@/hooks/useKarnatakaDistricts';
@@ -41,22 +43,23 @@ interface WeatherResponse {
   message?: string;
 }
 
-const getWeatherIcon = (icon: string) => {
+const getWeatherIcon = (icon: string, size: 'sm' | 'lg' = 'lg') => {
+  const sizeClass = size === 'sm' ? 'h-6 w-6' : 'h-10 w-10';
   switch (icon) {
     case 'sun':
-      return <Sun className="h-10 w-10 text-amber-500" />;
+      return <Sun className={`${sizeClass} text-amber-500`} />;
     case 'cloud':
-      return <Cloud className="h-10 w-10 text-gray-200" />;
+      return <Cloud className={`${sizeClass} text-gray-200`} />;
     case 'rain':
-      return <CloudRain className="h-10 w-10 text-blue-300" />;
+      return <CloudRain className={`${sizeClass} text-blue-300`} />;
     case 'drizzle':
-      return <CloudDrizzle className="h-10 w-10 text-blue-200" />;
+      return <CloudDrizzle className={`${sizeClass} text-blue-200`} />;
     case 'snow':
-      return <CloudSnow className="h-10 w-10 text-sky-200" />;
+      return <CloudSnow className={`${sizeClass} text-sky-200`} />;
     case 'thunderstorm':
-      return <CloudLightning className="h-10 w-10 text-yellow-400" />;
+      return <CloudLightning className={`${sizeClass} text-yellow-400`} />;
     default:
-      return <Sun className="h-10 w-10 text-amber-500" />;
+      return <Sun className={`${sizeClass} text-amber-500`} />;
   }
 };
 
@@ -71,6 +74,7 @@ const WeatherWidget = () => {
   const [error, setError] = useState<string | null>(null);
   const [isCached, setIsCached] = useState(false);
   const [isStale, setIsStale] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const fetchWeather = async (showRefreshSpinner = false) => {
     // Don't fetch if no location set
@@ -135,12 +139,9 @@ const WeatherWidget = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-20 w-20 rounded-full bg-white/20" />
-            <div className="space-y-2">
-              <Skeleton className="h-8 w-16 bg-white/20" />
-              <Skeleton className="h-4 w-24 bg-white/20" />
-            </div>
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-12 w-12 rounded-full bg-white/20" />
+            <Skeleton className="h-8 w-20 bg-white/20" />
           </div>
         </CardContent>
       </Card>
@@ -151,8 +152,6 @@ const WeatherWidget = () => {
   if (!hasLocation) {
     return (
       <Card className="bg-gradient-to-br from-slate-400 to-slate-500 text-white border-0 overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-        
         <CardHeader className="pb-2 relative">
           <CardTitle className="flex items-center gap-2 text-white/90 text-base">
             <Cloud className="h-4 w-4" />
@@ -160,14 +159,9 @@ const WeatherWidget = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="relative">
-          <div className="flex flex-col items-center justify-center py-4 text-center">
-            <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm mb-4">
-              <MapPin className="h-8 w-8 text-white/80" />
-            </div>
-            <p className="text-white/90 font-medium mb-1">Set your location</p>
-            <p className="text-white/60 text-sm mb-4">
-              Add your village or district to see local weather
-            </p>
+          <div className="flex flex-col items-center justify-center py-2 text-center">
+            <MapPin className="h-6 w-6 text-white/80 mb-2" />
+            <p className="text-white/90 text-sm">Set your location</p>
           </div>
         </CardContent>
       </Card>
@@ -178,8 +172,6 @@ const WeatherWidget = () => {
   if (error && !weather) {
     return (
       <Card className="bg-gradient-to-br from-slate-500 to-slate-600 text-white border-0 overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-        
         <CardHeader className="pb-2 relative">
           <CardTitle className="flex items-center gap-2 text-white/90 text-base">
             <Cloud className="h-4 w-4" />
@@ -187,22 +179,21 @@ const WeatherWidget = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="relative">
-          <div className="flex flex-col items-center justify-center py-4 text-center">
-            <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm mb-4">
-              <AlertCircle className="h-8 w-8 text-white/80" />
+          <div className="flex items-center gap-3">
+            <AlertCircle className="h-6 w-6 text-white/80" />
+            <div>
+              <p className="text-white/90 text-sm">Unavailable</p>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => fetchWeather(true)}
+                disabled={isRefreshing}
+                className="text-white/70 hover:text-white p-0 h-auto text-xs"
+              >
+                <RefreshCw className={`h-3 w-3 mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
+                Retry
+              </Button>
             </div>
-            <p className="text-white/90 font-medium mb-1">Weather unavailable</p>
-            <p className="text-white/60 text-sm mb-4">{error}</p>
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              onClick={() => fetchWeather(true)}
-              disabled={isRefreshing}
-              className="bg-white/20 hover:bg-white/30 text-white"
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-              Retry
-            </Button>
           </div>
         </CardContent>
       </Card>
@@ -218,81 +209,100 @@ const WeatherWidget = () => {
   return (
     <Card className="bg-gradient-to-br from-sky-500 to-blue-600 text-white border-0 overflow-hidden relative">
       {/* Background decoration */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-      <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
+      <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
       
-      <CardHeader className="pb-2 relative">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-white/90 text-base">
-            <Cloud className="h-4 w-4" />
-            Weather Today
-          </CardTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0 text-white/70 hover:text-white hover:bg-white/10"
-            onClick={() => fetchWeather(true)}
-            disabled={isRefreshing}
-          >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="relative">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
-              {getWeatherIcon(weather.icon)}
-            </div>
-            <div>
-              <p className="text-4xl font-bold">{weather.temp_c}°C</p>
-              <p className="text-white/80 text-sm">{weather.description}</p>
+      <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+        <CardHeader className="pb-2 relative">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-white/90 text-base">
+              <Cloud className="h-4 w-4" />
+              Weather Today
+            </CardTitle>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0 text-white/70 hover:text-white hover:bg-white/10"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fetchWeather(true);
+                }}
+                disabled={isRefreshing}
+              >
+                <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </Button>
             </div>
           </div>
-        </div>
-
-        <div className="flex items-center gap-1 mt-3 text-white/70 text-xs">
-          <MapPin className="h-3 w-3" />
-          <span>{weather.location || profile?.village || 'Your Location'}</span>
-        </div>
-
-        {weather.forecast_short && (
-          <p className="mt-2 text-xs text-white/60 italic line-clamp-2">
-            {weather.forecast_short}
-          </p>
-        )}
-
-        <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-white/20">
-          <div className="flex items-center gap-2">
-            <Droplets className="h-4 w-4 text-white/70" />
-            <div>
-              <p className="text-xs text-white/60">Humidity</p>
-              <p className="text-sm font-medium">{weather.humidity}%</p>
+        </CardHeader>
+        
+        <CardContent className="relative pt-0">
+          {/* Compact View - Always visible */}
+          <CollapsibleTrigger asChild>
+            <div className="flex items-center justify-between cursor-pointer hover:bg-white/5 rounded-lg p-2 -mx-2 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                  {getWeatherIcon(weather.icon, 'sm')}
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{weather.temp_c}°C</p>
+                  <p className="text-white/80 text-xs">{weather.description}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-white/60">
+                <span className="text-xs">{isExpanded ? 'Less' : 'More'}</span>
+                <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Wind className="h-4 w-4 text-white/70" />
-            <div>
-              <p className="text-xs text-white/60">Wind</p>
-              <p className="text-sm font-medium">{weather.wind_kmh} km/h</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Thermometer className="h-4 w-4 text-white/70" />
-            <div>
-              <p className="text-xs text-white/60">Feels</p>
-              <p className="text-sm font-medium">{weather.temp_c + 2}°C</p>
-            </div>
-          </div>
-        </div>
+          </CollapsibleTrigger>
 
-        {/* Last updated indicator */}
-        <div className="flex items-center gap-1 mt-3 pt-2 border-t border-white/10 text-white/50 text-[10px]">
-          <Clock className="h-3 w-3" />
-          <span>Updated {lastUpdated}</span>
-          {isStale && <span className="text-amber-300 ml-1">(cached)</span>}
-        </div>
-      </CardContent>
+          {/* Expanded Details */}
+          <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
+            <div className="pt-3 space-y-3">
+              <div className="flex items-center gap-1 text-white/70 text-xs">
+                <MapPin className="h-3 w-3" />
+                <span>{weather.location || profile?.village || 'Your Location'}</span>
+              </div>
+
+              {weather.forecast_short && (
+                <p className="text-xs text-white/60 italic line-clamp-2">
+                  {weather.forecast_short}
+                </p>
+              )}
+
+              <div className="grid grid-cols-3 gap-2 pt-3 border-t border-white/20">
+                <div className="flex items-center gap-2">
+                  <Droplets className="h-4 w-4 text-white/70" />
+                  <div>
+                    <p className="text-xs text-white/60">Humidity</p>
+                    <p className="text-sm font-medium">{weather.humidity}%</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Wind className="h-4 w-4 text-white/70" />
+                  <div>
+                    <p className="text-xs text-white/60">Wind</p>
+                    <p className="text-sm font-medium">{weather.wind_kmh} km/h</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Thermometer className="h-4 w-4 text-white/70" />
+                  <div>
+                    <p className="text-xs text-white/60">Feels</p>
+                    <p className="text-sm font-medium">{weather.temp_c + 2}°C</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Last updated indicator */}
+              <div className="flex items-center gap-1 pt-2 border-t border-white/10 text-white/50 text-[10px]">
+                <Clock className="h-3 w-3" />
+                <span>Updated {lastUpdated}</span>
+                {isStale && <span className="text-amber-300 ml-1">(cached)</span>}
+              </div>
+            </div>
+          </CollapsibleContent>
+        </CardContent>
+      </Collapsible>
     </Card>
   );
 };
