@@ -137,19 +137,58 @@ export const useTodaysTasks = () => {
   });
 };
 
-// Fetch all farmers (for agent to see)
+// Fetch farmers in agent's district with assignment status
 export const useAllFarmers = () => {
+  const { user } = useAuth();
+
   return useQuery({
-    queryKey: ['all-farmers'],
+    queryKey: ['all-farmers', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      if (!user?.id) return [];
+
+      // Get agent's district
+      const { data: agentProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('district')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) throw profileError;
+      if (!agentProfile?.district) return [];
+
+      // Get farmers in same district
+      const { data: farmers, error } = await supabase
         .from('profiles')
         .select('*, user_roles!inner(role)')
-        .eq('user_roles.role', 'farmer');
-      
+        .eq('user_roles.role', 'farmer')
+        .eq('district', agentProfile.district);
+
       if (error) throw error;
-      return data;
+
+      // Get all active assignments for these farmers
+      const farmerIds = (farmers || []).map(f => f.id);
+      if (farmerIds.length === 0) return [];
+
+      const { data: assignments } = await (supabase as any)
+        .from('agent_farmer_assignments')
+        .select('farmer_id, agent_id, active')
+        .in('farmer_id', farmerIds)
+        .eq('active', true);
+
+      // Map assignment info onto farmers
+      const assignmentMap: Record<string, string> = {};
+      (assignments || []).forEach((a: any) => {
+        assignmentMap[a.farmer_id] = a.agent_id;
+      });
+
+      return (farmers || []).map(f => ({
+        ...f,
+        assigned_agent_id: assignmentMap[f.id] || null,
+        is_assigned_to_me: assignmentMap[f.id] === user.id,
+        is_assigned_to_other: !!assignmentMap[f.id] && assignmentMap[f.id] !== user.id,
+      }));
     },
+    enabled: !!user?.id,
   });
 };
 

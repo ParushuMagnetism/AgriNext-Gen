@@ -63,6 +63,7 @@ const DashboardSidebar = ({ onClose, isOpen = true, isMobile = false }: Dashboar
     { icon: Users, label: t('nav.myFarmers'), href: '/agent/my-farmers' },
     { icon: Users, label: t('nav.farmersAndCrops'), href: '/agent/farmers' },
     { icon: Truck, label: t('nav.transport'), href: '/agent/transport' },
+    { icon: Settings, label: t('nav.profile'), href: '/agent/profile' },
   ];
 
   // Logistics navigation items
