@@ -28,6 +28,7 @@ import AgentFarmers from "./pages/agent/Farmers";
 import AgentMyFarmers from "./pages/agent/MyFarmers";
 import AgentFarmerDetail from "./pages/agent/FarmerDetail";
 import AgentTransport from "./pages/agent/Transport";
+import AgentProfile from "./pages/agent/Profile";
 import LogisticsDashboard from "./pages/logistics/Dashboard";
 import LogisticsAvailableLoads from "./pages/logistics/AvailableLoads";
 import LogisticsActiveTrips from "./pages/logistics/ActiveTrips";
@@ -210,6 +211,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["agent"]}>
                   <AgentTransport />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/agent/profile"
+              element={
+                <ProtectedRoute allowedRoles={["agent"]}>
+                  <AgentProfile />
                 </ProtectedRoute>
               }
             />
