@@ -12,8 +12,9 @@ import {
   Eye, 
   MoreVertical,
   Package,
-   Filter,
-   QrCode
+  Filter,
+  QrCode,
+  Camera
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -42,7 +43,11 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
- import ListingTraceQR from '@/components/listings/ListingTraceQR';
+import ListingTraceQR from '@/components/listings/ListingTraceQR';
+import CropSourceSelector from '@/components/listings/CropSourceSelector';
+import TraceSettingsPanel from '@/components/listings/TraceSettingsPanel';
+import EvidenceUploadSection from '@/components/listings/EvidenceUploadSection';
+import { useHarvestReadyCrops, TraceSettings, DEFAULT_TRACE_SETTINGS } from '@/hooks/useTraceability';
 
 interface Listing {
   id: string;
@@ -56,10 +61,12 @@ interface Listing {
   image_url: string | null;
   is_active: boolean;
   created_at: string;
-   trace_code: string | null;
-   trace_status: string;
-   inputs_summary: string | null;
-   test_report_urls: unknown;
+  trace_code: string | null;
+  trace_status: string;
+  inputs_summary: string | null;
+  test_report_urls: unknown;
+  crop_id: string | null;
+  trace_settings: TraceSettings | null;
 }
 
 const categories = ['Vegetables', 'Fruits', 'Grains', 'Pulses', 'Dairy', 'Spices', 'Other'];
@@ -73,6 +80,9 @@ const FarmerListings = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingListing, setEditingListing] = useState<Listing | null>(null);
+  const [sourceMode, setSourceMode] = useState<'crop' | 'custom'>('crop');
+  const [selectedCropId, setSelectedCropId] = useState('');
+  const [traceSettings, setTraceSettings] = useState<TraceSettings>(DEFAULT_TRACE_SETTINGS);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -83,10 +93,13 @@ const FarmerListings = () => {
     location: '',
   });
 
+  // Evidence section state - shown after listing is saved
+  const [showEvidenceForListing, setShowEvidenceForListing] = useState<string | null>(null);
+
+  const { data: harvestCrops = [], isLoading: cropsLoading } = useHarvestReadyCrops();
+
   useEffect(() => {
-    if (user) {
-      fetchListings();
-    }
+    if (user) fetchListings();
   }, [user]);
 
   const fetchListings = async () => {
@@ -98,24 +111,40 @@ const FarmerListings = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setListings(data || []);
+      setListings((data || []) as unknown as Listing[]);
     } catch (error) {
       console.error('Error fetching listings:', error);
-      toast({
-        title: t('common.error'),
-        description: t('farmer.listings.fetchError'),
-        variant: 'destructive',
-      });
+      toast({ title: t('common.error'), description: t('farmer.listings.fetchError'), variant: 'destructive' });
     } finally {
       setLoading(false);
     }
   };
 
+  const handleCropSelect = (cropId: string) => {
+    setSelectedCropId(cropId);
+    const crop = harvestCrops.find(c => c.id === cropId);
+    if (!crop) return;
+
+    // Auto-fill from crop data
+    const title = crop.variety ? `${crop.crop_name} (${crop.variety})` : crop.crop_name;
+    const location = crop.farmland
+      ? [crop.farmland.village, crop.farmland.district].filter(Boolean).join(', ')
+      : '';
+
+    setFormData({
+      ...formData,
+      title,
+      quantity: crop.estimated_quantity?.toString() || '',
+      unit: crop.quantity_unit || 'kg',
+      location,
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
-      const listingData = {
+      const listingData: any = {
         title: formData.title,
         description: formData.description || null,
         category: formData.category,
@@ -124,7 +153,12 @@ const FarmerListings = () => {
         unit: formData.unit,
         location: formData.location || null,
         seller_id: user?.id,
+        trace_settings: traceSettings,
       };
+
+      if (sourceMode === 'crop' && selectedCropId) {
+        listingData.crop_id = selectedCropId;
+      }
 
       if (editingListing) {
         const { error } = await supabase
@@ -135,12 +169,19 @@ const FarmerListings = () => {
         if (error) throw error;
         toast({ title: t('common.success'), description: t('farmer.listings.updateSuccess') });
       } else {
-        const { error } = await supabase
+        const { data: newListing, error } = await supabase
           .from('listings')
-          .insert([listingData]);
+          .insert([listingData])
+          .select()
+          .single();
 
         if (error) throw error;
         toast({ title: t('common.success'), description: t('farmer.listings.createSuccess') });
+
+        // After creation, offer evidence upload
+        if (newListing) {
+          setShowEvidenceForListing(newListing.id);
+        }
       }
 
       setIsDialogOpen(false);
@@ -148,36 +189,27 @@ const FarmerListings = () => {
       fetchListings();
     } catch (error) {
       console.error('Error saving listing:', error);
-      toast({
-        title: t('common.error'),
-        description: t('farmer.listings.saveError'),
-        variant: 'destructive',
-      });
+      toast({ title: t('common.error'), description: t('farmer.listings.saveError'), variant: 'destructive' });
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('listings')
-        .delete()
-        .eq('id', id);
-
+      const { error } = await supabase.from('listings').delete().eq('id', id);
       if (error) throw error;
       toast({ title: t('common.success'), description: t('farmer.listings.deleteSuccess') });
       fetchListings();
     } catch (error) {
       console.error('Error deleting listing:', error);
-      toast({
-        title: t('common.error'),
-        description: t('farmer.listings.deleteError'),
-        variant: 'destructive',
-      });
+      toast({ title: t('common.error'), description: t('farmer.listings.deleteError'), variant: 'destructive' });
     }
   };
 
   const handleEdit = (listing: Listing) => {
     setEditingListing(listing);
+    setSourceMode(listing.crop_id ? 'crop' : 'custom');
+    setSelectedCropId(listing.crop_id || '');
+    setTraceSettings(listing.trace_settings || DEFAULT_TRACE_SETTINGS);
     setFormData({
       title: listing.title,
       description: listing.description || '',
@@ -191,53 +223,33 @@ const FarmerListings = () => {
   };
 
   const resetForm = () => {
-    setFormData({
-      title: '',
-      description: '',
-      category: '',
-      price: '',
-      quantity: '',
-      unit: 'kg',
-      location: '',
-    });
+    setFormData({ title: '', description: '', category: '', price: '', quantity: '', unit: 'kg', location: '' });
     setEditingListing(null);
+    setSourceMode('crop');
+    setSelectedCropId('');
+    setTraceSettings(DEFAULT_TRACE_SETTINGS);
   };
 
   const toggleListingStatus = async (id: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
-        .from('listings')
-        .update({ is_active: !currentStatus })
-        .eq('id', id);
-
+      const { error } = await supabase.from('listings').update({ is_active: !currentStatus }).eq('id', id);
       if (error) throw error;
-      toast({ 
-        title: t('common.success'), 
-        description: !currentStatus ? t('farmer.listings.activated') : t('farmer.listings.deactivated')
-      });
+      toast({ title: t('common.success'), description: !currentStatus ? t('farmer.listings.activated') : t('farmer.listings.deactivated') });
       fetchListings();
     } catch (error) {
       console.error('Error updating listing status:', error);
-      toast({
-        title: t('common.error'),
-        description: t('farmer.listings.statusError'),
-        variant: 'destructive',
-      });
+      toast({ title: t('common.error'), description: t('farmer.listings.statusError'), variant: 'destructive' });
     }
   };
 
-   const handleTraceCodeGenerated = (listingId: string, traceCode: string) => {
-     setListings(prev => prev.map(l => 
-       l.id === listingId ? { ...l, trace_code: traceCode } : l
-     ));
-   };
- 
-   const handleTraceStatusChange = (listingId: string, newStatus: string) => {
-     setListings(prev => prev.map(l => 
-       l.id === listingId ? { ...l, trace_status: newStatus } : l
-     ));
-   };
- 
+  const handleTraceCodeGenerated = (listingId: string, traceCode: string) => {
+    setListings(prev => prev.map(l => l.id === listingId ? { ...l, trace_code: traceCode } : l));
+  };
+
+  const handleTraceStatusChange = (listingId: string, newStatus: string) => {
+    setListings(prev => prev.map(l => l.id === listingId ? { ...l, trace_status: newStatus } : l));
+  };
+
   const filteredListings = listings.filter(listing =>
     listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     listing.category.toLowerCase().includes(searchQuery.toLowerCase())
@@ -272,7 +284,7 @@ const FarmerListings = () => {
                   {t('farmer.listings.addListing')}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
+              <DialogContent className="sm:max-w-[560px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>{editingListing ? t('farmer.listings.editListing') : t('farmer.listings.addNewListing')}</DialogTitle>
                   <DialogDescription>
@@ -280,6 +292,18 @@ const FarmerListings = () => {
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {/* Crop Source Selector (only on create) */}
+                  {!editingListing && (
+                    <CropSourceSelector
+                      crops={harvestCrops}
+                      isLoading={cropsLoading}
+                      selectedCropId={selectedCropId}
+                      onSelectCrop={handleCropSelect}
+                      sourceMode={sourceMode}
+                      onSourceModeChange={setSourceMode}
+                    />
+                  )}
+
                   <div className="space-y-2">
                     <Label htmlFor="title">{t('farmer.listings.productName')}</Label>
                     <Input
@@ -369,6 +393,15 @@ const FarmerListings = () => {
                       </Select>
                     </div>
                   </div>
+
+                  {/* Trace Settings */}
+                  <TraceSettingsPanel settings={traceSettings} onChange={setTraceSettings} />
+
+                  {/* Evidence upload - only when editing an existing listing */}
+                  {editingListing && (
+                    <EvidenceUploadSection listingId={editingListing.id} />
+                  )}
+
                   <DialogFooter>
                     <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                       {t('common.cancel')}
@@ -382,6 +415,24 @@ const FarmerListings = () => {
             </Dialog>
           </div>
         </div>
+
+        {/* Evidence upload dialog for newly created listing */}
+        {showEvidenceForListing && (
+          <Dialog open={!!showEvidenceForListing} onOpenChange={() => setShowEvidenceForListing(null)}>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Add Evidence (Optional)</DialogTitle>
+                <DialogDescription>
+                  Upload photos or reports to strengthen your listing's traceability
+                </DialogDescription>
+              </DialogHeader>
+              <EvidenceUploadSection listingId={showEvidenceForListing} />
+              <DialogFooter>
+                <Button onClick={() => setShowEvidenceForListing(null)}>Done</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
 
         {/* Listings Grid */}
         {loading ? (
@@ -408,8 +459,11 @@ const FarmerListings = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredListings.map((listing) => (
               <div key={listing.id} className="bg-card rounded-xl border border-border overflow-hidden shadow-soft hover:shadow-medium transition-shadow">
-                <div className="h-32 bg-gradient-earth flex items-center justify-center">
+                <div className="h-32 bg-gradient-earth flex items-center justify-center relative">
                   <span className="text-4xl">🌾</span>
+                  {listing.crop_id && (
+                    <Badge className="absolute top-2 left-2 bg-primary/80 text-xs">Crop-linked</Badge>
+                  )}
                 </div>
                 <div className="p-4">
                   <div className="flex items-start justify-between">
@@ -430,6 +484,10 @@ const FarmerListings = () => {
                           <Edit className="h-4 w-4 mr-2" />
                           {t('common.edit')}
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setShowEvidenceForListing(listing.id)}>
+                          <Camera className="h-4 w-4 mr-2" />
+                          Add Evidence
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => toggleListingStatus(listing.id, listing.is_active)}>
                           <Eye className="h-4 w-4 mr-2" />
                           {listing.is_active ? t('farmer.listings.deactivate') : t('farmer.listings.activate')}
@@ -447,21 +505,21 @@ const FarmerListings = () => {
                   <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
                     {listing.description || t('farmer.listings.noDescription')}
                   </p>
-                   {/* Trace QR Section */}
-                   <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
-                     <QrCode className="h-4 w-4 text-muted-foreground" />
-                     <span className="text-xs text-muted-foreground flex-1">
-                       {listing.trace_code || 'No trace code'}
-                     </span>
-                     <ListingTraceQR
-                       listingId={listing.id}
-                       traceCode={listing.trace_code}
-                       traceStatus={listing.trace_status || 'published'}
-                       productName={listing.title}
-                       onTraceCodeGenerated={(code) => handleTraceCodeGenerated(listing.id, code)}
-                       onStatusChange={(status) => handleTraceStatusChange(listing.id, status)}
-                     />
-                   </div>
+                  {/* Trace QR Section */}
+                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
+                    <QrCode className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground flex-1">
+                      {listing.trace_code || 'No trace code'}
+                    </span>
+                    <ListingTraceQR
+                      listingId={listing.id}
+                      traceCode={listing.trace_code}
+                      traceStatus={listing.trace_status || 'published'}
+                      productName={listing.title}
+                      onTraceCodeGenerated={(code) => handleTraceCodeGenerated(listing.id, code)}
+                      onStatusChange={(status) => handleTraceStatusChange(listing.id, status)}
+                    />
+                  </div>
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
                     <div>
                       <p className="text-lg font-semibold text-foreground">

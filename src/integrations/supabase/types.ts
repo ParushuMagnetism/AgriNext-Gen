@@ -1192,6 +1192,7 @@ export type Database = {
         Row: {
           category: string
           created_at: string
+          crop_id: string | null
           description: string | null
           id: string
           image_url: string | null
@@ -1204,6 +1205,7 @@ export type Database = {
           test_report_urls: Json
           title: string
           trace_code: string | null
+          trace_settings: Json
           trace_status: string
           unit: string
           updated_at: string
@@ -1211,6 +1213,7 @@ export type Database = {
         Insert: {
           category: string
           created_at?: string
+          crop_id?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
@@ -1223,6 +1226,7 @@ export type Database = {
           test_report_urls?: Json
           title: string
           trace_code?: string | null
+          trace_settings?: Json
           trace_status?: string
           unit?: string
           updated_at?: string
@@ -1230,6 +1234,7 @@ export type Database = {
         Update: {
           category?: string
           created_at?: string
+          crop_id?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
@@ -1242,11 +1247,20 @@ export type Database = {
           test_report_urls?: Json
           title?: string
           trace_code?: string | null
+          trace_settings?: Json
           trace_status?: string
           unit?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "listings_crop_id_fkey"
+            columns: ["crop_id"]
+            isOneToOne: false
+            referencedRelation: "crops"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       logistics_routes: {
         Row: {
@@ -1843,6 +1857,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      trace_attachments: {
+        Row: {
+          captured_at: string | null
+          created_at: string | null
+          file_type: string
+          file_url: string
+          id: string
+          notes: string | null
+          owner_id: string
+          owner_type: string
+          tag: string
+          uploaded_by: string
+          visibility: string
+        }
+        Insert: {
+          captured_at?: string | null
+          created_at?: string | null
+          file_type: string
+          file_url: string
+          id?: string
+          notes?: string | null
+          owner_id: string
+          owner_type: string
+          tag: string
+          uploaded_by: string
+          visibility?: string
+        }
+        Update: {
+          captured_at?: string | null
+          created_at?: string | null
+          file_type?: string
+          file_url?: string
+          id?: string
+          notes?: string | null
+          owner_id?: string
+          owner_type?: string
+          tag?: string
+          uploaded_by?: string
+          visibility?: string
+        }
+        Relationships: []
       }
       transport_issues: {
         Row: {
