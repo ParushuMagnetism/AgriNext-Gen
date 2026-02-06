@@ -396,10 +396,23 @@ export const useAssignFarmerToAgent = () => {
       if (error) throw error;
       return data as AgentAssignment;
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['assigned-farmers'] });
       queryClient.invalidateQueries({ queryKey: ['agent-farmer-assignments'] });
       queryClient.invalidateQueries({ queryKey: ['farmer-agent'] });
+      queryClient.invalidateQueries({ queryKey: ['all-farmers'] });
+
+      // Audit log
+      if (user?.id) {
+        (supabase as any).from('agent_activity_logs').insert({
+          actor_id: user.id,
+          actor_role: 'agent',
+          farmer_id: variables.farmerId,
+          action_type: 'ASSIGN_FARMER',
+          details: { agent_id: variables.agentId },
+        });
+      }
+
       toast.success('Farmer assigned to agent');
     },
     onError: (error) => {

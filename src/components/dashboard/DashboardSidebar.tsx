@@ -94,6 +94,7 @@ const DashboardSidebar = ({ onClose, isOpen = true, isMobile = false }: Dashboar
     { icon: CropIcon, label: 'Crops', href: '/admin/crops' },
     { icon: Package, label: 'Transport', href: '/admin/transport' },
     { icon: ClipboardList, label: 'Orders', href: '/admin/orders' },
+    { icon: ClipboardList, label: 'Pending Updates', href: '/admin/pending-updates' },
     { icon: Sparkles, label: 'AI Console', href: '/admin/ai-console' },
     { icon: Database, label: 'Seed Data', href: '/admin/seed-data' },
     { icon: TestTube, label: 'Mysuru Demo', href: '/admin/mysuru-demo' },

@@ -83,6 +83,36 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_activity_logs: {
+        Row: {
+          action_type: string
+          actor_id: string
+          actor_role: string
+          created_at: string
+          details: Json | null
+          farmer_id: string | null
+          id: string
+        }
+        Insert: {
+          action_type: string
+          actor_id: string
+          actor_role?: string
+          created_at?: string
+          details?: Json | null
+          farmer_id?: string | null
+          id?: string
+        }
+        Update: {
+          action_type?: string
+          actor_id?: string
+          actor_role?: string
+          created_at?: string
+          details?: Json | null
+          farmer_id?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
       agent_data: {
         Row: {
           agent_id: string
@@ -183,6 +213,7 @@ export type Database = {
           farmer_id: string
           id: string
           notes: string | null
+          payload: Json | null
           priority: number | null
           task_status: Database["public"]["Enums"]["agent_task_status"]
           task_type: Database["public"]["Enums"]["agent_task_type"]
@@ -200,6 +231,7 @@ export type Database = {
           farmer_id: string
           id?: string
           notes?: string | null
+          payload?: Json | null
           priority?: number | null
           task_status?: Database["public"]["Enums"]["agent_task_status"]
           task_type?: Database["public"]["Enums"]["agent_task_type"]
@@ -217,6 +249,7 @@ export type Database = {
           farmer_id?: string
           id?: string
           notes?: string | null
+          payload?: Json | null
           priority?: number | null
           task_status?: Database["public"]["Enums"]["agent_task_status"]
           task_type?: Database["public"]["Enums"]["agent_task_type"]
@@ -2551,12 +2584,22 @@ export type Database = {
       normalize_district: { Args: { input_text: string }; Returns: string }
     }
     Enums: {
-      agent_task_status: "pending" | "in_progress" | "completed"
+      agent_task_status:
+        | "pending"
+        | "in_progress"
+        | "completed"
+        | "approved"
+        | "rejected"
       agent_task_type:
         | "visit"
         | "verify_crop"
         | "harvest_check"
         | "transport_assist"
+        | "onboard_farmer"
+        | "update_profile"
+        | "soil_report_upload"
+        | "field_visit"
+        | "farmer_request"
       app_role: "farmer" | "buyer" | "agent" | "logistics" | "admin"
       crop_status: "growing" | "one_week" | "ready" | "harvested"
       price_trend: "up" | "down" | "flat"
@@ -2694,12 +2737,23 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      agent_task_status: ["pending", "in_progress", "completed"],
+      agent_task_status: [
+        "pending",
+        "in_progress",
+        "completed",
+        "approved",
+        "rejected",
+      ],
       agent_task_type: [
         "visit",
         "verify_crop",
         "harvest_check",
         "transport_assist",
+        "onboard_farmer",
+        "update_profile",
+        "soil_report_upload",
+        "field_visit",
+        "farmer_request",
       ],
       app_role: ["farmer", "buyer", "agent", "logistics", "admin"],
       crop_status: ["growing", "one_week", "ready", "harvested"],

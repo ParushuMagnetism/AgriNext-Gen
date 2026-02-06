@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import FarmerQuickUpdateTab from '@/components/agent/FarmerQuickUpdateTab';
+import FarmerTasksTab from '@/components/agent/FarmerTasksTab';
 import {
   Table,
   TableBody,
@@ -25,6 +27,8 @@ import {
   FileText,
   Play,
   MessageCircle,
+  Edit,
+  ClipboardList,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useStartVisit, useActiveVisit } from '@/hooks/useAgentAssignments';
@@ -247,22 +251,30 @@ export default function AgentFarmerDetail() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6">
             <TabsTrigger value="overview" className="flex items-center gap-1">
               <User className="h-4 w-4" />
-              {language === 'kn' ? 'ಅವಲೋಕನ' : 'Overview'}
+              <span className="hidden sm:inline">{language === 'kn' ? 'ಅವಲೋಕನ' : 'Overview'}</span>
+            </TabsTrigger>
+            <TabsTrigger value="update" className="flex items-center gap-1">
+              <Edit className="h-4 w-4" />
+              <span className="hidden sm:inline">{language === 'kn' ? 'ನವೀಕರಣ' : 'Update'}</span>
+            </TabsTrigger>
+            <TabsTrigger value="tasks" className="flex items-center gap-1">
+              <ClipboardList className="h-4 w-4" />
+              <span className="hidden sm:inline">{language === 'kn' ? 'ಕಾರ್ಯಗಳು' : 'Tasks'}</span>
             </TabsTrigger>
             <TabsTrigger value="crops" className="flex items-center gap-1">
               <Sprout className="h-4 w-4" />
-              {language === 'kn' ? 'ಬೆಳೆಗಳು' : 'Crops'}
+              <span className="hidden sm:inline">{language === 'kn' ? 'ಬೆಳೆಗಳು' : 'Crops'}</span>
             </TabsTrigger>
             <TabsTrigger value="transport" className="flex items-center gap-1">
               <Truck className="h-4 w-4" />
-              {language === 'kn' ? 'ಸಾರಿಗೆ' : 'Transport'}
+              <span className="hidden sm:inline">{language === 'kn' ? 'ಸಾರಿಗೆ' : 'Transport'}</span>
             </TabsTrigger>
             <TabsTrigger value="farmlands" className="flex items-center gap-1">
               <FileText className="h-4 w-4" />
-              {language === 'kn' ? 'ಜಮೀನುಗಳು' : 'Farmlands'}
+              <span className="hidden sm:inline">{language === 'kn' ? 'ಜಮೀನುಗಳು' : 'Farmlands'}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -303,6 +315,14 @@ export default function AgentFarmerDetail() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="update" className="mt-6">
+            <FarmerQuickUpdateTab farmer={farmer} />
+          </TabsContent>
+
+          <TabsContent value="tasks" className="mt-6">
+            {farmerId && <FarmerTasksTab farmerId={farmerId} />}
           </TabsContent>
 
           <TabsContent value="crops" className="mt-6">

@@ -53,6 +53,7 @@ import AIConsole from "./pages/admin/AIConsole";
 import SeedData from "./pages/admin/SeedData";
 import MysuruDemoSeed from "./pages/admin/MysruDemoSeed";
 import DataHealth from "./pages/admin/DataHealth";
+import PendingUpdates from "./pages/admin/PendingUpdates";
  import ListingTrace from "./pages/trace/ListingTrace";
 const queryClient = new QueryClient();
 
@@ -418,6 +419,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <MysuruDemoSeed />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/pending-updates"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <PendingUpdates />
                 </ProtectedRoute>
               }
             />
