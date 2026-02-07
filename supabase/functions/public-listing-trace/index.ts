@@ -26,10 +26,11 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // 1) Fetch listing with safe fields
+    // 1) Fetch listing with safe fields + id for attachment lookup
     const { data: listing, error: listingError } = await supabase
       .from("listings")
       .select(`
+        id,
         trace_code,
         trace_status,
         title,
@@ -58,7 +59,7 @@ serve(async (req) => {
       );
     }
 
-    const settings = listing.trace_settings || {};
+    const settings: Record<string, any> = listing.trace_settings || {};
 
     // 2) Parse safe location
     let safeLocation = null;
@@ -72,8 +73,8 @@ serve(async (req) => {
     }
 
     // 3) Fetch crop details if linked and allowed
-    let cropDetails = null;
-    let cropTimeline = null;
+    let cropDetails: Record<string, any> | null = null;
+    let cropTimeline: any[] | null = null;
     if (listing.crop_id) {
       if (settings.show_crop_details) {
         const { data: crop } = await supabase
@@ -129,83 +130,130 @@ serve(async (req) => {
       }
     }
 
-    // 4) Fetch public evidence attachments
+    // 4) Helper: detect bucket from file path and generate signed URL
+    const getSignedUrl = async (filePath: string): Promise<string | null> => {
+      // Determine bucket based on path or default to traceability-media
+      let bucket = 'traceability-media';
+      if (filePath.startsWith('crop-media/') || filePath.includes('/crops/')) {
+        bucket = 'crop-media';
+      } else if (filePath.startsWith('soil-reports/') || filePath.includes('/lands/')) {
+        bucket = 'soil-reports';
+      }
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .createSignedUrl(filePath, 3600); // 1 hour expiry
+      if (error || !data?.signedUrl) {
+        // Try other buckets as fallback
+        for (const fallback of ['traceability-media', 'crop-media', 'soil-reports']) {
+          if (fallback === bucket) continue;
+          const { data: fb, error: fbErr } = await supabase.storage
+            .from(fallback)
+            .createSignedUrl(filePath, 3600);
+          if (!fbErr && fb?.signedUrl) return fb.signedUrl;
+        }
+        return null;
+      }
+      return data.signedUrl;
+    };
+
+    // 5) Fetch public evidence attachments using signed URLs
     const evidence: Record<string, any[]> = {};
+    const listingId = listing.id;
 
-    // Find the listing ID to query attachments
-    const { data: listingIdRow } = await supabase
-      .from("listings")
-      .select("id")
-      .eq("trace_code", traceCode)
-      .single();
+    if (settings.show_stage_photos) {
+      const { data: stagePhotos } = await supabase
+        .from("trace_attachments")
+        .select("file_url, file_type, captured_at, notes, tag")
+        .eq("owner_type", "listing")
+        .eq("owner_id", listingId)
+        .eq("tag", "stage_photo")
+        .eq("visibility", "public_on_qr")
+        .order("captured_at", { ascending: true })
+        .limit(10);
 
-    if (listingIdRow) {
-      const listingId = listingIdRow.id;
-
-      if (settings.show_stage_photos) {
-        const { data: stagePhotos } = await supabase
-          .from("trace_attachments")
-          .select("file_url, file_type, captured_at, notes")
-          .eq("owner_type", "listing")
-          .eq("owner_id", listingId)
-          .eq("tag", "stage_photo")
-          .eq("visibility", "public_on_qr")
-          .order("captured_at", { ascending: true })
-          .limit(10);
-
-        if (stagePhotos && stagePhotos.length > 0) {
-          evidence.stage_photos = stagePhotos.map((p: any) => ({
-            url: `${supabaseUrl}/storage/v1/object/public/traceability-media/${p.file_url}`,
-            date: p.captured_at,
-            notes: p.notes,
-          }));
+      if (stagePhotos && stagePhotos.length > 0) {
+        const photos = [];
+        for (const p of stagePhotos) {
+          const signedUrl = await getSignedUrl(p.file_url);
+          if (signedUrl) {
+            photos.push({ url: signedUrl, date: p.captured_at, notes: p.notes });
+          }
         }
+        if (photos.length > 0) evidence.stage_photos = photos;
       }
+    }
 
-      if (settings.show_input_photos) {
-        const { data: inputPhotos } = await supabase
-          .from("trace_attachments")
-          .select("file_url, file_type, captured_at, notes")
-          .eq("owner_type", "listing")
-          .eq("owner_id", listingId)
-          .eq("tag", "input_proof")
-          .eq("visibility", "public_on_qr")
-          .order("captured_at", { ascending: true })
-          .limit(10);
+    if (settings.show_input_photos) {
+      const { data: inputPhotos } = await supabase
+        .from("trace_attachments")
+        .select("file_url, file_type, captured_at, notes")
+        .eq("owner_type", "listing")
+        .eq("owner_id", listingId)
+        .eq("tag", "input_proof")
+        .eq("visibility", "public_on_qr")
+        .order("captured_at", { ascending: true })
+        .limit(10);
 
-        if (inputPhotos && inputPhotos.length > 0) {
-          evidence.input_photos = inputPhotos.map((p: any) => ({
-            url: `${supabaseUrl}/storage/v1/object/public/traceability-media/${p.file_url}`,
-            date: p.captured_at,
-            notes: p.notes,
-          }));
+      if (inputPhotos && inputPhotos.length > 0) {
+        const photos = [];
+        for (const p of inputPhotos) {
+          const signedUrl = await getSignedUrl(p.file_url);
+          if (signedUrl) {
+            photos.push({ url: signedUrl, date: p.captured_at, notes: p.notes });
+          }
         }
+        if (photos.length > 0) evidence.input_photos = photos;
       }
+    }
 
-      if (settings.show_soil_report) {
-        const { data: soilReports } = await supabase
-          .from("trace_attachments")
-          .select("file_url, file_type, captured_at, notes")
-          .eq("owner_type", "listing")
-          .eq("owner_id", listingId)
-          .eq("tag", "soil_report")
-          .eq("visibility", "public_on_qr")
-          .order("captured_at", { ascending: true })
-          .limit(5);
+    if (settings.show_soil_report) {
+      const { data: soilReports } = await supabase
+        .from("trace_attachments")
+        .select("file_url, file_type, captured_at, notes")
+        .eq("owner_type", "listing")
+        .eq("owner_id", listingId)
+        .eq("tag", "soil_report")
+        .eq("visibility", "public_on_qr")
+        .order("captured_at", { ascending: true })
+        .limit(5);
 
-        if (soilReports && soilReports.length > 0) {
-          evidence.soil_reports = soilReports.map((p: any) => ({
-            url: `${supabaseUrl}/storage/v1/object/public/traceability-media/${p.file_url}`,
-            type: p.file_type,
-            date: p.captured_at,
-            notes: p.notes,
-          }));
+      if (soilReports && soilReports.length > 0) {
+        const reports = [];
+        for (const p of soilReports) {
+          const signedUrl = await getSignedUrl(p.file_url);
+          if (signedUrl) {
+            reports.push({ url: signedUrl, type: p.file_type, date: p.captured_at, notes: p.notes });
+          }
+        }
+        if (reports.length > 0) evidence.soil_reports = reports;
+      }
+    }
+
+    // Also check crop_media photos linked via crop diary (if crop linked + photos enabled)
+    if (listing.crop_id && settings.show_stage_photos) {
+      const { data: cropPhotos } = await supabase
+        .from("trace_attachments")
+        .select("file_url, file_type, captured_at, notes")
+        .eq("owner_type", "crop")
+        .eq("owner_id", listing.crop_id)
+        .in("tag", ["stage_photo", "input_proof"])
+        .eq("visibility", "public_on_qr")
+        .order("captured_at", { ascending: true })
+        .limit(10);
+
+      if (cropPhotos && cropPhotos.length > 0) {
+        if (!evidence.stage_photos) evidence.stage_photos = [];
+        for (const p of cropPhotos) {
+          const signedUrl = await getSignedUrl(p.file_url);
+          if (signedUrl) {
+            evidence.stage_photos.push({ url: signedUrl, date: p.captured_at, notes: p.notes });
+          }
         }
       }
     }
 
-    // 5) Build response
-    const publicData: any = {
+    // 6) Build response — never expose internal IDs
+    const publicData: Record<string, any> = {
       trace_code: listing.trace_code,
       product_name: listing.title,
       category: listing.category,
@@ -220,17 +268,9 @@ serve(async (req) => {
       platform: "AgriNext Gen",
     };
 
-    if (cropDetails) {
-      publicData.crop = cropDetails;
-    }
-
-    if (cropTimeline) {
-      publicData.crop_timeline = cropTimeline;
-    }
-
-    if (Object.keys(evidence).length > 0) {
-      publicData.evidence = evidence;
-    }
+    if (cropDetails) publicData.crop = cropDetails;
+    if (cropTimeline) publicData.crop_timeline = cropTimeline;
+    if (Object.keys(evidence).length > 0) publicData.evidence = evidence;
 
     return new Response(
       JSON.stringify(publicData),

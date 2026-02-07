@@ -398,8 +398,8 @@ const FarmerListings = () => {
                   <TraceSettingsPanel settings={traceSettings} onChange={setTraceSettings} />
 
                   {/* Evidence upload - only when editing an existing listing */}
-                  {editingListing && (
-                    <EvidenceUploadSection listingId={editingListing.id} />
+                   {editingListing && (
+                    <EvidenceUploadSection listingId={editingListing.id} cropId={editingListing.crop_id} />
                   )}
 
                   <DialogFooter>
@@ -426,7 +426,7 @@ const FarmerListings = () => {
                   Upload photos or reports to strengthen your listing's traceability
                 </DialogDescription>
               </DialogHeader>
-              <EvidenceUploadSection listingId={showEvidenceForListing} />
+              <EvidenceUploadSection listingId={showEvidenceForListing} cropId={listings.find(l => l.id === showEvidenceForListing)?.crop_id} />
               <DialogFooter>
                 <Button onClick={() => setShowEvidenceForListing(null)}>Done</Button>
               </DialogFooter>
