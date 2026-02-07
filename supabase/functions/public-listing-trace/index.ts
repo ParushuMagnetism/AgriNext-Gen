@@ -26,24 +26,12 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // 1) Fetch listing with safe fields + id for attachment lookup
+    // 1) Fetch listing
     const { data: listing, error: listingError } = await supabase
       .from("listings")
       .select(`
-        id,
-        trace_code,
-        trace_status,
-        title,
-        category,
-        quantity,
-        unit,
-        price,
-        location,
-        inputs_summary,
-        test_report_urls,
-        created_at,
-        crop_id,
-        trace_settings
+        id, trace_code, trace_status, title, category, quantity, unit, price,
+        location, inputs_summary, test_report_urls, created_at, crop_id, trace_settings
       `)
       .eq("trace_code", traceCode)
       .eq("trace_status", "published")
@@ -51,17 +39,14 @@ serve(async (req) => {
 
     if (listingError || !listing) {
       return new Response(
-        JSON.stringify({ 
-          error: "not_found",
-          message: "This trace record is not available or has been unpublished." 
-        }),
+        JSON.stringify({ error: "not_found", message: "This trace record is not available or has been unpublished." }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     const settings: Record<string, any> = listing.trace_settings || {};
 
-    // 2) Parse safe location
+    // 2) Safe location
     let safeLocation = null;
     if (listing.location) {
       const parts = listing.location.split(',').map((p: string) => p.trim());
@@ -72,9 +57,11 @@ serve(async (req) => {
       }
     }
 
-    // 3) Fetch crop details if linked and allowed
+    // 3) Crop details + geo verification check
     let cropDetails: Record<string, any> | null = null;
     let cropTimeline: any[] | null = null;
+    let geoVerified = false;
+
     if (listing.crop_id) {
       if (settings.show_crop_details) {
         const { data: crop } = await supabase
@@ -93,11 +80,10 @@ serve(async (req) => {
             growth_stage: crop.growth_stage,
           };
 
-          // Fetch farmland origin at safe level
           if (crop.land_id) {
             const { data: farmland } = await supabase
               .from("farmlands")
-              .select("district, village")
+              .select("district, village, geo_verified")
               .eq("id", crop.land_id)
               .single();
 
@@ -106,12 +92,43 @@ serve(async (req) => {
               if (settings.show_origin_level === 'district_village') {
                 cropDetails.origin_village = farmland.village;
               }
+              if (farmland.geo_verified) {
+                geoVerified = true;
+              }
             }
           }
         }
       }
 
-      // Crop timeline (activity logs)
+      // Also check geo from farmland even if crop details not shown
+      if (!geoVerified && settings.show_geo_proof) {
+        const { data: crop } = await supabase
+          .from("crops")
+          .select("land_id")
+          .eq("id", listing.crop_id)
+          .single();
+        if (crop?.land_id) {
+          const { data: fl } = await supabase
+            .from("farmlands")
+            .select("geo_verified")
+            .eq("id", crop.land_id)
+            .single();
+          if (fl?.geo_verified) geoVerified = true;
+        }
+      }
+
+      // Check crop media for geo-verified photos
+      if (!geoVerified && settings.show_geo_proof) {
+        const { data: geoPhotos } = await supabase
+          .from("crop_media")
+          .select("id")
+          .eq("crop_id", listing.crop_id)
+          .eq("geo_verified", true)
+          .limit(1);
+        if (geoPhotos && geoPhotos.length > 0) geoVerified = true;
+      }
+
+      // Crop timeline
       if (settings.show_crop_timeline) {
         const { data: activities } = await supabase
           .from("crop_activity_logs")
@@ -130,9 +147,8 @@ serve(async (req) => {
       }
     }
 
-    // 4) Helper: detect bucket from file path and generate signed URL
+    // 4) Signed URL helper
     const getSignedUrl = async (filePath: string): Promise<string | null> => {
-      // Determine bucket based on path or default to traceability-media
       let bucket = 'traceability-media';
       if (filePath.startsWith('crop-media/') || filePath.includes('/crops/')) {
         bucket = 'crop-media';
@@ -141,9 +157,8 @@ serve(async (req) => {
       }
       const { data, error } = await supabase.storage
         .from(bucket)
-        .createSignedUrl(filePath, 3600); // 1 hour expiry
+        .createSignedUrl(filePath, 3600);
       if (error || !data?.signedUrl) {
-        // Try other buckets as fallback
         for (const fallback of ['traceability-media', 'crop-media', 'soil-reports']) {
           if (fallback === bucket) continue;
           const { data: fb, error: fbErr } = await supabase.storage
@@ -156,14 +171,14 @@ serve(async (req) => {
       return data.signedUrl;
     };
 
-    // 5) Fetch public evidence attachments using signed URLs
+    // 5) Evidence attachments
     const evidence: Record<string, any[]> = {};
     const listingId = listing.id;
 
     if (settings.show_stage_photos) {
       const { data: stagePhotos } = await supabase
         .from("trace_attachments")
-        .select("file_url, file_type, captured_at, notes, tag")
+        .select("file_url, file_type, captured_at, notes")
         .eq("owner_type", "listing")
         .eq("owner_id", listingId)
         .eq("tag", "stage_photo")
@@ -175,9 +190,7 @@ serve(async (req) => {
         const photos = [];
         for (const p of stagePhotos) {
           const signedUrl = await getSignedUrl(p.file_url);
-          if (signedUrl) {
-            photos.push({ url: signedUrl, date: p.captured_at, notes: p.notes });
-          }
+          if (signedUrl) photos.push({ url: signedUrl, date: p.captured_at, notes: p.notes });
         }
         if (photos.length > 0) evidence.stage_photos = photos;
       }
@@ -198,9 +211,7 @@ serve(async (req) => {
         const photos = [];
         for (const p of inputPhotos) {
           const signedUrl = await getSignedUrl(p.file_url);
-          if (signedUrl) {
-            photos.push({ url: signedUrl, date: p.captured_at, notes: p.notes });
-          }
+          if (signedUrl) photos.push({ url: signedUrl, date: p.captured_at, notes: p.notes });
         }
         if (photos.length > 0) evidence.input_photos = photos;
       }
@@ -221,15 +232,13 @@ serve(async (req) => {
         const reports = [];
         for (const p of soilReports) {
           const signedUrl = await getSignedUrl(p.file_url);
-          if (signedUrl) {
-            reports.push({ url: signedUrl, type: p.file_type, date: p.captured_at, notes: p.notes });
-          }
+          if (signedUrl) reports.push({ url: signedUrl, type: p.file_type, date: p.captured_at, notes: p.notes });
         }
         if (reports.length > 0) evidence.soil_reports = reports;
       }
     }
 
-    // Also check crop_media photos linked via crop diary (if crop linked + photos enabled)
+    // Crop-linked photos
     if (listing.crop_id && settings.show_stage_photos) {
       const { data: cropPhotos } = await supabase
         .from("trace_attachments")
@@ -245,14 +254,12 @@ serve(async (req) => {
         if (!evidence.stage_photos) evidence.stage_photos = [];
         for (const p of cropPhotos) {
           const signedUrl = await getSignedUrl(p.file_url);
-          if (signedUrl) {
-            evidence.stage_photos.push({ url: signedUrl, date: p.captured_at, notes: p.notes });
-          }
+          if (signedUrl) evidence.stage_photos.push({ url: signedUrl, date: p.captured_at, notes: p.notes });
         }
       }
     }
 
-    // 6) Build response — never expose internal IDs
+    // 6) Build response
     const publicData: Record<string, any> = {
       trace_code: listing.trace_code,
       product_name: listing.title,
@@ -271,6 +278,7 @@ serve(async (req) => {
     if (cropDetails) publicData.crop = cropDetails;
     if (cropTimeline) publicData.crop_timeline = cropTimeline;
     if (Object.keys(evidence).length > 0) publicData.evidence = evidence;
+    if (settings.show_geo_proof && geoVerified) publicData.geo_verified = true;
 
     return new Response(
       JSON.stringify(publicData),

@@ -13,12 +13,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Search, LandPlot, MapPin, Layers, Edit, Trash2, TreeDeciduous, TestTube2 } from 'lucide-react';
+import { Plus, Search, LandPlot, MapPin, Layers, Edit, Trash2, TreeDeciduous, TestTube2, Loader2, CheckCircle2 } from 'lucide-react';
 import EditFarmlandDialog from '@/components/farmer/EditFarmlandDialog';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
 import EmptyState from '@/components/farmer/EmptyState';
 import HelpTooltip from '@/components/farmer/HelpTooltip';
 import FarmlandSoilReportsPanel from '@/components/farmer/soil-reports/FarmlandSoilReportsPanel';
+import { useGeoCapture } from '@/hooks/useGeoCapture';
 
 const FarmlandsPage = () => {
   const { data: farmlands, isLoading } = useFarmlands();
@@ -36,6 +37,7 @@ const FarmlandsPage = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [soilReportsFarmland, setSoilReportsFarmland] = useState<Farmland | null>(null);
   const [soilReportsPanelOpen, setSoilReportsPanelOpen] = useState(false);
+  const geo = useGeoCapture();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -64,6 +66,9 @@ const FarmlandsPage = () => {
         soil_type: formData.soil_type || null,
         village: formData.village || null,
         district: formData.district || null,
+        location_lat: geo.position?.latitude ?? null,
+        location_long: geo.position?.longitude ?? null,
+        geo_verified: !!geo.position,
       });
 
       if (error) throw error;
@@ -71,6 +76,7 @@ const FarmlandsPage = () => {
       toast({ title: t('common.success'), description: t('farmer.farmlands.addSuccess') });
       setIsDialogOpen(false);
       setFormData({ name: '', area: '', area_unit: 'acres', soil_type: '', village: '', district: '' });
+      geo.clear();
       queryClient.invalidateQueries({ queryKey: ['farmlands', user.id] });
     } catch (error: any) {
       toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
@@ -276,6 +282,38 @@ const FarmlandsPage = () => {
                     />
                   </div>
                 </div>
+
+                {/* GPS Capture */}
+                <div className="rounded-lg border border-border p-3 space-y-2">
+                  <Label className="text-sm font-medium flex items-center gap-1.5">
+                    <MapPin className="h-4 w-4" />
+                    Farm Location (GPS) — Optional
+                  </Label>
+                  {geo.position ? (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm flex items-center gap-1 text-green-600">
+                        <CheckCircle2 className="h-4 w-4" />
+                        📍 Location Captured
+                      </span>
+                      <Button type="button" variant="outline" size="sm" onClick={() => geo.capture()} disabled={geo.capturing}>
+                        {geo.capturing ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
+                        Recapture
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Location not added</span>
+                      <Button type="button" variant="outline" size="sm" onClick={() => geo.capture()} disabled={geo.capturing}>
+                        {geo.capturing ? (
+                          <><Loader2 className="h-3 w-3 animate-spin mr-1" /> Capturing...</>
+                        ) : (
+                          <><MapPin className="h-3 w-3 mr-1" /> Capture Location</>
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
                 <Button type="submit" className="w-full" size="lg">{t('farmer.farmlands.addFarmland')}</Button>
               </form>
             </DialogContent>
@@ -338,6 +376,17 @@ const FarmlandsPage = () => {
                       <div className="flex items-center gap-2">
                         <Layers className="h-4 w-4 shrink-0" />
                         <span className="capitalize">{t(`enum.soil_types.${land.soil_type}`)}</span>
+                      </div>
+                    )}
+                    {(land as any).geo_verified ? (
+                      <div className="flex items-center gap-2 text-green-600">
+                        <CheckCircle2 className="h-4 w-4 shrink-0" />
+                        <span>📍 Location Captured</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 shrink-0 opacity-40" />
+                        <span>Location not added</span>
                       </div>
                     )}
                   </div>

@@ -12,6 +12,7 @@ export interface TraceSettings {
   show_stage_photos: boolean;
   show_input_photos: boolean;
   show_soil_report: boolean;
+  show_geo_proof: boolean;
 }
 
 export const DEFAULT_TRACE_SETTINGS: TraceSettings = {
@@ -21,6 +22,7 @@ export const DEFAULT_TRACE_SETTINGS: TraceSettings = {
   show_stage_photos: false,
   show_input_photos: false,
   show_soil_report: false,
+  show_geo_proof: false,
 };
 
 export interface TraceAttachment {

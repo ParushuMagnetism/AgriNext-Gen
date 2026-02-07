@@ -63,6 +63,7 @@ interface TraceData {
     input_photos?: EvidenceItem[];
     soil_reports?: EvidenceItem[];
   };
+  geo_verified?: boolean;
 }
 
 const ACTIVITY_LABELS: Record<string, string> = {
@@ -386,6 +387,21 @@ const ListingTrace = () => {
                   </a>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Geo Verification Badge */}
+        {traceData.geo_verified && (
+          <Card className="mb-4 border-blue-200 bg-blue-50">
+            <CardContent className="py-4">
+              <div className="flex items-center justify-center gap-2 text-blue-800">
+                <MapPin className="h-5 w-5" />
+                <span className="text-sm font-medium">Geo-verified at farm level</span>
+              </div>
+              <p className="text-xs text-center text-blue-700 mt-1">
+                Farm location has been verified via GPS
+              </p>
             </CardContent>
           </Card>
         )}

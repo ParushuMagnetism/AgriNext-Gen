@@ -772,7 +772,10 @@ export type Database = {
           created_at: string | null
           crop_id: string
           file_path: string
+          geo_verified: boolean
           id: string
+          latitude: number | null
+          longitude: number | null
           mime_type: string
           owner_farmer_id: string
           tags: string[] | null
@@ -785,7 +788,10 @@ export type Database = {
           created_at?: string | null
           crop_id: string
           file_path: string
+          geo_verified?: boolean
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           mime_type: string
           owner_farmer_id: string
           tags?: string[] | null
@@ -798,7 +804,10 @@ export type Database = {
           created_at?: string | null
           crop_id?: string
           file_path?: string
+          geo_verified?: boolean
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           mime_type?: string
           owner_farmer_id?: string
           tags?: string[] | null
@@ -1059,6 +1068,7 @@ export type Database = {
           demo_tag: string | null
           district: string | null
           farmer_id: string
+          geo_verified: boolean
           id: string
           location_lat: number | null
           location_long: number | null
@@ -1074,6 +1084,7 @@ export type Database = {
           demo_tag?: string | null
           district?: string | null
           farmer_id: string
+          geo_verified?: boolean
           id?: string
           location_lat?: number | null
           location_long?: number | null
@@ -1089,6 +1100,7 @@ export type Database = {
           demo_tag?: string | null
           district?: string | null
           farmer_id?: string
+          geo_verified?: boolean
           id?: string
           location_lat?: number | null
           location_long?: number | null

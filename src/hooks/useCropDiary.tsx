@@ -155,11 +155,15 @@ export const useUploadCropMedia = () => {
       file,
       caption,
       tags,
+      latitude,
+      longitude,
     }: {
       cropId: string;
       file: File;
       caption?: string;
       tags?: string[];
+      latitude?: number;
+      longitude?: number;
     }) => {
       if (!user?.id) throw new Error('Not authenticated');
 
@@ -187,6 +191,9 @@ export const useUploadCropMedia = () => {
           mime_type: file.type,
           caption: caption || null,
           tags: tags || null,
+          latitude: latitude ?? null,
+          longitude: longitude ?? null,
+          geo_verified: !!(latitude && longitude),
         })
         .select()
         .single();
