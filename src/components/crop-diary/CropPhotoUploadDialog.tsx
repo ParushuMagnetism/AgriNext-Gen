@@ -4,11 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Camera, Upload, X, Loader2 } from 'lucide-react';
+import { Camera, Upload, X, Loader2, MapPin, CheckCircle2 } from 'lucide-react';
 import { useUploadCropMedia } from '@/hooks/useCropDiary';
 import { toast } from 'sonner';
 import imageCompression from 'browser-image-compression';
 import { FILE_SIZE_LIMITS, validateFileSize, isImageFile, getErrorMessage, createRetryAction } from '@/lib/error-utils';
+import { useGeoCapture } from '@/hooks/useGeoCapture';
 
 interface CropPhotoUploadDialogProps {
   cropId: string;
@@ -22,6 +23,7 @@ const CropPhotoUploadDialog = ({ cropId, open, onOpenChange }: CropPhotoUploadDi
   const [caption, setCaption] = useState('');
   const [monthTag, setMonthTag] = useState('');
   const [isCompressing, setIsCompressing] = useState(false);
+  const geo = useGeoCapture();
 
   const uploadMutation = useUploadCropMedia();
 
@@ -29,20 +31,17 @@ const CropPhotoUploadDialog = ({ cropId, open, onOpenChange }: CropPhotoUploadDi
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
 
-    // Validate file type
     if (!isImageFile(selectedFile)) {
       toast.error('Please select an image file (JPG, PNG, WebP)');
       return;
     }
 
-    // Validate file size
     const validation = validateFileSize(selectedFile, FILE_SIZE_LIMITS.IMAGE_MAX_MB);
     if (!validation.valid) {
       toast.error(validation.message);
       return;
     }
 
-    // Compress if needed
     let processedFile = selectedFile;
     const sizeMB = selectedFile.size / (1024 * 1024);
     
@@ -54,8 +53,6 @@ const CropPhotoUploadDialog = ({ cropId, open, onOpenChange }: CropPhotoUploadDi
           maxWidthOrHeight: 1920,
           useWebWorker: true,
         });
-        const compressedSizeMB = processedFile.size / (1024 * 1024);
-        console.log(`Image compressed: ${sizeMB.toFixed(2)}MB → ${compressedSizeMB.toFixed(2)}MB`);
       } catch (error) {
         console.error('Compression failed:', error);
         toast.error('Failed to compress image. Please try a smaller file.');
@@ -69,6 +66,11 @@ const CropPhotoUploadDialog = ({ cropId, open, onOpenChange }: CropPhotoUploadDi
     const reader = new FileReader();
     reader.onloadend = () => setPreview(reader.result as string);
     reader.readAsDataURL(processedFile);
+
+    // Auto-capture GPS when photo is selected
+    if (!geo.position) {
+      geo.capture();
+    }
   };
 
   const clearFile = () => {
@@ -89,12 +91,15 @@ const CropPhotoUploadDialog = ({ cropId, open, onOpenChange }: CropPhotoUploadDi
         file,
         caption: caption || undefined,
         tags: tags.length > 0 ? tags : undefined,
+        latitude: geo.position?.latitude,
+        longitude: geo.position?.longitude,
       });
 
       setFile(null);
       setPreview(null);
       setCaption('');
       setMonthTag('');
+      geo.clear();
       onOpenChange(false);
     } catch (error) {
       const message = getErrorMessage(error);
@@ -174,6 +179,29 @@ const CropPhotoUploadDialog = ({ cropId, open, onOpenChange }: CropPhotoUploadDi
               >
                 <X className="h-4 w-4" />
               </Button>
+            </div>
+          )}
+
+          {/* Geo status indicator */}
+          {file && (
+            <div className="flex items-center gap-2 text-xs px-1">
+              {geo.capturing ? (
+                <span className="text-muted-foreground flex items-center gap-1">
+                  <Loader2 className="h-3 w-3 animate-spin" /> Capturing location...
+                </span>
+              ) : geo.position ? (
+                <span className="text-green-600 flex items-center gap-1">
+                  <CheckCircle2 className="h-3 w-3" /> 📍 Geo-tagged
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => geo.capture()}
+                  className="text-muted-foreground hover:text-foreground flex items-center gap-1"
+                >
+                  <MapPin className="h-3 w-3" /> Add location (optional)
+                </button>
+              )}
             </div>
           )}
 

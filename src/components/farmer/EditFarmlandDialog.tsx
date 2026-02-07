@@ -10,7 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, MapPin, CheckCircle2 } from 'lucide-react';
+import { useGeoCapture } from '@/hooks/useGeoCapture';
 
 interface EditFarmlandDialogProps {
   farmland: Farmland | null;
@@ -24,6 +25,7 @@ const EditFarmlandDialog = ({ farmland, open, onOpenChange }: EditFarmlandDialog
   const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [isSaving, setIsSaving] = useState(false);
+  const geo = useGeoCapture();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -33,6 +35,12 @@ const EditFarmlandDialog = ({ farmland, open, onOpenChange }: EditFarmlandDialog
     village: '',
     district: '',
   });
+
+  const [geoState, setGeoState] = useState<{
+    lat: number | null;
+    lng: number | null;
+    verified: boolean;
+  }>({ lat: null, lng: null, verified: false });
 
   useEffect(() => {
     if (farmland) {
@@ -44,8 +52,23 @@ const EditFarmlandDialog = ({ farmland, open, onOpenChange }: EditFarmlandDialog
         village: farmland.village || '',
         district: farmland.district || '',
       });
+      setGeoState({
+        lat: (farmland as any).location_lat || null,
+        lng: (farmland as any).location_long || null,
+        verified: (farmland as any).geo_verified || false,
+      });
     }
   }, [farmland]);
+
+  const handleCaptureLocation = async () => {
+    const pos = await geo.capture();
+    if (pos) {
+      setGeoState({ lat: pos.latitude, lng: pos.longitude, verified: true });
+      toast({ title: 'Location captured', description: `Accuracy: ~${Math.round(pos.accuracy)}m` });
+    } else if (geo.error) {
+      toast({ title: 'Location error', description: geo.error, variant: 'destructive' });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,6 +85,9 @@ const EditFarmlandDialog = ({ farmland, open, onOpenChange }: EditFarmlandDialog
           soil_type: formData.soil_type || null,
           village: formData.village || null,
           district: formData.district || null,
+          location_lat: geoState.lat,
+          location_long: geoState.lng,
+          geo_verified: geoState.verified,
         })
         .eq('id', farmland.id);
 
@@ -154,6 +180,38 @@ const EditFarmlandDialog = ({ farmland, open, onOpenChange }: EditFarmlandDialog
               />
             </div>
           </div>
+
+          {/* GPS Capture */}
+          <div className="rounded-lg border border-border p-3 space-y-2">
+            <Label className="text-sm font-medium flex items-center gap-1.5">
+              <MapPin className="h-4 w-4" />
+              Farm Location (GPS)
+            </Label>
+            {geoState.verified ? (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-green-600 flex items-center gap-1">
+                  <CheckCircle2 className="h-4 w-4" />
+                  📍 Location Captured
+                </span>
+                <Button type="button" variant="outline" size="sm" onClick={handleCaptureLocation} disabled={geo.capturing}>
+                  {geo.capturing ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
+                  Recapture
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Location not added</span>
+                <Button type="button" variant="outline" size="sm" onClick={handleCaptureLocation} disabled={geo.capturing}>
+                  {geo.capturing ? (
+                    <><Loader2 className="h-3 w-3 animate-spin mr-1" /> Capturing...</>
+                  ) : (
+                    <><MapPin className="h-3 w-3 mr-1" /> Capture Location</>
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
+
           <Button type="submit" className="w-full" disabled={isSaving}>
             {isSaving ? (
               <>

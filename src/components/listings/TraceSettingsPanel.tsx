@@ -80,6 +80,14 @@ const TraceSettingsPanel = ({ settings, onChange }: TraceSettingsPanelProps) => 
             onCheckedChange={(v) => update('show_soil_report', v)}
           />
         </div>
+
+        <div className="flex items-center justify-between">
+          <Label className="text-xs">Show geo verification badge</Label>
+          <Switch
+            checked={settings.show_geo_proof ?? false}
+            onCheckedChange={(v) => update('show_geo_proof', v)}
+          />
+        </div>
       </div>
     </div>
   );
