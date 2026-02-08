@@ -32,3 +32,6 @@ verify_jwt = true
 [functions.agent-update-task-status]
 
 [functions.agent-update-crop-status]
+
+[functions.gemini-chat]
+verify_jwt = false
