@@ -23,10 +23,10 @@ Deno.serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
+    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
 
-    if (!geminiApiKey) {
-      console.error("GEMINI_API_KEY not configured");
+    if (!lovableApiKey) {
+      console.error("LOVABLE_API_KEY not configured");
       return new Response(
         JSON.stringify({ error: "AI service not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -69,39 +69,60 @@ Deno.serve(async (req) => {
       .order("created_at", { ascending: true })
       .limit(20);
 
-    const contents = (history || []).map((m) => ({
-      role: m.role === "model" ? "model" : "user",
-      parts: [{ text: m.content }],
+    const messages = (history || []).map((m) => ({
+      role: m.role === "model" ? "assistant" : "user",
+      content: m.content,
     }));
 
-    // Call Gemini API
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`,
+    // Call Lovable AI Gateway
+    const aiRes = await fetch(
+      "https://ai.gateway.lovable.dev/v1/chat/completions",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${lovableApiKey}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          contents,
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 1024,
-          },
+          model: "google/gemini-3-flash-preview",
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are Krishi Mitra, a helpful farming assistant for Indian farmers. Provide concise, practical advice about crops, weather, soil, government schemes, and farming best practices. Be friendly and supportive.",
+            },
+            ...messages,
+          ],
         }),
       }
     );
 
-    if (!geminiRes.ok) {
-      const errText = await geminiRes.text();
-      console.error("Gemini API error:", geminiRes.status, errText);
+    if (!aiRes.ok) {
+      const errText = await aiRes.text();
+      console.error("AI gateway error:", aiRes.status, errText);
+
+      if (aiRes.status === 429) {
+        return new Response(
+          JSON.stringify({ error: "Rate limit exceeded. Please try again shortly." }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (aiRes.status === 402) {
+        return new Response(
+          JSON.stringify({ error: "AI credits exhausted. Please add funds." }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       return new Response(
         JSON.stringify({ error: "AI service error" }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const geminiData = await geminiRes.json();
+    const aiData = await aiRes.json();
     const reply =
-      geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      aiData?.choices?.[0]?.message?.content ||
       "Sorry, I could not generate a response.";
 
     // Save model reply

@@ -482,7 +482,9 @@ serve(async (req) => {
     const supabaseService = createClient(supabaseUrl, supabaseServiceKey);
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabaseUser.auth.getUser(token);
+    const { data: claimsData, error: claimsError } = await supabaseUser.auth.getClaims(token);
+    const user = claimsError ? null : { id: claimsData?.claims?.sub as string };
+    const userError = claimsError;
     if (userError || !user) {
       console.error("Auth error:", userError);
       return new Response(
