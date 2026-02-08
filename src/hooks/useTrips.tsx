@@ -98,34 +98,57 @@ export const useTrips = (status?: string | string[]) => {
       const { data: trips, error } = await query;
       if (error) throw error;
 
-      // Enrich with farmer and crop data
-      const enrichedTrips = await Promise.all(
-        (trips || []).map(async (trip) => {
-          const request = trip.transport_request;
-          if (!request) return trip;
+      const farmerIds = Array.from(
+        new Set((trips || []).map((trip) => trip.transport_request?.farmer_id).filter(Boolean))
+      ) as string[];
+      const cropIds = Array.from(
+        new Set((trips || []).map((trip) => trip.transport_request?.crop_id).filter(Boolean))
+      ) as string[];
 
-          const [farmerResult, cropResult] = await Promise.all([
-            supabase
+      const [farmersRes, cropsRes] = await Promise.all([
+        farmerIds.length > 0
+          ? supabase
               .from('profiles')
-              .select('full_name, village, district, phone')
-              .eq('id', request.farmer_id)
-              .maybeSingle(),
-            request.crop_id
-              ? supabase
-                  .from('crops')
-                  .select('crop_name, variety')
-                  .eq('id', request.crop_id)
-                  .maybeSingle()
-              : Promise.resolve({ data: null }),
-          ]);
+              .select('id, full_name, village, district, phone')
+              .in('id', farmerIds)
+          : Promise.resolve({ data: [], error: null }),
+        cropIds.length > 0
+          ? supabase
+              .from('crops')
+              .select('id, crop_name, variety')
+              .in('id', cropIds)
+          : Promise.resolve({ data: [], error: null }),
+      ]);
 
-          return {
-            ...trip,
-            farmer: farmerResult.data,
-            crop: cropResult.data,
-          };
-        })
-      );
+      if (farmersRes.error) throw farmersRes.error;
+      if (cropsRes.error) throw cropsRes.error;
+
+      const farmerMap = new Map((farmersRes.data || []).map((f: any) => [f.id, f]));
+      const cropMap = new Map((cropsRes.data || []).map((c: any) => [c.id, c]));
+
+      const enrichedTrips = (trips || []).map((trip) => {
+        const request = trip.transport_request;
+        const farmer = request?.farmer_id ? farmerMap.get(request.farmer_id) : null;
+        const crop = request?.crop_id ? cropMap.get(request.crop_id) : null;
+
+        return {
+          ...trip,
+          farmer: farmer
+            ? {
+                full_name: farmer.full_name,
+                village: farmer.village,
+                district: farmer.district,
+                phone: farmer.phone,
+              }
+            : null,
+          crop: crop
+            ? {
+                crop_name: crop.crop_name,
+                variety: crop.variety,
+              }
+            : null,
+        };
+      });
 
       return enrichedTrips as Trip[];
     },

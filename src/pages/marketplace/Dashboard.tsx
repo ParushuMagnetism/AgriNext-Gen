@@ -3,38 +3,42 @@ import DashboardLayout from '@/layouts/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  ShoppingCart, 
-  Leaf, 
-  TrendingUp, 
+import {
+  ShoppingCart,
+  Leaf,
+  TrendingUp,
   Package,
   Sparkles,
   ArrowRight,
   MapPin,
-  User
+  User,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { 
+import {
   useBuyerProfile,
   useCreateBuyerProfile,
   useMarketProducts,
   useMarketplaceDashboardStats,
-  useBuyerOrders
+  useBuyerOrders,
 } from '@/hooks/useMarketplaceDashboard';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useLanguage } from '@/hooks/useLanguage';
+import PageShell from '@/components/layout/PageShell';
+import KpiCard from '@/components/dashboard/KpiCard';
+import ActionPanel from '@/components/dashboard/ActionPanel';
 
 const MarketplaceDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { data: profile, isLoading: profileLoading } = useBuyerProfile();
   const createProfile = useCreateBuyerProfile();
   const { data: products } = useMarketProducts();
   const stats = useMarketplaceDashboardStats();
   const { data: orders } = useBuyerOrders();
-  
+
   const [aiLoading, setAiLoading] = useState(false);
   const [stockAdvice, setStockAdvice] = useState<string | null>(null);
 
@@ -47,17 +51,17 @@ const MarketplaceDashboard = () => {
 
   const handleStockRecommendation = async () => {
     if (!profile) return;
-    
+
     setAiLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('marketplace-ai', {
         body: {
           type: 'stock_recommendation',
           buyerProfile: profile,
-          marketData: { available_crops: products?.slice(0, 10) }
-        }
+          marketData: { available_crops: products?.slice(0, 10) },
+        },
       });
-      
+
       if (error) throw error;
       setStockAdvice(data.result);
       toast.success('AI recommendations ready!');
@@ -71,11 +75,13 @@ const MarketplaceDashboard = () => {
 
   if (profileLoading) {
     return (
-      <DashboardLayout title="Marketplace">
+      <DashboardLayout title={t('nav.dashboard')}>
         <div className="space-y-6">
-          <Skeleton className="h-32 w-full" />
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24" />)}
+          <div className="h-32 w-full animate-pulse rounded-lg bg-muted" />
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-24 animate-pulse rounded-lg bg-muted" />
+            ))}
           </div>
         </div>
       </DashboardLayout>
@@ -84,22 +90,18 @@ const MarketplaceDashboard = () => {
 
   if (!profile) {
     return (
-      <DashboardLayout title="Marketplace">
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <Card className="max-w-md w-full">
+      <DashboardLayout title={t('nav.dashboard')}>
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <Card className="w-full max-w-md">
             <CardHeader className="text-center">
-              <ShoppingCart className="h-16 w-16 mx-auto text-primary mb-4" />
+              <ShoppingCart className="mx-auto mb-4 h-16 w-16 text-primary" />
               <CardTitle>Welcome to AgriNext Gen Marketplace!</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-center text-muted-foreground">
                 Set up your buyer profile to start purchasing fresh produce directly from farmers.
               </p>
-              <Button 
-                className="w-full" 
-                onClick={handleCreateProfile}
-                disabled={createProfile.isPending}
-              >
+              <Button className="w-full" onClick={handleCreateProfile} disabled={createProfile.isPending}>
                 {createProfile.isPending ? 'Creating...' : 'Create Buyer Profile'}
               </Button>
             </CardContent>
@@ -109,199 +111,117 @@ const MarketplaceDashboard = () => {
     );
   }
 
-  const freshProducts = products?.filter(p => p.status === 'ready').slice(0, 4) || [];
-  const activeOrders = orders?.filter(o => !['delivered', 'cancelled'].includes(o.status)).slice(0, 3) || [];
+  const freshProducts = products?.filter((p) => p.status === 'ready').slice(0, 4) || [];
+  const activeOrders = orders?.filter((o) => !['delivered', 'cancelled'].includes(o.status)).slice(0, 3) || [];
 
   return (
-    <DashboardLayout title="Marketplace">
-      <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Marketplace</h1>
-          <p className="text-muted-foreground">
-            Welcome, {profile.name} • {profile.company_name || profile.buyer_type}
-          </p>
+    <DashboardLayout title={t('nav.dashboard')}>
+      <PageShell
+        title={t('marketplace.browseMarketplace')}
+        subtitle={`Welcome, ${profile.name} - ${profile.company_name || profile.buyer_type}`}
+        actions={
+          <Button onClick={() => navigate('/marketplace/browse')}>
+            <ShoppingCart className="mr-2 h-4 w-4" />
+            {t('marketplace.browseProducts')}
+          </Button>
+        }
+      >
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <KpiCard label={t('marketplace.available')} value={stats.totalProducts} icon={Package} priority="primary" onClick={() => navigate('/marketplace/browse')} />
+          <KpiCard label="Fresh Harvest" value={stats.freshHarvest} icon={Leaf} priority="success" />
+          <KpiCard label="Coming Soon" value={stats.oneWeekAway} icon={TrendingUp} priority="warning" />
+          <KpiCard label="Active Orders" value={stats.activeOrders} icon={ShoppingCart} priority="info" onClick={() => navigate('/marketplace/orders')} />
         </div>
-        <Button onClick={() => navigate('/marketplace/browse')}>
-          <ShoppingCart className="h-4 w-4 mr-2" />
-          Browse Products
-        </Button>
-      </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="cursor-pointer hover:shadow-md" onClick={() => navigate('/marketplace/browse')}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Available</p>
-                <p className="text-2xl font-bold text-primary">{stats.totalProducts}</p>
-              </div>
-              <Package className="h-8 w-8 text-primary" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Fresh Harvest</p>
-                <p className="text-2xl font-bold text-green-600">{stats.freshHarvest}</p>
-              </div>
-              <Leaf className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Coming Soon</p>
-                <p className="text-2xl font-bold text-amber-600">{stats.oneWeekAway}</p>
-              </div>
-              <TrendingUp className="h-8 w-8 text-amber-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="cursor-pointer hover:shadow-md" onClick={() => navigate('/marketplace/orders')}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Active Orders</p>
-                <p className="text-2xl font-bold text-blue-600">{stats.activeOrders}</p>
-              </div>
-              <ShoppingCart className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Content */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Fresh Harvest */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Leaf className="h-5 w-5 text-green-600" />
-                Fresh Harvest Available
-              </CardTitle>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/marketplace/browse')}>
-                View All <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {freshProducts.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Leaf className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>No fresh harvest available</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {freshProducts.map(product => (
-                  <div 
-                    key={product.id}
-                    className="p-3 rounded-lg border hover:bg-accent/50 cursor-pointer transition-colors"
-                    onClick={() => navigate(`/marketplace/product/${product.id}`)}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium">{product.crop_name}</span>
-                      <Badge variant="default" className="bg-green-100 text-green-800">Ready</Badge>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <span>{product.estimated_quantity} {product.quantity_unit}</span>
-                      <span className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        {product.farmer?.village || product.land?.village || 'Unknown'}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Active Orders */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <ShoppingCart className="h-5 w-5 text-blue-600" />
-                Your Active Orders
-              </CardTitle>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/marketplace/orders')}>
-                View All <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {activeOrders.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <ShoppingCart className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>No active orders</p>
-                <Button variant="link" onClick={() => navigate('/marketplace/browse')}>
-                  Start shopping
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Leaf className="h-5 w-5 text-green-600" />
+                  Fresh Harvest Available
+                </CardTitle>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/marketplace/browse')}>
+                  {t('common.viewAll')} <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {activeOrders.map(order => (
-                  <div 
-                    key={order.id}
-                    className="p-3 rounded-lg border hover:bg-accent/50 cursor-pointer transition-colors"
-                    onClick={() => navigate('/marketplace/orders')}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium">{order.crop?.crop_name || 'Order'}</span>
-                      <Badge variant="outline">{order.status}</Badge>
+            </CardHeader>
+            <CardContent>
+              {freshProducts.length === 0 ? (
+                <div className="py-8 text-center text-muted-foreground">
+                  <Leaf className="mx-auto mb-3 h-12 w-12 opacity-50" />
+                  <p>{t('marketplace.noProductsFound')}</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {freshProducts.map((product) => (
+                    <div key={product.id} className="cursor-pointer rounded-lg border p-3 transition-colors hover:bg-accent/50" onClick={() => navigate(`/marketplace/product/${product.id}`)}>
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="font-medium">{product.crop_name}</span>
+                        <Badge variant="default" className="bg-green-100 text-green-800">{t('crops.readyShort')}</Badge>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                        <span>{product.estimated_quantity} {product.quantity_unit}</span>
+                        <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{product.farmer?.village || product.land?.village || t('common.unknown')}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <span>{order.quantity} {order.quantity_unit}</span>
-                      <span className="flex items-center gap-1">
-                        <User className="h-3 w-3" />
-                        {order.farmer?.full_name || 'Farmer'}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-      {/* AI Recommendations */}
-      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" />
-              AI Stock Advisor
-            </CardTitle>
-            <Button onClick={handleStockRecommendation} disabled={aiLoading}>
-              {aiLoading ? 'Analyzing...' : 'What Should I Stock?'}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <ShoppingCart className="h-5 w-5 text-blue-600" />
+                  Your Active Orders
+                </CardTitle>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/marketplace/orders')}>
+                  {t('common.viewAll')} <ArrowRight className="ml-1 h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {activeOrders.length === 0 ? (
+                <div className="py-8 text-center text-muted-foreground">
+                  <ShoppingCart className="mx-auto mb-3 h-12 w-12 opacity-50" />
+                  <p>{t('orders.noOrdersYet')}</p>
+                  <Button variant="link" onClick={() => navigate('/marketplace/browse')}>{t('marketplace.browseProducts')}</Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {activeOrders.map((order) => (
+                    <div key={order.id} className="cursor-pointer rounded-lg border p-3 transition-colors hover:bg-accent/50" onClick={() => navigate('/marketplace/orders')}>
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="font-medium">{order.crop?.crop_name || 'Order'}</span>
+                        <Badge variant="outline">{order.status}</Badge>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                        <span>{order.quantity} {order.quantity_unit}</span>
+                        <span className="flex items-center gap-1"><User className="h-3 w-3" />{order.farmer?.full_name || 'Farmer'}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <ActionPanel
+          title="AI Stock Advisor"
+          context="Get recommendations on what to stock this week from your market profile and fresh inventory."
+          primaryAction={<Button onClick={handleStockRecommendation} disabled={aiLoading}><Sparkles className="mr-2 h-4 w-4" />{aiLoading ? 'Analyzing...' : 'What Should I Stock?'}</Button>}
+        >
           {stockAdvice ? (
-            <div className="p-4 bg-background rounded-lg whitespace-pre-wrap text-sm">
-              {stockAdvice}
-            </div>
+            <div className="rounded-lg bg-background p-4 text-sm whitespace-pre-wrap">{stockAdvice}</div>
           ) : (
-            <p className="text-muted-foreground">
-              Get AI-powered recommendations on what crops to stock this week based on market trends and your buyer profile.
-            </p>
+            <p className="text-muted-foreground">Get AI-powered recommendations based on market trends and your buyer profile.</p>
           )}
-        </CardContent>
-      </Card>
-      </div>
+        </ActionPanel>
+      </PageShell>
     </DashboardLayout>
   );
 };

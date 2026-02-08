@@ -1,8 +1,9 @@
 import DashboardLayout from '@/layouts/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import PageShell from '@/components/layout/PageShell';
+import DataState from '@/components/ui/DataState';
 import {
   Table,
   TableBody,
@@ -11,12 +12,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ShoppingCart, Package, Truck, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { ShoppingCart, Package, Truck, CheckCircle2, XCircle, Clock, type LucideIcon } from 'lucide-react';
 import { useBuyerOrders } from '@/hooks/useMarketplaceDashboard';
 import { format, parseISO } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
-const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
+const statusConfig: Record<string, { label: string; color: string; icon: LucideIcon }> = {
   requested: { label: 'Requested', color: 'bg-amber-100 text-amber-800', icon: Clock },
   confirmed: { label: 'Confirmed', color: 'bg-blue-100 text-blue-800', icon: CheckCircle2 },
   in_transport: { label: 'In Transport', color: 'bg-purple-100 text-purple-800', icon: Truck },
@@ -29,14 +30,7 @@ const Orders = () => {
   const { data: orders, isLoading } = useBuyerOrders();
 
   if (isLoading) {
-    return (
-      <DashboardLayout title="My Orders">
-        <div className="space-y-6">
-          <Skeleton className="h-10 w-48" />
-          <Skeleton className="h-96 w-full" />
-        </div>
-      </DashboardLayout>
-    );
+    return <DashboardLayout title="My Orders"><DataState loading><></></DataState></DashboardLayout>;
   }
 
   const activeOrders = orders?.filter(o => !['delivered', 'cancelled'].includes(o.status)) || [];
@@ -44,18 +38,16 @@ const Orders = () => {
 
   return (
     <DashboardLayout title="My Orders">
-      <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">My Orders</h1>
-          <p className="text-muted-foreground">{orders?.length || 0} total orders</p>
-        </div>
-        <Button onClick={() => navigate('/marketplace/browse')}>
-          <ShoppingCart className="h-4 w-4 mr-2" />
-          Shop More
-        </Button>
-      </div>
+      <PageShell
+        title="My Orders"
+        subtitle={`${orders?.length || 0} total orders`}
+        actions={(
+          <Button onClick={() => navigate('/marketplace/browse')}>
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            Shop More
+          </Button>
+        )}
+      >
 
       {/* Active Orders */}
       <Card>
@@ -187,7 +179,7 @@ const Orders = () => {
           </CardContent>
         </Card>
       )}
-      </div>
+      </PageShell>
     </DashboardLayout>
   );
 };

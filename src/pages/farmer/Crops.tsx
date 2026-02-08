@@ -13,7 +13,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
-import { Skeleton } from '@/components/ui/skeleton';
+import PageShell from '@/components/layout/PageShell';
+import DataState from '@/components/ui/DataState';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Search, Sprout, Calendar, MapPin, Scale, Edit, Trash2, Truck, BookOpen } from 'lucide-react';
 import { format } from 'date-fns';
@@ -108,8 +109,9 @@ const CropsPage = () => {
         quantity_unit: 'quintals',
       });
       queryClient.invalidateQueries({ queryKey: ['crops', user.id] });
-    } catch (error: any) {
-      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t('common.error');
+      toast({ title: t('common.error'), description: message, variant: 'destructive' });
     }
   };
 
@@ -129,8 +131,9 @@ const CropsPage = () => {
       queryClient.invalidateQueries({ queryKey: ['crops', user?.id] });
       setDeleteConfirmOpen(false);
       setDeletingCrop(null);
-    } catch (error: any) {
-      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t('common.error');
+      toast({ title: t('common.error'), description: message, variant: 'destructive' });
     } finally {
       setIsDeleting(false);
     }
@@ -138,7 +141,7 @@ const CropsPage = () => {
 
   return (
     <DashboardLayout title={t('farmer.crops.title')}>
-      <div className="space-y-6">
+      <PageShell title={t('farmer.crops.title')}>
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <Card 
@@ -342,11 +345,9 @@ const CropsPage = () => {
 
         {/* Crops Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Skeleton key={i} className="h-48 rounded-xl" />
-            ))}
-          </div>
+          <DataState loading>
+            <></>
+          </DataState>
         ) : filteredCrops?.length === 0 ? (
           <Card>
             <CardContent className="p-0">
@@ -439,7 +440,7 @@ const CropsPage = () => {
             })}
           </div>
         )}
-      </div>
+      </PageShell>
 
       <EditCropDialog
         crop={editingCrop}

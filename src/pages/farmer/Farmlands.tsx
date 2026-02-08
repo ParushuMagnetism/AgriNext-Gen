@@ -11,7 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
-import { Skeleton } from '@/components/ui/skeleton';
+import PageShell from '@/components/layout/PageShell';
+import DataState from '@/components/ui/DataState';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Search, LandPlot, MapPin, Layers, Edit, Trash2, TreeDeciduous, TestTube2, Loader2, CheckCircle2 } from 'lucide-react';
 import EditFarmlandDialog from '@/components/farmer/EditFarmlandDialog';
@@ -78,8 +79,9 @@ const FarmlandsPage = () => {
       setFormData({ name: '', area: '', area_unit: 'acres', soil_type: '', village: '', district: '' });
       geo.clear();
       queryClient.invalidateQueries({ queryKey: ['farmlands', user.id] });
-    } catch (error: any) {
-      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t('common.error');
+      toast({ title: t('common.error'), description: message, variant: 'destructive' });
     }
   };
 
@@ -99,8 +101,9 @@ const FarmlandsPage = () => {
       queryClient.invalidateQueries({ queryKey: ['farmlands', user?.id] });
       setDeleteConfirmOpen(false);
       setDeletingFarmland(null);
-    } catch (error: any) {
-      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t('common.error');
+      toast({ title: t('common.error'), description: message, variant: 'destructive' });
     } finally {
       setIsDeleting(false);
     }
@@ -116,7 +119,7 @@ const FarmlandsPage = () => {
 
   return (
     <DashboardLayout title={t('farmer.farmlands.title')}>
-      <div className="space-y-6">
+      <PageShell title={t('farmer.farmlands.title')}>
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
@@ -287,13 +290,13 @@ const FarmlandsPage = () => {
                 <div className="rounded-lg border border-border p-3 space-y-2">
                   <Label className="text-sm font-medium flex items-center gap-1.5">
                     <MapPin className="h-4 w-4" />
-                    Farm Location (GPS) — Optional
+                    Farm Location (GPS) - Optional
                   </Label>
                   {geo.position ? (
                     <div className="flex items-center justify-between">
                       <span className="text-sm flex items-center gap-1 text-green-600">
                         <CheckCircle2 className="h-4 w-4" />
-                        📍 Location Captured
+                        Location captured
                       </span>
                       <Button type="button" variant="outline" size="sm" onClick={() => geo.capture()} disabled={geo.capturing}>
                         {geo.capturing ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
@@ -322,11 +325,9 @@ const FarmlandsPage = () => {
 
         {/* Farmlands Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-40 rounded-xl" />
-            ))}
-          </div>
+          <DataState loading>
+            <></>
+          </DataState>
         ) : filteredFarmlands?.length === 0 ? (
           <Card>
             <CardContent className="p-0">
@@ -378,10 +379,10 @@ const FarmlandsPage = () => {
                         <span className="capitalize">{t(`enum.soil_types.${land.soil_type}`)}</span>
                       </div>
                     )}
-                    {(land as any).geo_verified ? (
+                    {(land as { geo_verified?: boolean }).geo_verified ? (
                       <div className="flex items-center gap-2 text-green-600">
                         <CheckCircle2 className="h-4 w-4 shrink-0" />
-                        <span>📍 Location Captured</span>
+                        <span>Location captured</span>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
@@ -427,7 +428,7 @@ const FarmlandsPage = () => {
             ))}
           </div>
         )}
-      </div>
+      </PageShell>
 
       <EditFarmlandDialog
         farmland={editingFarmland}
@@ -456,3 +457,4 @@ const FarmlandsPage = () => {
 };
 
 export default FarmlandsPage;
+

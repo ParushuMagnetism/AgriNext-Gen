@@ -13,7 +13,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
-import { Skeleton } from '@/components/ui/skeleton';
+import PageShell from '@/components/layout/PageShell';
+import DataState from '@/components/ui/DataState';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Truck, MapPin, Calendar, Package, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
@@ -112,8 +113,9 @@ const TransportPage = () => {
         notes: '',
       });
       queryClient.invalidateQueries({ queryKey: ['transport-requests', user.id] });
-    } catch (error: any) {
-      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t('common.error');
+      toast({ title: t('common.error'), description: message, variant: 'destructive' });
     }
   };
 
@@ -136,8 +138,9 @@ const TransportPage = () => {
       queryClient.invalidateQueries({ queryKey: ['transport-requests', user?.id] });
       setCancelConfirmOpen(false);
       setCancellingRequest(null);
-    } catch (error: any) {
-      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t('common.error');
+      toast({ title: t('common.error'), description: message, variant: 'destructive' });
     } finally {
       setIsCancelling(false);
     }
@@ -153,7 +156,7 @@ const TransportPage = () => {
 
   return (
     <DashboardLayout title={t('farmer.transport.title')}>
-      <div className="space-y-6">
+      <PageShell title={t('farmer.transport.title')}>
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
@@ -357,11 +360,9 @@ const TransportPage = () => {
 
         {/* Requests List */}
         {isLoading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-32 rounded-xl" />
-            ))}
-          </div>
+          <DataState loading>
+            <></>
+          </DataState>
         ) : filteredRequests?.length === 0 ? (
           <Card>
             <CardContent className="p-0">
@@ -403,7 +404,7 @@ const TransportPage = () => {
                             {request.crop?.crop_name || t('farmer.transport.generalProduce')}
                           </span>
                           <span className="text-muted-foreground">
-                            • {request.quantity} {request.quantity_unit}
+                            - {request.quantity} {request.quantity_unit}
                           </span>
                           <Badge className={status.color}>{status.label}</Badge>
                         </div>
@@ -443,7 +444,7 @@ const TransportPage = () => {
             })}
           </div>
         )}
-      </div>
+      </PageShell>
 
       <ConfirmDialog
         open={cancelConfirmOpen}
@@ -460,3 +461,4 @@ const TransportPage = () => {
 };
 
 export default TransportPage;
+

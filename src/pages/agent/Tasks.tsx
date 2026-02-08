@@ -46,13 +46,14 @@ import {
   CheckCircle, 
   Clock, 
   Play,
-  Filter,
   Search,
   FileAudio
 } from 'lucide-react';
 import AgentVoiceNoteDialog from '@/components/agent/AgentVoiceNoteDialog';
 import { format, parseISO } from 'date-fns';
 import { toast } from 'sonner';
+import PageShell from '@/components/layout/PageShell';
+import DataState from '@/components/ui/DataState';
 
 const taskTypeLabels: Record<string, string> = {
   visit: 'Farm Visit',
@@ -129,17 +130,10 @@ const AgentTasks = () => {
 
   return (
     <DashboardLayout title="Tasks">
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <ClipboardList className="h-6 w-6 text-primary" />
-              My Tasks
-            </h1>
-            <p className="text-muted-foreground">Manage your field visit tasks</p>
-          </div>
-          
+      <PageShell
+        title="My Tasks"
+        subtitle="Manage your field visit tasks"
+        actions={(
           <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
             <DialogTrigger asChild>
               <Button>
@@ -196,7 +190,9 @@ const AgentTasks = () => {
                   <Label>Task Type</Label>
                   <Select 
                     value={newTask.task_type} 
-                    onValueChange={(v: any) => setNewTask({ ...newTask, task_type: v })}
+                    onValueChange={(v: 'visit' | 'verify_crop' | 'harvest_check' | 'transport_assist') =>
+                      setNewTask({ ...newTask, task_type: v })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -238,8 +234,9 @@ const AgentTasks = () => {
               </div>
             </DialogContent>
           </Dialog>
-        </div>
-
+        )}
+      >
+          
         {/* Filters */}
         <Card>
           <CardContent className="py-4">
@@ -272,13 +269,7 @@ const AgentTasks = () => {
         {/* Tasks Table */}
         <Card>
           <CardContent className="p-0">
-            {isLoading ? (
-              <div className="p-6 space-y-4">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Skeleton key={i} className="h-16 w-full" />
-                ))}
-              </div>
-            ) : (
+            <DataState loading={isLoading} empty={!isLoading && (!filteredTasks || filteredTasks.length === 0)} emptyTitle="No tasks found">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -374,10 +365,10 @@ const AgentTasks = () => {
                   )}
                 </TableBody>
               </Table>
-            )}
+            </DataState>
           </CardContent>
         </Card>
-      </div>
+      </PageShell>
     </DashboardLayout>
   );
 };

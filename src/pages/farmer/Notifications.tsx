@@ -4,10 +4,11 @@ import DashboardLayout from '@/layouts/DashboardLayout';
 import { useFarmerNotifications } from '@/hooks/useFarmerDashboard';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import PageShell from '@/components/layout/PageShell';
+import DataState from '@/components/ui/DataState';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Bell, 
@@ -54,8 +55,9 @@ const NotificationsPage = () => {
         .eq('id', id);
       if (error) throw error;
       queryClient.invalidateQueries({ queryKey: ['farmer-notifications', user?.id] });
-    } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to update notification';
+      toast({ title: 'Error', description: message, variant: 'destructive' });
     }
   };
 
@@ -69,8 +71,9 @@ const NotificationsPage = () => {
       if (error) throw error;
       toast({ title: 'All notifications marked as read' });
       queryClient.invalidateQueries({ queryKey: ['farmer-notifications', user?.id] });
-    } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to update notifications';
+      toast({ title: 'Error', description: message, variant: 'destructive' });
     }
   };
 
@@ -85,7 +88,18 @@ const NotificationsPage = () => {
 
   return (
     <DashboardLayout title="Notifications">
-      <div className="space-y-6">
+      <PageShell
+        title="Notifications"
+        subtitle={unreadCount > 0 ? `${unreadCount} unread notifications` : 'All caught up!'}
+        actions={
+          unreadCount > 0 ? (
+            <Button variant="outline" onClick={markAllAsRead}>
+              <CheckCheck className="h-4 w-4 mr-2" />
+              Mark all as read
+            </Button>
+          ) : undefined
+        }
+      >
         {/* Header Stats */}
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
           <div className="flex items-center gap-3">
@@ -99,12 +113,6 @@ const NotificationsPage = () => {
               </p>
             </div>
           </div>
-          {unreadCount > 0 && (
-            <Button variant="outline" onClick={markAllAsRead}>
-              <CheckCheck className="h-4 w-4 mr-2" />
-              Mark all as read
-            </Button>
-          )}
         </div>
 
         {/* Filters */}
@@ -127,20 +135,7 @@ const NotificationsPage = () => {
         </div>
 
         {/* Notifications List */}
-        {isLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <Skeleton key={i} className="h-24 rounded-xl" />
-            ))}
-          </div>
-        ) : filteredNotifications?.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <Bell className="h-12 w-12 text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground">No notifications found</p>
-            </CardContent>
-          </Card>
-        ) : (
+        <DataState loading={isLoading} empty={!isLoading && (!filteredNotifications || filteredNotifications.length === 0)} emptyTitle="No notifications found">
           <div className="space-y-3">
             {filteredNotifications?.map((notification) => {
               const config = typeConfig[notification.type] || typeConfig.info;
@@ -192,8 +187,8 @@ const NotificationsPage = () => {
               );
             })}
           </div>
-        )}
-      </div>
+        </DataState>
+      </PageShell>
     </DashboardLayout>
   );
 };

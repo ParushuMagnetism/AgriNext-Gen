@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -33,6 +32,8 @@ import {
 } from '@/components/ui/select';
 import { getErrorMessage } from '@/lib/error-utils';
 import { toast } from 'sonner';
+import PageShell from '@/components/layout/PageShell';
+import DataState from '@/components/ui/DataState';
 
 const AvailableLoads = () => {
   const { data: loads, isLoading } = useAvailableLoads();
@@ -84,29 +85,15 @@ const AvailableLoads = () => {
   };
 
   if (isLoading) {
-    return (
-      <DashboardLayout title="Available Loads">
-        <div className="space-y-6">
-          <Skeleton className="h-10 w-48" />
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-96 w-full" />
-        </div>
-      </DashboardLayout>
-    );
+    return <DashboardLayout title="Available Loads"><DataState loading><></></DataState></DashboardLayout>;
   }
 
   return (
     <DashboardLayout title="Available Loads">
-      <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Available Loads</h1>
-          <p className="text-muted-foreground">
-            {filteredLoads?.length || 0} loads waiting for pickup
-          </p>
-        </div>
-      </div>
+      <PageShell
+        title="Available Loads"
+        subtitle={`${filteredLoads?.length || 0} loads waiting for pickup`}
+      >
 
       {/* Search */}
       <Card>
@@ -132,13 +119,11 @@ const AvailableLoads = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {!filteredLoads || filteredLoads.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <Package className="h-16 w-16 mx-auto mb-4 opacity-50" />
-              <p className="text-lg">No available loads found</p>
-              <p className="text-sm">Check back later for new transport requests</p>
-            </div>
-          ) : (
+          <DataState
+            empty={!filteredLoads || filteredLoads.length === 0}
+            emptyTitle="No available loads found"
+            emptyMessage="Check back later for new transport requests."
+          >
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -214,7 +199,7 @@ const AvailableLoads = () => {
                 </TableBody>
               </Table>
             </div>
-          )}
+          </DataState>
         </CardContent>
       </Card>
 
@@ -268,7 +253,7 @@ const AvailableLoads = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      </div>
+      </PageShell>
     </DashboardLayout>
   );
 };

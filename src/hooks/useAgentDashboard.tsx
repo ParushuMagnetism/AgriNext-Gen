@@ -39,6 +39,47 @@ export interface AIAgentLog {
   created_at: string;
 }
 
+const enrichTasksWithContext = async (tasks: any[]): Promise<AgentTask[]> => {
+  if (!tasks || tasks.length === 0) return [];
+
+  const farmerIds = Array.from(new Set(tasks.map((t) => t.farmer_id).filter(Boolean)));
+  const cropIds = Array.from(new Set(tasks.map((t) => t.crop_id).filter(Boolean)));
+
+  const [farmersRes, cropsRes] = await Promise.all([
+    farmerIds.length > 0
+      ? supabase
+          .from('profiles')
+          .select('id, full_name, village, district, phone')
+          .in('id', farmerIds)
+      : Promise.resolve({ data: [], error: null }),
+    cropIds.length > 0
+      ? supabase
+          .from('crops')
+          .select('id, crop_name, status, harvest_estimate, estimated_quantity')
+          .in('id', cropIds as string[])
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+
+  if (farmersRes.error) throw farmersRes.error;
+  if (cropsRes.error) throw cropsRes.error;
+
+  const farmerMap = new Map((farmersRes.data || []).map((f: any) => [f.id, f]));
+  const cropMap = new Map((cropsRes.data || []).map((c: any) => [c.id, c]));
+
+  return tasks.map((task) => ({
+    ...task,
+    farmer: farmerMap.get(task.farmer_id)
+      ? {
+          full_name: farmerMap.get(task.farmer_id).full_name,
+          village: farmerMap.get(task.farmer_id).village,
+          district: farmerMap.get(task.farmer_id).district,
+          phone: farmerMap.get(task.farmer_id).phone,
+        }
+      : null,
+    crop: task.crop_id ? cropMap.get(task.crop_id) || null : null,
+  })) as AgentTask[];
+};
+
 // Fetch agent tasks
 export const useAgentTasks = () => {
   const { user } = useAuth();
@@ -58,32 +99,7 @@ export const useAgentTasks = () => {
       
       if (error) throw error;
       
-      // Then get farmer and crop details
-      const enrichedTasks = await Promise.all(
-        (tasks || []).map(async (task) => {
-          // Get farmer info
-          const { data: farmer } = await supabase
-            .from('profiles')
-            .select('full_name, village, district, phone')
-            .eq('id', task.farmer_id)
-            .single();
-          
-          // Get crop info if exists
-          let crop = null;
-          if (task.crop_id) {
-            const { data: cropData } = await supabase
-              .from('crops')
-              .select('crop_name, status, harvest_estimate, estimated_quantity')
-              .eq('id', task.crop_id)
-              .single();
-            crop = cropData;
-          }
-          
-          return { ...task, farmer, crop } as AgentTask;
-        })
-      );
-      
-      return enrichedTasks;
+      return enrichTasksWithContext(tasks || []);
     },
     enabled: !!user?.id,
   });
@@ -108,30 +124,7 @@ export const useTodaysTasks = () => {
       
       if (error) throw error;
       
-      // Enrich with farmer and crop details
-      const enrichedTasks = await Promise.all(
-        (tasks || []).map(async (task) => {
-          const { data: farmer } = await supabase
-            .from('profiles')
-            .select('full_name, village, district, phone')
-            .eq('id', task.farmer_id)
-            .single();
-          
-          let crop = null;
-          if (task.crop_id) {
-            const { data: cropData } = await supabase
-              .from('crops')
-              .select('crop_name, status, harvest_estimate, estimated_quantity')
-              .eq('id', task.crop_id)
-              .single();
-            crop = cropData;
-          }
-          
-          return { ...task, farmer, crop } as AgentTask;
-        })
-      );
-      
-      return enrichedTasks;
+      return enrichTasksWithContext(tasks || []);
     },
     enabled: !!user?.id,
   });
@@ -238,16 +231,16 @@ export const useUpdateTaskStatus = () => {
   
   return useMutation({
     mutationFn: async ({ taskId, status, notes }: { taskId: string; status: 'pending' | 'in_progress' | 'completed'; notes?: string }) => {
-      const { error } = await supabase
-        .from('agent_tasks')
-        .update({ 
-          task_status: status,
+      const { data, error } = await supabase.functions.invoke('agent-update-task-status', {
+        body: {
+          task_id: taskId,
+          status,
           notes: notes || null,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', taskId);
-      
+        },
+      });
+
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agent-tasks'] });
@@ -310,15 +303,17 @@ export const useUpdateCropStatus = () => {
       quantity?: number;
       notes?: string;
     }) => {
-      const updateData: any = { status };
-      if (quantity !== undefined) updateData.estimated_quantity = quantity;
-      
-      const { error } = await supabase
-        .from('crops')
-        .update(updateData)
-        .eq('id', cropId);
-      
+      const { data, error } = await supabase.functions.invoke('agent-update-crop-status', {
+        body: {
+          crop_id: cropId,
+          status,
+          estimated_quantity: quantity,
+          notes: notes || null,
+        },
+      });
+
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['all-crops-agent'] });

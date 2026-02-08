@@ -4,29 +4,33 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  Truck, 
-  Package, 
-  CheckCircle2, 
-  Clock, 
+import {
+  Truck,
+  Package,
+  CheckCircle2,
+  Clock,
   Sparkles,
   MapPin,
   ArrowRight,
   RotateCcw,
-  User
+  User,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  useLogisticsDashboardStats, 
-  useActiveTrips, 
+import {
+  useLogisticsDashboardStats,
+  useActiveTrips,
   useAvailableLoads,
   useTransporterProfile,
-  useCreateTransporterProfile
+  useCreateTransporterProfile,
 } from '@/hooks/useLogisticsDashboard';
 import { useAuth } from '@/hooks/useAuth';
 import { format, parseISO } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useLanguage } from '@/hooks/useLanguage';
+import PageShell from '@/components/layout/PageShell';
+import KpiCard from '@/components/dashboard/KpiCard';
+import ActionPanel from '@/components/dashboard/ActionPanel';
 
 const statusColors: Record<string, string> = {
   requested: 'bg-amber-100 text-amber-800',
@@ -39,25 +43,24 @@ const statusColors: Record<string, string> = {
 const LogisticsDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { stats, transporter } = useLogisticsDashboardStats();
+  const { t } = useLanguage();
+  const { stats } = useLogisticsDashboardStats();
   const { data: activeTrips, isLoading: tripsLoading } = useActiveTrips();
   const { data: availableLoads, isLoading: loadsLoading } = useAvailableLoads();
   const { data: profile, isLoading: profileLoading } = useTransporterProfile();
   const createProfile = useCreateTransporterProfile();
-  
+
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
   const [reverseLoading, setReverseLoading] = useState(false);
   const [reverseSuggestion, setReverseSuggestion] = useState<string | null>(null);
 
-  // Create profile if not exists
   const handleCreateProfile = () => {
     createProfile.mutate({
       name: user?.email?.split('@')[0] || 'Transporter',
     });
   };
 
-  // AI Route Optimization
   const handleAIRouteOptimization = async () => {
     if (!availableLoads || availableLoads.length === 0) {
       toast.error('No available loads to optimize');
@@ -66,7 +69,7 @@ const LogisticsDashboard = () => {
 
     setAiLoading(true);
     try {
-      const loads = availableLoads.map(load => ({
+      const loads = availableLoads.map((load) => ({
         farmer_name: load.farmer?.full_name,
         village: load.pickup_village || load.pickup_location,
         crop_name: load.crop?.crop_name,
@@ -76,11 +79,11 @@ const LogisticsDashboard = () => {
       }));
 
       const { data, error } = await supabase.functions.invoke('transport-ai', {
-        body: { 
-          type: 'route_optimization', 
+        body: {
+          type: 'route_optimization',
           loads,
-          currentLocation: profile?.operating_village || 'Base'
-        }
+          currentLocation: profile?.operating_village || 'Base',
+        },
       });
 
       if (error) throw error;
@@ -94,17 +97,16 @@ const LogisticsDashboard = () => {
     }
   };
 
-  // AI Reverse Logistics
   const handleReverseLogistics = async () => {
     setReverseLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('transport-ai', {
-        body: { 
+        body: {
           type: 'reverse_logistics',
           currentLocation: 'Market/Mandi',
           homeBase: profile?.operating_village || 'Base village',
-          loads: []
-        }
+          loads: [],
+        },
       });
 
       if (error) throw error;
@@ -120,36 +122,33 @@ const LogisticsDashboard = () => {
 
   if (profileLoading) {
     return (
-      <DashboardLayout title="Transporter Dashboard">
+      <DashboardLayout title={t('nav.dashboard')}>
         <div className="space-y-6">
           <Skeleton className="h-32 w-full" />
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24" />)}
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-24" />
+            ))}
           </div>
         </div>
       </DashboardLayout>
     );
   }
 
-  // Show profile creation if no profile exists
   if (!profile) {
     return (
-      <DashboardLayout title="Transporter Dashboard">
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <Card className="max-w-md w-full">
+      <DashboardLayout title={t('nav.dashboard')}>
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <Card className="w-full max-w-md">
             <CardHeader className="text-center">
-              <Truck className="h-16 w-16 mx-auto text-primary mb-4" />
+              <Truck className="mx-auto mb-4 h-16 w-16 text-primary" />
               <CardTitle>Welcome, Transporter!</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-center text-muted-foreground">
                 Set up your transporter profile to start accepting loads and managing trips.
               </p>
-              <Button 
-                className="w-full" 
-                onClick={handleCreateProfile}
-                disabled={createProfile.isPending}
-              >
+              <Button className="w-full" onClick={handleCreateProfile} disabled={createProfile.isPending}>
                 {createProfile.isPending ? 'Creating...' : 'Create Profile'}
               </Button>
             </CardContent>
@@ -160,243 +159,128 @@ const LogisticsDashboard = () => {
   }
 
   return (
-    <DashboardLayout title="Transporter Dashboard">
-      <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Transporter Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome back, {profile.name} • {profile.operating_village || 'Set your location'}
-          </p>
-        </div>
-        <div className="flex gap-2">
+    <DashboardLayout title={t('nav.dashboard')}>
+      <PageShell
+        title="Transporter Dashboard"
+        subtitle={`Welcome back, ${profile.name} - ${profile.operating_village || 'Set your location'}`}
+        actions={
           <Button variant="outline" onClick={() => navigate('/logistics/profile')}>
-            <User className="h-4 w-4 mr-2" />
-            Profile
+            <User className="mr-2 h-4 w-4" />
+            {t('nav.profile')}
           </Button>
+        }
+      >
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <KpiCard label={t('logistics.availableLoads')} value={stats.availableLoads} icon={Package} priority="warning" onClick={() => navigate('/logistics/loads')} />
+          <KpiCard label="Accepted Trips" value={stats.acceptedTrips} icon={Clock} priority="info" onClick={() => navigate('/logistics/trips')} />
+          <KpiCard label="In Progress" value={stats.tripsInProgress} icon={Truck} priority="primary" onClick={() => navigate('/logistics/trips')} />
+          <KpiCard label={t('logistics.completedTrips')} value={stats.completedTrips} icon={CheckCircle2} priority="success" onClick={() => navigate('/logistics/completed')} />
         </div>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/logistics/loads')}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Available Loads</p>
-                <p className="text-2xl font-bold text-amber-600">{stats.availableLoads}</p>
-              </div>
-              <Package className="h-8 w-8 text-amber-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/logistics/trips')}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Accepted Trips</p>
-                <p className="text-2xl font-bold text-blue-600">{stats.acceptedTrips}</p>
-              </div>
-              <Clock className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/logistics/trips')}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">In Progress</p>
-                <p className="text-2xl font-bold text-purple-600">{stats.tripsInProgress}</p>
-              </div>
-              <Truck className="h-8 w-8 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/logistics/completed')}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Completed</p>
-                <p className="text-2xl font-bold text-green-600">{stats.completedTrips}</p>
-              </div>
-              <CheckCircle2 className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Active Trips */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Truck className="h-5 w-5 text-primary" />
-                Today's Active Trips
-              </CardTitle>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/logistics/trips')}>
-                View All <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {tripsLoading ? (
-              <div className="space-y-3">
-                {[1, 2].map(i => <Skeleton key={i} className="h-20" />)}
-              </div>
-            ) : !activeTrips || activeTrips.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Truck className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>No active trips</p>
-                <Button variant="link" onClick={() => navigate('/logistics/loads')}>
-                  Browse available loads
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Truck className="h-5 w-5 text-primary" />
+                  Today's Active Trips
+                </CardTitle>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/logistics/trips')}>
+                  {t('common.viewAll')} <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {activeTrips.slice(0, 3).map(trip => (
-                  <div 
-                    key={trip.id} 
-                    className="p-3 rounded-lg border hover:bg-accent/50 transition-colors cursor-pointer"
-                    onClick={() => navigate(`/logistics/trip/${trip.id}`)}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium">{trip.crop?.crop_name || 'Unknown Crop'}</span>
-                      <Badge className={statusColors[trip.status]}>{trip.status.replace('_', ' ')}</Badge>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <MapPin className="h-3 w-3" />
-                      <span>{trip.pickup_village || trip.pickup_location}</span>
-                      <span>•</span>
-                      <span>{trip.quantity} {trip.quantity_unit}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* New Load Requests */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Package className="h-5 w-5 text-amber-600" />
-                New Load Requests
-              </CardTitle>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/logistics/loads')}>
-                View All <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {loadsLoading ? (
-              <div className="space-y-3">
-                {[1, 2].map(i => <Skeleton key={i} className="h-20" />)}
-              </div>
-            ) : !availableLoads || availableLoads.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Package className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>No new load requests</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {availableLoads.slice(0, 3).map(load => (
-                  <div 
-                    key={load.id} 
-                    className="p-3 rounded-lg border hover:bg-accent/50 transition-colors"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium">{load.farmer?.full_name || 'Unknown Farmer'}</span>
-                      <span className="text-sm text-muted-foreground">
-                        {load.preferred_date ? format(parseISO(load.preferred_date), 'MMM d') : 'Flexible'}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                      <span>{load.crop?.crop_name || 'Crop'}</span>
-                      <span>•</span>
-                      <span>{load.quantity} {load.quantity_unit}</span>
-                      <span>•</span>
-                      <MapPin className="h-3 w-3" />
-                      <span>{load.pickup_village || load.pickup_location}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* AI Suggestions Panel */}
-      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-            AI-Powered Suggestions
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
-            {/* Route Optimization */}
-            <div className="p-4 rounded-lg border bg-background">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="font-medium">Route Optimization</h4>
-                <Button 
-                  size="sm" 
-                  onClick={handleAIRouteOptimization}
-                  disabled={aiLoading || !availableLoads?.length}
-                >
-                  {aiLoading ? 'Analyzing...' : 'Suggest Best Route'}
-                </Button>
-              </div>
-              {aiSuggestion ? (
-                <div className="text-sm text-muted-foreground whitespace-pre-wrap max-h-48 overflow-y-auto">
-                  {aiSuggestion}
+            </CardHeader>
+            <CardContent>
+              {tripsLoading ? (
+                <div className="space-y-3">{[1, 2].map((i) => <Skeleton key={i} className="h-20" />)}</div>
+              ) : !activeTrips || activeTrips.length === 0 ? (
+                <div className="py-8 text-center text-muted-foreground">
+                  <Truck className="mx-auto mb-3 h-12 w-12 opacity-50" />
+                  <p>{t('logistics.noActiveTrips')}</p>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">
-                  Click to get AI-recommended pickup order for maximum efficiency.
-                </p>
+                <div className="space-y-3">
+                  {activeTrips.slice(0, 3).map((trip) => (
+                    <div key={trip.id} className="cursor-pointer rounded-lg border p-3 transition-colors hover:bg-accent/50" onClick={() => navigate(`/logistics/trip/${trip.id}`)}>
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="font-medium">{trip.crop?.crop_name || 'Unknown Crop'}</span>
+                        <Badge className={statusColors[trip.status]}>{trip.status.replace('_', ' ')}</Badge>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <MapPin className="h-3 w-3" />
+                        <span>{trip.pickup_village || trip.pickup_location}</span>
+                        <span>-</span>
+                        <span>{trip.quantity} {trip.quantity_unit}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
-            </div>
+            </CardContent>
+          </Card>
 
-            {/* Reverse Logistics */}
-            <div className="p-4 rounded-lg border bg-background">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="font-medium flex items-center gap-2">
-                  <RotateCcw className="h-4 w-4" />
-                  Reverse Load
-                </h4>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={handleReverseLogistics}
-                  disabled={reverseLoading}
-                >
-                  {reverseLoading ? 'Finding...' : 'Find Return Loads'}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Package className="h-5 w-5 text-amber-600" />
+                  New Load Requests
+                </CardTitle>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/logistics/loads')}>
+                  {t('common.viewAll')} <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
               </div>
-              {reverseSuggestion ? (
-                <div className="text-sm text-muted-foreground whitespace-pre-wrap max-h-48 overflow-y-auto">
-                  {reverseSuggestion}
+            </CardHeader>
+            <CardContent>
+              {loadsLoading ? (
+                <div className="space-y-3">{[1, 2].map((i) => <Skeleton key={i} className="h-20" />)}</div>
+              ) : !availableLoads || availableLoads.length === 0 ? (
+                <div className="py-8 text-center text-muted-foreground">
+                  <Package className="mx-auto mb-3 h-12 w-12 opacity-50" />
+                  <p>{t('logistics.noLoadsFound')}</p>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">
-                  Find cargo for your return trip to maximize earnings.
-                </p>
+                <div className="space-y-3">
+                  {availableLoads.slice(0, 3).map((load) => (
+                    <div key={load.id} className="rounded-lg border p-3 transition-colors hover:bg-accent/50">
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="font-medium">{load.farmer?.full_name || 'Unknown Farmer'}</span>
+                        <span className="text-sm text-muted-foreground">{load.preferred_date ? format(parseISO(load.preferred_date), 'MMM d') : t('common.flexible')}</span>
+                      </div>
+                      <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>{load.crop?.crop_name || 'Crop'}</span>
+                        <span>-</span>
+                        <span>{load.quantity} {load.quantity_unit}</span>
+                        <span>-</span>
+                        <MapPin className="h-3 w-3" />
+                        <span>{load.pickup_village || load.pickup_location}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <ActionPanel
+          title="AI-Powered Suggestions"
+          context="Optimize routing and return loads to reduce idle distance and improve earnings."
+          primaryAction={<Button size="sm" onClick={handleAIRouteOptimization} disabled={aiLoading || !availableLoads?.length}>{aiLoading ? 'Analyzing...' : 'Suggest Best Route'}</Button>}
+          secondaryAction={<Button size="sm" variant="outline" onClick={handleReverseLogistics} disabled={reverseLoading}><RotateCcw className="mr-2 h-4 w-4" />{reverseLoading ? 'Finding...' : 'Find Return Loads'}</Button>}
+        >
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-lg border bg-background p-4">
+              <h4 className="mb-2 flex items-center gap-2 font-medium"><Sparkles className="h-4 w-4 text-primary" />Route Optimization</h4>
+              <p className="text-sm text-muted-foreground whitespace-pre-wrap">{aiSuggestion || 'Click "Suggest Best Route" to get AI-recommended pickup sequencing.'}</p>
+            </div>
+            <div className="rounded-lg border bg-background p-4">
+              <h4 className="mb-2 flex items-center gap-2 font-medium"><RotateCcw className="h-4 w-4" />Reverse Logistics</h4>
+              <p className="text-sm text-muted-foreground whitespace-pre-wrap">{reverseSuggestion || 'Click "Find Return Loads" to identify profitable return trips.'}</p>
             </div>
           </div>
-        </CardContent>
-      </Card>
-      </div>
+        </ActionPanel>
+      </PageShell>
     </DashboardLayout>
   );
 };

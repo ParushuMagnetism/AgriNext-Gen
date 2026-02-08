@@ -275,26 +275,37 @@ export const useFarmerOrders = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      if (!orders || orders.length === 0) return [];
 
-      // Enrich with buyer and crop info
-      const enriched = await Promise.all(
-        (orders || []).map(async (order) => {
-          const [buyerRes, cropRes] = await Promise.all([
-            supabase.from('buyers').select('name, company_name, phone, district')
-              .eq('id', order.buyer_id).maybeSingle(),
-            order.crop_id
-              ? supabase.from('crops').select('crop_name, variety')
-                  .eq('id', order.crop_id).maybeSingle()
-              : Promise.resolve({ data: null }),
-          ]);
+      const buyerIds = Array.from(new Set(orders.map((order) => order.buyer_id).filter(Boolean)));
+      const cropIds = Array.from(new Set(orders.map((order) => order.crop_id).filter(Boolean)));
 
-          return {
-            ...order,
-            buyer: buyerRes.data,
-            crop: cropRes.data,
-          };
-        })
-      );
+      const [buyersRes, cropsRes] = await Promise.all([
+        buyerIds.length > 0
+          ? supabase
+              .from('buyers')
+              .select('id, name, company_name, phone, district')
+              .in('id', buyerIds)
+          : Promise.resolve({ data: [], error: null }),
+        cropIds.length > 0
+          ? supabase
+              .from('crops')
+              .select('id, crop_name, variety')
+              .in('id', cropIds as string[])
+          : Promise.resolve({ data: [], error: null }),
+      ]);
+
+      if (buyersRes.error) throw buyersRes.error;
+      if (cropsRes.error) throw cropsRes.error;
+
+      const buyerMap = new Map((buyersRes.data || []).map((buyer: any) => [buyer.id, buyer]));
+      const cropMap = new Map((cropsRes.data || []).map((crop: any) => [crop.id, crop]));
+
+      const enriched = orders.map((order) => ({
+        ...order,
+        buyer: buyerMap.get(order.buyer_id) || null,
+        crop: order.crop_id ? cropMap.get(order.crop_id) || null : null,
+      }));
 
       return enriched as FarmerOrder[];
     },
