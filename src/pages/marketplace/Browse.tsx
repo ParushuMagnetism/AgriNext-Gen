@@ -4,7 +4,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
+import PageShell from '@/components/layout/PageShell';
+import DataState from '@/components/ui/DataState';
 import {
   Select,
   SelectContent,
@@ -59,26 +60,19 @@ const BrowseMarketplace = () => {
   if (isLoading) {
     return (
       <DashboardLayout title="Browse Marketplace">
-        <div className="space-y-6">
-          <Skeleton className="h-10 w-full" />
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-48" />)}
-          </div>
-        </div>
+        <DataState loading>
+          <></>
+        </DataState>
       </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout title="Browse Marketplace">
-      <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Browse Marketplace</h1>
-        <p className="text-muted-foreground">
-          {sortedProducts.length} products available
-        </p>
-      </div>
+      <PageShell
+        title="Browse Marketplace"
+        subtitle={`${sortedProducts.length} products available`}
+      >
 
       {/* Filters */}
       <Card>
@@ -123,15 +117,11 @@ const BrowseMarketplace = () => {
       </Card>
 
       {/* Products Grid */}
-      {sortedProducts.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <Leaf className="h-16 w-16 mx-auto mb-4 opacity-50" />
-            <p className="text-lg text-muted-foreground">No products found</p>
-            <p className="text-sm text-muted-foreground">Try adjusting your search or filters</p>
-          </CardContent>
-        </Card>
-      ) : (
+      <DataState
+        empty={sortedProducts.length === 0}
+        emptyTitle="No products found"
+        emptyMessage="Try adjusting your search or filters."
+      >
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {sortedProducts.map(product => (
             <Card 
@@ -188,8 +178,8 @@ const BrowseMarketplace = () => {
             </Card>
           ))}
         </div>
-      )}
-      </div>
+      </DataState>
+      </PageShell>
     </DashboardLayout>
   );
 };

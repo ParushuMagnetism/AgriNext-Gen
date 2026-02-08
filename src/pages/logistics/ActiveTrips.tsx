@@ -1,33 +1,25 @@
-import { useState } from 'react';
 import DashboardLayout from '@/layouts/DashboardLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Truck, 
   MapPin, 
   Calendar, 
   Phone,
   Package,
-  ExternalLink,
-  Loader2
+  ExternalLink
 } from 'lucide-react';
-import { useActiveTrips, TransportRequest } from '@/hooks/useLogisticsDashboard';
 import { useTrips } from '@/hooks/useTrips';
 import { format, parseISO } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import PageShell from '@/components/layout/PageShell';
+import DataState from '@/components/ui/DataState';
 
 const statusColors: Record<string, string> = {
   assigned: 'bg-blue-100 text-blue-800',
   en_route: 'bg-purple-100 text-purple-800',
   picked_up: 'bg-indigo-100 text-indigo-800',
-};
-
-const statusLabels: Record<string, string> = {
-  assigned: 'Assigned',
-  en_route: 'En Route',
-  picked_up: 'Picked Up',
 };
 
 const ActiveTrips = () => {
@@ -40,44 +32,22 @@ const ActiveTrips = () => {
   };
 
   if (isLoading) {
-    return (
-      <DashboardLayout title="Active Trips">
-        <div className="space-y-6">
-          <Skeleton className="h-10 w-48" />
-          <div className="space-y-4">
-            {[1, 2, 3].map(i => <Skeleton key={i} className="h-40" />)}
-          </div>
-        </div>
-      </DashboardLayout>
-    );
+    return <DashboardLayout title="Active Trips"><DataState loading><></></DataState></DashboardLayout>;
   }
 
   return (
     <DashboardLayout title="Active Trips">
-      <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Active Trips</h1>
-        <p className="text-muted-foreground">
-          {trips?.length || 0} trips in progress
-        </p>
-      </div>
+      <PageShell
+        title="Active Trips"
+        subtitle={`${trips?.length || 0} trips in progress`}
+      >
 
       {/* Trips List */}
-      {!trips || trips.length === 0 ? (
-        <Card>
-          <CardContent className="py-12">
-            <div className="text-center text-muted-foreground">
-              <Truck className="h-16 w-16 mx-auto mb-4 opacity-50" />
-              <p className="text-lg">No active trips</p>
-              <p className="text-sm mb-4">Accept some loads to start transporting</p>
-              <Button onClick={() => navigate('/logistics/loads')}>
-                Browse Available Loads
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
+      <DataState
+        empty={!trips || trips.length === 0}
+        emptyTitle="No active trips"
+        emptyMessage="Accept some loads to start transporting."
+      >
         <div className="space-y-4">
           {trips.map((trip) => {
             const request = trip.transport_request;
@@ -177,8 +147,13 @@ const ActiveTrips = () => {
             );
           })}
         </div>
-      )}
-      </div>
+      </DataState>
+      {!trips || trips.length === 0 ? (
+        <div className="pt-2">
+          <Button onClick={() => navigate('/logistics/loads')}>Browse Available Loads</Button>
+        </div>
+      ) : null}
+      </PageShell>
     </DashboardLayout>
   );
 };

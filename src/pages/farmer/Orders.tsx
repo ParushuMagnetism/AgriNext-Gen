@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import PageShell from '@/components/layout/PageShell';
 import { 
   Search, 
   Filter,
@@ -103,7 +104,7 @@ const FarmerOrders = () => {
 
   return (
     <DashboardLayout title="Orders">
-      <div className="space-y-6">
+      <PageShell title="Orders" subtitle="View and manage incoming buyer orders">
         {/* Header Actions */}
         <div className="flex flex-col sm:flex-row gap-4 justify-between">
           <div className="relative flex-1 max-w-md">
@@ -357,7 +358,7 @@ const FarmerOrders = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
+      </PageShell>
     </DashboardLayout>
   );
 };

@@ -10,7 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
+import PageShell from '@/components/layout/PageShell';
+import DataState from '@/components/ui/DataState';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
@@ -69,8 +70,9 @@ const SettingsPage = () => {
       
       toast({ title: t('toast.profile_updated') });
       queryClient.invalidateQueries({ queryKey: ['farmer-profile', user.id] });
-    } catch (error: any) {
-      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t('common.error');
+      toast({ title: t('common.error'), description: message, variant: 'destructive' });
     } finally {
       setIsSaving(false);
     }
@@ -84,17 +86,16 @@ const SettingsPage = () => {
   if (isLoading) {
     return (
       <DashboardLayout title={t('nav.settings')}>
-        <div className="space-y-6">
-          <Skeleton className="h-48 rounded-xl" />
-          <Skeleton className="h-64 rounded-xl" />
-        </div>
+        <DataState loading>
+          <></>
+        </DataState>
       </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout title={t('nav.settings')}>
-      <div className="max-w-3xl space-y-6">
+      <PageShell title={t('nav.settings')} className="max-w-3xl">
         {/* Profile Section */}
         <Card>
           <CardHeader>
@@ -215,7 +216,7 @@ const SettingsPage = () => {
                 <div>
                   <p className="font-medium">{t('settings.language')}</p>
                   <p className="text-sm text-muted-foreground">
-                    {language === 'en' ? 'English' : 'ಕನ್ನಡ'}
+                    {language === 'en' ? t('common.english') : t('common.kannada')}
                   </p>
                 </div>
               </div>
@@ -227,7 +228,7 @@ const SettingsPage = () => {
                   disabled={languageLoading}
                 >
                   {language === 'en' && <Check className="h-3 w-3 mr-1" />}
-                  English
+                  {t('common.english')}
                 </Button>
                 <Button 
                   variant={language === 'kn' ? 'default' : 'outline'} 
@@ -236,7 +237,7 @@ const SettingsPage = () => {
                   disabled={languageLoading}
                 >
                   {language === 'kn' && <Check className="h-3 w-3 mr-1" />}
-                  ಕನ್ನಡ
+                  {t('common.kannada')}
                 </Button>
               </div>
             </div>
@@ -253,7 +254,7 @@ const SettingsPage = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </PageShell>
     </DashboardLayout>
   );
 };

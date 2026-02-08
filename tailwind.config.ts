@@ -17,12 +17,22 @@ export default {
         sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
         display: ['Outfit', 'system-ui', 'sans-serif'],
       },
+      spacing: {
+        xs: 'var(--space-xs)',
+        sm: 'var(--space-sm)',
+        md: 'var(--space-md)',
+        lg: 'var(--space-lg)',
+        xl: 'var(--space-xl)',
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        success: "hsl(var(--success))",
+        warning: "hsl(var(--warning))",
+        info: "hsl(var(--info))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -63,9 +73,21 @@ export default {
         },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        lg: "var(--radius-lg)",
+        md: "var(--radius-md)",
+        sm: "var(--radius-sm)",
+      },
+      boxShadow: {
+        'elev-1': 'var(--elevation-1)',
+        'elev-2': 'var(--elevation-2)',
+        'elev-3': 'var(--elevation-3)',
+      },
+      transitionDuration: {
+        standard: 'var(--motion-duration-standard)',
+        quick: 'var(--motion-duration-quick)',
+      },
+      transitionTimingFunction: {
+        standard: 'var(--motion-ease-standard)',
       },
       keyframes: {
         "accordion-down": {
@@ -76,10 +98,20 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "fade-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        "slide-up": {
+          from: { opacity: "0", transform: "translateY(8px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
+        "accordion-down": "accordion-down var(--motion-duration-quick) ease-out",
+        "accordion-up": "accordion-up var(--motion-duration-quick) ease-out",
+        "fade-in": "fade-in var(--motion-duration-standard) var(--motion-ease-standard)",
+        "slide-up": "slide-up var(--motion-duration-standard) var(--motion-ease-standard)",
       },
     },
   },

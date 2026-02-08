@@ -16,59 +16,44 @@ import CropPhotoReminderWidget from '@/components/crop-diary/CropPhotoReminderWi
 import MyAgentWidget from '@/components/farmer/MyAgentWidget';
 import MyHelpRequests from '@/components/farmer/MyHelpRequests';
 import { useRealtimeSubscriptions } from '@/hooks/useRealtimeSubscriptions';
+import { useLanguage } from '@/hooks/useLanguage';
+import PageShell from '@/components/layout/PageShell';
 
 const FarmerDashboard = () => {
-  // Enable real-time subscriptions for live data updates
   useRealtimeSubscriptions();
+  const { t } = useLanguage();
 
   return (
-    <DashboardLayout title="My Crop">
-      <div className="space-y-6">
-        {/* Location Prompt - Shows if district is missing */}
+    <DashboardLayout title={t('nav.dashboard')}>
+      <PageShell title={t('dashboard.welcome')} subtitle={t('dashboard.quickActions')} density="comfortable">
         <FarmerLocationPrompt />
-
-        {/* Onboarding Tour for New Farmers */}
         <OnboardingTour />
-
-        {/* Farmer Summary Header */}
         <FarmerSummaryCard />
-
-        {/* Quick Actions */}
         <QuickActions />
 
-        {/* Key Info Row: Weather + Mandi Prices + Agent Notes */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           <WeatherWidget />
           <MarketPricesWidget />
           <AgentNotesSection />
         </div>
 
-        {/* Farmlands Summary */}
         <FarmlandsSummary />
-
-        {/* Crop Photo Reminders */}
         <CropPhotoReminderWidget />
-
-        {/* My Crops Section */}
         <CropsSection />
 
-        {/* Two column layout for Harvest & Transport */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <HarvestTimeline />
           <TransportSection />
         </div>
 
-        {/* Advisories */}
         <AdvisoriesList />
 
-        {/* My Agent + Help Requests */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <MyAgentWidget />
           <MyHelpRequests />
         </div>
-      </div>
-      
-      {/* Voice Assistant - Floating Button */}
+      </PageShell>
+
       <VoiceAssistant />
     </DashboardLayout>
   );

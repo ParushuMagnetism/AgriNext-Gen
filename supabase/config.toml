@@ -11,15 +11,15 @@ project_id = "fblxjdlaedzgigcxhevl"
 [functions.admin-ai]
 
 [functions.seed-test-data]
-verify_jwt = false
+verify_jwt = true
 
 [functions.get-weather]
 
 [functions.sync-karnataka-mandi-prices]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-price-forecast]
-verify_jwt = false
+verify_jwt = true
 
 [functions.tts-elevenlabs]
 
@@ -28,3 +28,7 @@ verify_jwt = false
 [functions.accept-load]
 
 [functions.update-trip-status]
+
+[functions.agent-update-task-status]
+
+[functions.agent-update-crop-status]

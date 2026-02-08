@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Skeleton } from '@/components/ui/skeleton';
+import PageShell from '@/components/layout/PageShell';
+import DataState from '@/components/ui/DataState';
 import {
   Select,
   SelectContent,
@@ -82,8 +83,9 @@ const BuyerProfile = () => {
 
       toast.success('Profile updated!');
       queryClient.invalidateQueries({ queryKey: ['buyer-profile'] });
-    } catch (error: any) {
-      toast.error('Failed to update: ' + error.message);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Failed to update: ${message}`);
     } finally {
       setIsSaving(false);
     }
@@ -91,20 +93,15 @@ const BuyerProfile = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 p-4 md:p-6">
-        <Skeleton className="h-10 w-48" />
-        <Skeleton className="h-96 w-full" />
-      </div>
+      <DashboardLayout title="Buyer Profile">
+        <DataState loading><></></DataState>
+      </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout title="Buyer Profile">
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Buyer Profile</h1>
-          <p className="text-muted-foreground">Manage your marketplace profile</p>
-        </div>
+      <PageShell title="Buyer Profile" subtitle="Manage your marketplace profile">
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Personal Info */}
@@ -208,7 +205,7 @@ const BuyerProfile = () => {
             {isSaving ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>
-      </div>
+      </PageShell>
     </DashboardLayout>
   );
 };
