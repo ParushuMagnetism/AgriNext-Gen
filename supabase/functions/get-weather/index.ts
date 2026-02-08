@@ -118,9 +118,11 @@ Deno.serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
 
-    // Verify token by resolving current user via JWT-aware user client
+    // Verify token using getClaims (compatible with Lovable Cloud ES256 signing)
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await userClient.auth.getUser(token);
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    const user = claimsError ? null : { id: claimsData?.claims?.sub as string };
+    const userError = claimsError;
     
     if (userError || !user) {
       console.error('Auth error:', userError);
