@@ -119,7 +119,8 @@ Deno.serve(async (req) => {
     });
 
     // Verify token by resolving current user via JWT-aware user client
-    const { data: { user }, error: userError } = await userClient.auth.getUser();
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await userClient.auth.getUser(token);
     
     if (userError || !user) {
       console.error('Auth error:', userError);

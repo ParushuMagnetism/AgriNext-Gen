@@ -1,6 +1,7 @@
 project_id = "fblxjdlaedzgigcxhevl"
 
 [functions.farmer-assistant]
+verify_jwt = false
 
 [functions.agent-ai]
 
@@ -14,6 +15,7 @@ project_id = "fblxjdlaedzgigcxhevl"
 verify_jwt = true
 
 [functions.get-weather]
+verify_jwt = false
 
 [functions.sync-karnataka-mandi-prices]
 verify_jwt = true
